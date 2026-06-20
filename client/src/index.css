@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme tokens ───────────────────────────────────────────── */
+:root {
+  --c-bg:          #0a0a0f;
+  --c-card:        #13131a;
+  --c-raised:      #0f0f16;
+  --c-border:      #1e1e2e;
+  --c-border-2:    #2e2e40;
+  --c-text:        #e8e8f0;
+  --c-text-2:      rgba(232, 232, 240, 0.6);
+  --c-text-3:      rgba(232, 232, 240, 0.3);
+  --c-accent:      #D97757;
+  --c-accent-bg:   rgba(217, 119, 87, 0.10);
+  --c-accent-glow: rgba(217, 119, 87, 0.25);
+}
+
+[data-theme="light"] {
+  /* Claude's warm editorial palette */
+  --c-bg:          #FAF9F7;
+  --c-card:        #FFFFFF;
+  --c-raised:      #F2F0EC;
+  --c-border:      #E5E3DF;
+  --c-border-2:    #C5C1BA;
+  --c-text:        #1F1B18;
+  --c-text-2:      #6B6866;
+  --c-text-3:      #A09D98;
+  --c-accent:      #D97757;
+  --c-accent-bg:   rgba(217, 119, 87, 0.08);
+  --c-accent-glow: rgba(217, 119, 87, 0.15);
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body, #root { height: 100%; margin: 0; }
+
+  body {
+    background-color: var(--c-bg);
+    color: var(--c-text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.15s ease;
+  }
+
+  select, input, textarea {
+    background: var(--c-raised);
+    color: var(--c-text);
+  }
+  option { background: var(--c-card); color: var(--c-text); }
+}
+
+/* ── Utilities ──────────────────────────────────────────────── */
+@layer utilities {
+  .font-display { font-family: 'Bebas Neue', Impact, sans-serif; }
+
+  /* Arena stage stays dark regardless of theme */
+  .arena-dark {
+    background: #0a0a0f !important;
+    color: #e8e8f0 !important;
+  }
+
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom, transparent 0px, transparent 3px,
+      rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Fighter glows */
+  .glow-claude  { text-shadow: 0 0 24px #D97757; }
+  .glow-gpt     { text-shadow: 0 0 24px #10A37F; }
+  .glow-gemini  { text-shadow: 0 0 24px #4285F4; }
+
+  .border-glow-claude  { box-shadow: 0 0 14px #D9775744; }
+  .border-glow-gpt     { box-shadow: 0 0 14px #10A37F44; }
+  .border-glow-gemini  { box-shadow: 0 0 14px #4285F444; }
+
+  /* Thin scrollbar */
+  .thin-scroll::-webkit-scrollbar { width: 4px; }
+  .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+  .thin-scroll::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
+}
