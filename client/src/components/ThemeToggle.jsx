@@ -8,14 +8,15 @@ export default function ThemeToggle({ className = '' }) {
     <button
       onClick={toggle}
       title={`Switch to ${isLight ? 'dark' : 'light'} mode`}
-      className={`w-9 h-9 rounded-lg flex items-center justify-center text-base transition-all duration-200 hover:scale-105 ${className}`}
+      aria-label={`Switch to ${isLight ? 'dark' : 'light'} mode`}
+      className={`h-10 min-w-[68px] rounded-lg px-3 flex items-center justify-center text-xs font-semibold transition-all duration-200 hover:scale-[1.03] ${className}`}
       style={{
         background: 'var(--c-raised)',
         border: '1px solid var(--c-border)',
         color: 'var(--c-text-2)',
       }}
     >
-      {isLight ? '🌙' : '☀️'}
+      {isLight ? 'Dark' : 'Light'}
     </button>
   );
 }

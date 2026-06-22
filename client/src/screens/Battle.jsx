@@ -132,13 +132,13 @@ export default function Battle() {
     return () => stopRef.current?.();
   }, []);
 
-  const modeLabel = { roast: '🔥 ROAST BATTLE', injection: '🧬 PROMPT INJECTION', impersonation: '🎭 IMPERSONATION' };
+  const modeLabel = { roast: 'ROAST BATTLE', injection: 'PROMPT INJECTION', impersonation: 'IMPERSONATION' };
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0a0a0f' }}>
 
       {/* ── ARENA STAGE (fixed, never scrolls) ── */}
-      <div className="relative flex-shrink-0" style={{ height: 380 }}>
+      <div className="relative flex-shrink-0" style={{ height: 'min(380px, 45svh)', '--arena-h': 'min(380px, 45svh)' }}>
 
         {/* KO flash */}
         <AnimatePresence>
@@ -156,9 +156,9 @@ export default function Battle() {
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: `radial-gradient(ellipse 50% 80% at 85% 80%, ${colorB}1A, transparent 70%)` }} />
 
-        {/* Scanline texture */}
+        {/* Subtle stage shade */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px)',
+          backgroundImage: 'linear-gradient(to bottom, rgba(255,255,255,0.025), transparent 34%, rgba(0,0,0,0.22))',
         }} />
 
         {/* ── HP BARS ── */}
@@ -180,7 +180,7 @@ export default function Battle() {
         </div>
 
         {/* ── FIGHTING STAGE ── */}
-        <div className="relative flex-1" style={{ height: 'calc(380px - 72px - 40px)' }}>
+        <div className="relative flex-1" style={{ height: 'calc(var(--arena-h, 380px) - 72px - 40px)' }}>
 
           {/* Round / KO announcer */}
           <RoundAnnouncer label={announcer?.label} sub={announcer?.sub} visible={!!announcer} />
@@ -234,14 +234,14 @@ export default function Battle() {
             <span className="text-xs text-red-400">{error}</span>
           )}
 
-          <button onClick={() => navigate('/')} className="text-xs text-white/25 hover:text-white/50 transition-colors tracking-wider">
-            ← EXIT
+          <button onClick={() => navigate('/')} className="text-xs text-white/25 hover:text-white/50 transition-colors tracking-wider min-w-[44px] min-h-[44px] flex items-center justify-end">
+            EXIT
           </button>
         </div>
       </div>
 
       {/* ── ROUND LOG (scrollable below stage) ── */}
-      <div ref={logRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ background: '#0a0a0f' }}>
+      <div ref={logRef} className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-3" style={{ background: '#0a0a0f', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
 
         {rounds.length === 0 && phase === 'fighting' && (
           <div className="flex items-center justify-center gap-3 py-12 text-white/25 text-sm">

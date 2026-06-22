@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fighterColor } from '../lib/colors';
-import { getCreature } from '../components/creatures/pixelData';
 import CompactRound from '../components/arena/CompactRound';
 import FighterSprite from '../components/FighterSprite';
 import ThemeToggle from '../components/ThemeToggle';
@@ -128,13 +127,13 @@ export default function Result() {
             </motion.div>
           )}
 
-          {/* loser creature — small, K.O. */}
+          {/* loser creature — small, K.O. — hidden on narrow screens to avoid overlap */}
           {loser && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="absolute opacity-40"
+              className="absolute opacity-40 hidden sm:block"
               style={{ right: '8%', bottom: 40 }}
             >
               <FighterSprite

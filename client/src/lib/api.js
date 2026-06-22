@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8787';
+const BASE = import.meta.env.VITE_API_URL || '';
 
 export async function getMeta() {
   const res = await fetch(`${BASE}/api/battle/meta`);
@@ -50,7 +50,9 @@ export function streamBattle({ fighterAId, fighterBId, mode, rounds, topic }, { 
           if (eventLine === 'round') onRound(payload);
           if (eventLine === 'end') onEnd(payload);
           if (eventLine === 'error') onError(payload.error);
-        } catch {}
+        } catch {
+          // Ignore malformed SSE chunks and continue reading the stream.
+        }
       }
     }
   }).catch((err) => {

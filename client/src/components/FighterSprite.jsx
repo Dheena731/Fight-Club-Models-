@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import PixelCreature from './creatures/PixelCreature';
 import { getCreature } from './creatures/pixelData';
@@ -71,7 +71,7 @@ export default function FighterSprite({ fighter, state = 'idle', flip = false, s
           break;
       }
     })();
-  }, [state]);
+  }, [state, controls, dir, flip]);
 
   // start idle on mount
   useEffect(() => {
@@ -79,7 +79,7 @@ export default function FighterSprite({ fighter, state = 'idle', flip = false, s
       y: [0, -6, 0],
       transition: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' },
     });
-  }, []);
+  }, [controls]);
 
   return (
     <motion.div

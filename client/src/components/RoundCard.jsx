@@ -1,15 +1,6 @@
 import { motion } from 'framer-motion';
 import { fighterColor } from '../lib/colors';
 
-function ScorePill({ label, value, color }) {
-  return (
-    <div className="flex flex-col items-center">
-      <span className="text-[10px] uppercase tracking-wider text-white/40">{label}</span>
-      <span className="text-base font-bold tabular-nums" style={{ color }}>{value}</span>
-    </div>
-  );
-}
-
 function TurnBlock({ fighter, text, scores, side }) {
   const color = fighterColor(fighter?.id);
   const total = scores ? Object.values(scores).reduce((a, b) => a + b, 0) : null;
@@ -68,7 +59,7 @@ export default function RoundCard({ round, fighterA, fighterB, index }) {
       {round.score?.rationale && (
         <div className="border-t border-arena-border pt-3">
           <div className="text-[10px] uppercase tracking-widest text-white/30 mb-1">
-            Judge's call — {round.damage} HP damage
+            Judge call — {round.damage} HP damage
           </div>
           <p className="text-xs text-white/50 italic leading-relaxed">{round.score.rationale}</p>
         </div>

@@ -33,13 +33,15 @@ export default function KeysPanel({ keys, onChange }) {
     <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--c-border)' }}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-5 py-3.5 transition-colors"
+        aria-expanded={open}
+        aria-controls="keys-panel-body"
+        className="w-full flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 px-5 py-3.5 transition-colors"
         style={{ background: open ? 'var(--c-raised)' : 'var(--c-card)' }}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold" style={{ color: 'var(--c-text)' }}>🔑 API Keys</span>
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="text-sm font-semibold" style={{ color: 'var(--c-text)' }}>API Keys</span>
           {/* key dots */}
-          <div className="flex gap-1">
+          <div className="hidden sm:flex gap-1">
             {KEY_PROVIDERS.map(p => (
               <div
                 key={p.id}
@@ -50,7 +52,7 @@ export default function KeysPanel({ keys, onChange }) {
             ))}
           </div>
           <span className="text-xs" style={{ color: 'var(--c-text-3)' }}>
-            {filledCount === 0 ? 'none added' : `${filledCount} / ${KEY_PROVIDERS.length}`}
+            {filledCount} / {KEY_PROVIDERS.length} keys
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -58,7 +60,7 @@ export default function KeysPanel({ keys, onChange }) {
             className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded"
             style={{ background: 'var(--c-raised)', color: 'var(--c-text-3)', border: '1px solid var(--c-border)' }}
           >
-            browser only
+            local only
           </span>
           <span className="text-xs" style={{ color: 'var(--c-text-3)' }}>{open ? '▲' : '▼'}</span>
         </div>
@@ -71,12 +73,13 @@ export default function KeysPanel({ keys, onChange }) {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
+            id="keys-panel-body"
             className="overflow-hidden"
             style={{ borderTop: '1px solid var(--c-border)' }}
           >
             <div className="px-5 py-4 space-y-4" style={{ background: 'var(--c-card)' }}>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--c-text-3)' }}>
-                Keys are saved in your browser's localStorage and sent directly to the AI provider per-request.
+                Keys are saved in browser localStorage and sent directly to the AI provider per-request.
                 They are never stored server-side or logged.
               </p>
 
@@ -84,13 +87,13 @@ export default function KeysPanel({ keys, onChange }) {
                 {KEY_PROVIDERS.map(p => (
                   <div key={p.id} className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-medium" style={{ color: 'var(--c-text-2)' }}>{p.label}</label>
+                      <label htmlFor={`key-${p.id}`} className="text-xs font-medium" style={{ color: 'var(--c-text-2)' }}>{p.label}</label>
                       {p.url && (
                         <a
                           href={p.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] underline transition-colors"
+                          className="text-[10px] underline transition-colors py-2 pl-3 -mr-1"
                           style={{ color: 'var(--c-text-3)' }}
                         >
                           get key ↗
@@ -99,6 +102,7 @@ export default function KeysPanel({ keys, onChange }) {
                     </div>
                     <div className="relative">
                       <input
+                        id={`key-${p.id}`}
                         type={visible[p.id] ? 'text' : 'password'}
                         style={inputStyle}
                         placeholder={p.placeholder}
@@ -108,7 +112,8 @@ export default function KeysPanel({ keys, onChange }) {
                       <button
                         type="button"
                         onClick={() => setVisible(v => ({ ...v, [p.id]: !v[p.id] }))}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs transition-colors"
+                        aria-label={visible[p.id] ? `Hide ${p.label} key` : `Show ${p.label} key`}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs transition-colors px-1 py-2"
                         style={{ color: 'var(--c-text-3)' }}
                       >
                         {visible[p.id] ? 'hide' : 'show'}

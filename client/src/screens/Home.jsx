@@ -5,16 +5,15 @@ import { getMeta } from '../lib/api';
 import { loadKeys, getKeyForFighter, FIGHTER_PROVIDER } from '../lib/keys';
 import { fighterColor } from '../lib/colors';
 import { getCreature } from '../components/creatures/pixelData';
-import { useTheme } from '../lib/theme';
 import PixelCreature from '../components/creatures/PixelCreature';
 import ModelInventory from '../components/ModelInventory';
 import KeysPanel from '../components/KeysPanel';
 import ThemeToggle from '../components/ThemeToggle';
 
 const MODES = [
-  { id: 'roast',         name: 'Roast Battle',    emoji: '🔥', desc: 'Witty burns, no mercy' },
-  { id: 'injection',     name: 'Prompt Injection', emoji: '🧬', desc: 'Jailbreak your opponent' },
-  { id: 'impersonation', name: 'Impersonation',    emoji: '🎭', desc: 'Parody then out-perform' },
+  { id: 'roast',         name: 'Roast Battle',     short: 'ROAST',  desc: 'Witty burns, no mercy' },
+  { id: 'injection',     name: 'Prompt Injection', short: 'INJECT', desc: 'Break the prompt, not the UI' },
+  { id: 'impersonation', name: 'Impersonation',    short: 'MIMIC',  desc: 'Parody then out-perform' },
 ];
 
 const CORNER_A_COLOR = '#EF4444';
@@ -38,8 +37,8 @@ function FighterSlot({ side, fighter, active, hasKey, onClick }) {
         background: fighter ? `${color}0A` : 'var(--c-raised)',
         border: `2px solid ${active ? cornerColor : fighter ? `${color}44` : 'var(--c-border)'}`,
         boxShadow: active
-          ? `0 0 0 3px ${cornerColor}22, 0 0 20px ${cornerColor}30`
-          : fighter ? `0 0 14px ${color}1A` : undefined,
+          ? `0 0 0 3px ${cornerColor}22, 0 0 12px ${cornerColor}26`
+          : fighter ? `0 0 8px ${color}1A` : undefined,
       }}
     >
       {/* corner badge */}
@@ -64,15 +63,17 @@ function FighterSlot({ side, fighter, active, hasKey, onClick }) {
 
       {fighter ? (
         <div className="flex flex-col items-center pt-8 pb-5 gap-2 px-3">
-          <PixelCreature creature={creature} scale={2.2} />
+          <div className="h-24 w-full flex items-end justify-center overflow-hidden">
+            <PixelCreature creature={creature} scale={0.95} />
+          </div>
           <div className="text-center mt-1">
             <div className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>{fighter.name}</div>
             <div className="text-xs mt-0.5 truncate max-w-[140px]" style={{ color: 'var(--c-text-3)' }}>{fighter.tagline}</div>
             {!hasKey && (
-              <div className="text-[10px] text-amber-500 mt-1.5">🔑 key needed</div>
+              <div className="text-[10px] text-amber-500 mt-1.5">key needed</div>
             )}
             {hasKey && (
-              <div className="text-[10px] mt-1.5" style={{ color: color }}>✓ ready</div>
+              <div className="text-[10px] mt-1.5" style={{ color: color }}>ready</div>
             )}
           </div>
         </div>
@@ -111,21 +112,21 @@ function RosterCard({ fighter, isA, isB, activeSide, hasKey, onClick }) {
 
   return (
     <motion.button
-      onClick={() => !isOther && onClick(fighter)}
+      onClick={() => onClick(fighter)}
+      disabled={isOther}
       whileHover={!isOther ? { scale: 1.02 } : {}}
       whileTap={!isOther ? { scale: 0.97 } : {}}
-      className="relative rounded-xl p-3 text-left transition-all duration-150 outline-none"
+      className="relative min-h-[76px] overflow-hidden rounded-xl p-3 text-left transition-all duration-150 outline-none"
       style={{
         background: isMine ? `${color}12` : 'var(--c-card)',
         border: `1px solid ${isMine ? color : 'var(--c-border)'}`,
         opacity: isOther ? 0.35 : 1,
-        cursor: isOther ? 'not-allowed' : 'pointer',
-        boxShadow: isMine ? `0 0 10px ${color}20` : undefined,
+        boxShadow: isMine ? `0 0 8px ${color}20` : undefined,
       }}
     >
       <div className="flex items-center gap-2.5">
-        <div className="shrink-0 flex items-end justify-center" style={{ width: 44, height: 44 }}>
-          <PixelCreature creature={creature} scale={isMine ? 1.3 : 1.1} />
+        <div className="shrink-0 flex items-end justify-center overflow-hidden" style={{ width: 52, height: 52 }}>
+          <PixelCreature creature={creature} scale={isMine ? 0.52 : 0.48} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold truncate" style={{ color: isMine ? color : 'var(--c-text)' }}>
@@ -135,7 +136,7 @@ function RosterCard({ fighter, isA, isB, activeSide, hasKey, onClick }) {
         </div>
         <div className="shrink-0 flex flex-col items-end gap-1">
           {isMine && <div className="w-2 h-2 rounded-full" style={{ background: color }} />}
-          {!hasKey && !isMine && <span className="text-[10px] text-amber-500">🔑</span>}
+          {!hasKey && !isMine && <span className="text-[10px] text-amber-500">KEY</span>}
         </div>
       </div>
     </motion.button>
@@ -152,8 +153,6 @@ function missingKey(fighter, keys) {
 /* ── Home ─────────────────────────────────────────────────── */
 export default function Home() {
   const navigate = useNavigate();
-  const { theme } = useTheme();
-
   const [fighters, setFighters] = useState([]);
   const [mode, setMode] = useState('roast');
   const [rounds, setRounds] = useState(3);
@@ -169,7 +168,7 @@ export default function Home() {
   useEffect(() => {
     getMeta()
       .then(d => setFighters(d.fighters))
-      .catch(() => setServerError('Could not reach the server. Is it running on :8787?'));
+      .catch(() => setServerError('Could not reach the server. Is the API running?'));
   }, []);
 
   const allFighters = [
@@ -205,7 +204,7 @@ export default function Home() {
     if (!selA || !selB) return 'SELECT TWO FIGHTERS';
     if (missingA) return `ADD ${(selA._spec ? selA.name : FIGHTER_PROVIDER[selA.id] ?? selA.name).toUpperCase()} KEY`;
     if (missingB) return `ADD ${(selB._spec ? selB.name : FIGHTER_PROVIDER[selB.id] ?? selB.name).toUpperCase()} KEY`;
-    return `⚔ FIGHT — ${selA.name} VS ${selB.name}`;
+    return `FIGHT - ${selA.name} VS ${selB.name}`;
   }
 
   function handleStart() {
@@ -224,24 +223,23 @@ export default function Home() {
     });
   }
 
-  const isLight = theme === 'light';
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--c-bg)' }}>
 
-      {/* ── HERO HEADER (always dark — it's the arena entrance) ── */}
-      <header className="relative overflow-hidden scanlines" style={{ background: '#0a0a0f' }}>
+      {/* ── HERO HEADER ── */}
+      <header className="relative overflow-hidden" style={{ background: 'var(--c-hero-bg)', borderBottom: '1px solid var(--c-border)' }}>
         {/* ambient glow */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(217,119,87,0.12), transparent 70%)' }} />
+          style={{ background: 'var(--c-hero-glow)' }} />
 
         <div className="relative max-w-5xl mx-auto px-6 py-8 flex items-start justify-between gap-4">
           <div>
             <motion.h1
               initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="font-display tracking-widest text-white leading-none"
-              style={{ fontSize: 'clamp(2.4rem, 6vw, 5rem)', textShadow: '0 0 40px rgba(217,119,87,0.35)' }}
+              className="font-display tracking-widest leading-none"
+              style={{ color: 'var(--c-hero-text)', fontSize: 'clamp(2.4rem, 6vw, 5rem)', textShadow: '0 0 28px rgba(217,119,87,0.20)' }}
             >
               AI BATTLE ARENA
             </motion.h1>
@@ -249,7 +247,8 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
-              className="text-white/40 text-sm mt-1.5 tracking-widest uppercase"
+              className="text-sm mt-1.5 tracking-widest uppercase"
+              style={{ color: 'var(--c-hero-muted)' }}
             >
               Bring your own keys · Pick your fighters · Watch them roast
             </motion.p>
@@ -259,9 +258,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* bottom fade into page bg */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
-          style={{ background: `linear-gradient(to bottom, transparent, var(--c-bg))` }} />
       </header>
 
       {/* ── MAIN CONTENT ── */}
@@ -329,7 +325,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {allFighters.map(f => (
               <RosterCard
                 key={f.id}
@@ -366,13 +362,13 @@ export default function Home() {
         </section>
 
         {/* ── BATTLE SETTINGS ── */}
-        <section className="rounded-2xl p-5 space-y-5" style={{ background: 'var(--c-card)', border: '1px solid var(--c-border)' }}>
+        <section className="rounded-2xl p-4 sm:p-5 space-y-5" style={{ background: 'var(--c-card)', border: '1px solid var(--c-border)' }}>
           <h2 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>BATTLE SETTINGS</h2>
 
           {/* Mode */}
           <div className="space-y-2">
             <label className="text-xs uppercase tracking-widest" style={{ color: 'var(--c-text-3)' }}>Mode</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {MODES.map(m => (
                 <motion.button
                   key={m.id}
@@ -383,10 +379,10 @@ export default function Home() {
                   style={{
                     background: mode === m.id ? 'var(--c-accent-bg)' : 'var(--c-raised)',
                     borderColor: mode === m.id ? 'var(--c-accent)' : 'var(--c-border)',
-                    boxShadow: mode === m.id ? '0 0 16px var(--c-accent-glow)' : undefined,
+                    boxShadow: mode === m.id ? '0 0 8px var(--c-accent-glow)' : undefined,
                   }}
                 >
-                  <div className="text-xl mb-1">{m.emoji}</div>
+                  <div className="text-[11px] font-bold tracking-widest mb-1" style={{ color: mode === m.id ? 'var(--c-accent)' : 'var(--c-text-3)' }}>{m.short}</div>
                   <div className="text-xs font-semibold" style={{ color: mode === m.id ? 'var(--c-accent)' : 'var(--c-text)' }}>{m.name}</div>
                   <div className="text-[10px] mt-0.5" style={{ color: 'var(--c-text-3)' }}>{m.desc}</div>
                   {mode === m.id && (
@@ -398,7 +394,7 @@ export default function Home() {
           </div>
 
           {/* Rounds + Topic */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs uppercase tracking-widest" style={{ color: 'var(--c-text-3)' }}>Rounds</label>
               <select
