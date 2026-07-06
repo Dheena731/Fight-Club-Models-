@@ -9,6 +9,7 @@ import PixelCreature from '../components/creatures/PixelCreature';
 import ModelInventory from '../components/ModelInventory';
 import KeysPanel from '../components/KeysPanel';
 import ThemeToggle from '../components/ThemeToggle';
+import * as sfx from '../lib/sfx';
 
 const MODES = [
   { id: 'roast',         name: 'Roast Battle',     short: 'ROAST',  desc: 'Witty burns, no mercy' },
@@ -19,138 +20,197 @@ const MODES = [
 const CORNER_A_COLOR = '#EF4444';
 const CORNER_B_COLOR = '#3B82F6';
 
-/* ── Fighter Slot ─────────────────────────────────────────── */
-function FighterSlot({ side, fighter, active, hasKey, onClick }) {
-  const color = fighter?.color ?? (side === 'a' ? CORNER_A_COLOR : CORNER_B_COLOR);
-  const cornerColor = side === 'a' ? CORNER_A_COLOR : CORNER_B_COLOR;
-  const label = side === 'a' ? 'CORNER A' : 'CORNER B';
-  const creature = fighter ? getCreature(fighter.id ?? fighter.provider ?? 'custom') : null;
-
-  return (
-    <motion.button
-      onClick={onClick}
-      whileHover={{ scale: 1.015 }}
-      whileTap={{ scale: 0.985 }}
-      className="relative w-full rounded-2xl overflow-hidden text-left transition-all duration-200 outline-none"
-      style={{
-        minHeight: 180,
-        background: fighter ? `${color}0A` : 'var(--c-raised)',
-        border: `2px solid ${active ? cornerColor : fighter ? `${color}44` : 'var(--c-border)'}`,
-        boxShadow: active
-          ? `0 0 0 3px ${cornerColor}22, 0 0 12px ${cornerColor}26`
-          : fighter ? `0 0 8px ${color}1A` : undefined,
-      }}
-    >
-      {/* corner badge */}
-      <div className="absolute top-3 left-3 z-10">
-        <span
-          className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded"
-          style={{ background: `${cornerColor}18`, color: cornerColor, border: `1px solid ${cornerColor}44` }}
-        >
-          {label}
-        </span>
-      </div>
-
-      {/* active pulse */}
-      {active && (
-        <motion.div
-          className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full z-10"
-          style={{ background: cornerColor }}
-          animate={{ opacity: [1, 0.25, 1], scale: [1, 0.8, 1] }}
-          transition={{ duration: 1.1, repeat: Infinity }}
-        />
-      )}
-
-      {fighter ? (
-        <div className="flex flex-col items-center pt-8 pb-5 gap-2 px-3">
-          <div className="h-24 w-full flex items-end justify-center overflow-hidden">
-            <PixelCreature creature={creature} scale={0.95} />
-          </div>
-          <div className="text-center mt-1">
-            <div className="font-semibold text-sm" style={{ color: 'var(--c-text)' }}>{fighter.name}</div>
-            <div className="text-xs mt-0.5 truncate max-w-[140px]" style={{ color: 'var(--c-text-3)' }}>{fighter.tagline}</div>
-            {!hasKey && (
-              <div className="text-[10px] text-amber-500 mt-1.5">key needed</div>
-            )}
-            {hasKey && (
-              <div className="text-[10px] mt-1.5" style={{ color: color }}>ready</div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-44 gap-2" style={{ opacity: 0.5 }}>
-          <div className="font-display text-5xl" style={{ color: cornerColor }}>?</div>
-          <div className="text-[11px] font-semibold tracking-wider" style={{ color: cornerColor }}>
-            {active ? '← SELECT BELOW' : 'TAP TO SELECT'}
-          </div>
-        </div>
-      )}
-    </motion.button>
-  );
+/* ── Playful tale-of-the-tape stats, deterministic per fighter ── */
+function statsFor(id) {
+  let h = 2166136261;
+  for (const c of String(id)) h = ((h ^ c.charCodeAt(0)) * 16777619) >>> 0;
+  const pick = (n) => 5 + ((h >> (n * 5)) % 6); // 5..10
+  return [
+    ['POW', pick(0)],
+    ['WIT', pick(1)],
+    ['SPD', pick(2)],
+  ];
 }
 
-/* ── VS Badge ─────────────────────────────────────────────── */
-function VSBadge() {
+function StatBar({ label, value, color }) {
   return (
-    <div className="flex items-center justify-center shrink-0 self-center px-1">
-      <div
-        className="font-display text-2xl tracking-widest w-12 h-12 rounded-full flex items-center justify-center"
-        style={{ background: 'var(--c-raised)', border: '2px solid var(--c-border)', color: 'var(--c-text-3)' }}
-      >
-        VS
+    <div className="flex items-center gap-1.5 w-full">
+      <span className="font-display text-[11px] tracking-widest w-8 shrink-0" style={{ color: 'var(--c-text-3)' }}>
+        {label}
+      </span>
+      <div className="flex gap-[3px] flex-1" role="img" aria-label={`${label} ${value} of 10`}>
+        {Array.from({ length: 10 }, (_, i) => (
+          <span
+            key={i}
+            className="h-[7px] flex-1 rounded-[1px]"
+            style={{ background: i < value ? color : 'var(--c-border-2)', opacity: i < value ? 1 : 0.5 }}
+          />
+        ))}
       </div>
+      <span className="font-display text-[11px] w-4 text-right" style={{ color }}>{value}</span>
     </div>
   );
 }
 
-/* ── Fighter Roster Card ──────────────────────────────────── */
-function RosterCard({ fighter, isA, isB, activeSide, hasKey, onClick }) {
-  const color = fighter.color ?? '#888';
+/* ── Stage side: one fighter on the select-screen stage ──────── */
+function StageSide({ side, fighter, active, hasKey, onClick }) {
+  const cornerColor = side === 'a' ? CORNER_A_COLOR : CORNER_B_COLOR;
+  const color = fighter?.color ?? cornerColor;
+  const creature = fighter ? getCreature(fighter.id ?? fighter.provider ?? 'custom') : null;
+  const playerTag = side === 'a' ? 'P1' : 'P2';
+  const flip = side === 'b';
+
+  return (
+    <button
+      onClick={onClick}
+      className="relative flex flex-col items-center gap-0 outline-none w-full group"
+      aria-label={`${playerTag} — ${fighter ? fighter.name : 'empty slot'}${active ? ' (selecting)' : ''}`}
+    >
+      {/* player tag */}
+      <div className="absolute top-0 z-10" style={{ [flip ? 'right' : 'left']: 8 }}>
+        <span
+          className="font-display text-sm tracking-widest px-2 py-0.5 rounded-sm"
+          style={{ background: cornerColor, color: '#0a0a0f' }}
+        >
+          {playerTag}
+        </span>
+        {active && (
+          <motion.span
+            className="ml-1.5 inline-block align-middle w-2 h-2 rounded-full"
+            style={{ background: cornerColor }}
+            animate={{ opacity: [1, 0.2, 1] }}
+            transition={{ duration: 0.9, repeat: Infinity }}
+          />
+        )}
+      </div>
+
+      {/* the fighter on the platform */}
+      <div className="home-creature h-36 sm:h-44 flex items-end justify-center w-full pt-6">
+        {fighter ? (
+          <motion.div
+            key={fighter.id}
+            initial={{ y: -60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+            style={{ transform: flip ? 'scaleX(-1)' : 'none' }}
+            className="drop-shadow-[0_0_18px_rgba(0,0,0,0.6)]"
+          >
+            <PixelCreature creature={creature} scale={1.15} brightness={hasKey ? 1 : 0.55} />
+          </motion.div>
+        ) : (
+          <motion.div
+            className="font-display text-7xl leading-none pb-2 select-none"
+            style={{ color: cornerColor, opacity: 0.5 }}
+            animate={active ? { opacity: [0.5, 0.9, 0.5] } : {}}
+            transition={{ duration: 1.2, repeat: Infinity }}
+            aria-hidden="true"
+          >
+            ?
+          </motion.div>
+        )}
+      </div>
+
+      {/* platform */}
+      <div
+        className="h-3 w-4/5 rounded-[50%]"
+        style={{
+          background: `radial-gradient(ellipse at center, ${fighter ? color : cornerColor}55 0%, transparent 70%)`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* nameplate */}
+      <div className="mt-2 w-full max-w-[240px] text-center">
+        <div
+          className="font-display text-2xl tracking-wider truncate px-2"
+          style={{ color: fighter ? color : 'var(--c-text-3)' }}
+        >
+          {fighter ? fighter.name.toUpperCase() : active ? 'PICK FROM ROSTER' : 'TAP TO SELECT'}
+        </div>
+        {fighter && (
+          <>
+            <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--c-text-3)' }}>
+              {fighter.tagline}
+            </div>
+            <div className="flex flex-col gap-1 mt-2 px-1">
+              {statsFor(fighter.id).map(([label, value]) => (
+                <StatBar key={label} label={label} value={value} color={color} />
+              ))}
+            </div>
+            <div
+              className="font-display text-[12px] tracking-[0.25em] mt-2"
+              style={{ color: hasKey ? '#22C55E' : '#F59E0B' }}
+            >
+              {hasKey ? '● READY' : '⚠ INSERT KEY'}
+            </div>
+          </>
+        )}
+      </div>
+    </button>
+  );
+}
+
+/* ── Roster tile — the character-select grid cell ────────────── */
+function RosterTile({ fighter, isA, isB, activeSide, hasKey, onClick }) {
   const creature = getCreature(fighter.id ?? fighter.provider ?? 'custom');
-  const isMine = activeSide === 'a' ? isA : isB;
   const isOther = activeSide === 'a' ? isB : isA;
+  const picked = isA || isB;
+  const pickColor = isA ? CORNER_A_COLOR : CORNER_B_COLOR;
 
   return (
     <motion.button
       onClick={() => onClick(fighter)}
       disabled={isOther}
-      whileHover={!isOther ? { scale: 1.02 } : {}}
-      whileTap={!isOther ? { scale: 0.97 } : {}}
-      className="relative min-h-[76px] overflow-hidden rounded-xl p-3 text-left transition-all duration-150 outline-none"
+      whileHover={!isOther ? { y: -4 } : {}}
+      whileTap={!isOther ? { scale: 0.95 } : {}}
+      className="relative rounded-xl overflow-hidden text-center outline-none transition-all duration-150"
       style={{
-        background: isMine ? `${color}12` : 'var(--c-card)',
-        border: `1px solid ${isMine ? color : 'var(--c-border)'}`,
+        background: 'var(--c-card)',
+        border: `2px solid ${picked ? pickColor : 'var(--c-border)'}`,
         opacity: isOther ? 0.35 : 1,
-        boxShadow: isMine ? `0 0 8px ${color}20` : undefined,
+        boxShadow: picked ? `0 0 14px ${pickColor}44` : undefined,
       }}
+      aria-pressed={picked}
+      aria-label={`${fighter.name}${picked ? ` — corner ${isA ? 'A' : 'B'}` : ''}${!hasKey ? ' (key needed)' : ''}`}
     >
-      <div className="flex items-center gap-2.5">
-        <div className="shrink-0 flex items-end justify-center overflow-hidden" style={{ width: 52, height: 52 }}>
-          <PixelCreature creature={creature} scale={isMine ? 0.52 : 0.48} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold truncate" style={{ color: isMine ? color : 'var(--c-text)' }}>
-            {fighter.name}
-          </div>
-          <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--c-text-3)' }}>{fighter.tagline}</div>
-        </div>
-        <div className="shrink-0 flex flex-col items-end gap-1">
-          {isMine && <div className="w-2 h-2 rounded-full" style={{ background: color }} />}
-          {!hasKey && !isMine && <span className="text-[10px] text-amber-500">KEY</span>}
-        </div>
+      {picked && (
+        <span
+          className="absolute top-1.5 left-1.5 z-10 font-display text-[11px] tracking-widest px-1.5 py-0.5 rounded-sm"
+          style={{ background: pickColor, color: '#0a0a0f' }}
+        >
+          {isA ? 'P1' : 'P2'}
+        </span>
+      )}
+      {!hasKey && (
+        <span className="absolute top-1.5 right-1.5 z-10 text-[10px] font-bold text-amber-500" title="API key needed">
+          🔒
+        </span>
+      )}
+      <div className="h-20 flex items-end justify-center pt-2 overflow-hidden">
+        <PixelCreature creature={creature} scale={0.62} brightness={isOther ? 0.6 : 1} />
+      </div>
+      <div
+        className="font-display text-sm tracking-wider truncate px-2 py-1.5 mt-1"
+        style={{
+          color: picked ? pickColor : 'var(--c-text)',
+          background: 'var(--c-raised)',
+          borderTop: '1px solid var(--c-border)',
+        }}
+      >
+        {fighter.name.toUpperCase()}
       </div>
     </motion.button>
   );
 }
 
-/* ── Helpers ──────────────────────────────────────────────── */
+/* ── Helpers ──────────────────────────────────────────────────── */
 function missingKey(fighter, keys) {
   if (!fighter) return false;
   if (fighter._spec) return !fighter._spec.apiKey && fighter._spec.provider !== 'ollama';
   return !getKeyForFighter(fighter.id, keys);
 }
 
-/* ── Home ─────────────────────────────────────────────────── */
+/* ── Home — the character-select screen ──────────────────────── */
 export default function Home() {
   const navigate = useNavigate();
   const [fighters, setFighters] = useState([]);
@@ -180,6 +240,7 @@ export default function Home() {
   ];
 
   function selectFighter(fighter) {
+    sfx.punch();
     if (activeSide === 'a') {
       if (fighter.id === selA?.id) { setSelA(null); return; }
       setSelA(fighter);
@@ -198,17 +259,19 @@ export default function Home() {
 
   const missingA = missingKey(selA, keys);
   const missingB = missingKey(selB, keys);
-  const canStart = selA && selB && selA.id !== selB.id && !missingA && !missingB;
+  const bothChosen = selA && selB && selA.id !== selB.id;
+  const canStart = bothChosen && !missingA && !missingB;
 
   function getStartLabel() {
     if (!selA || !selB) return 'SELECT TWO FIGHTERS';
     if (missingA) return `ADD ${(selA._spec ? selA.name : FIGHTER_PROVIDER[selA.id] ?? selA.name).toUpperCase()} KEY`;
     if (missingB) return `ADD ${(selB._spec ? selB.name : FIGHTER_PROVIDER[selB.id] ?? selB.name).toUpperCase()} KEY`;
-    return `FIGHT - ${selA.name} VS ${selB.name}`;
+    return `FIGHT!`;
   }
 
   function handleStart() {
     if (!canStart) return;
+    sfx.bell();
     navigate('/battle', {
       state: {
         fighterAId: buildSpec(selA),
@@ -223,45 +286,48 @@ export default function Home() {
     });
   }
 
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--c-bg)' }}>
 
-      {/* ── HERO HEADER ── */}
+      {/* ── MARQUEE HEADER ── */}
       <header className="relative overflow-hidden" style={{ background: 'var(--c-hero-bg)', borderBottom: '1px solid var(--c-border)' }}>
-        {/* ambient glow */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'var(--c-hero-glow)' }} />
-
-        <div className="relative max-w-5xl mx-auto px-6 py-8 flex items-start justify-between gap-4">
-          <div>
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'var(--c-hero-glow)' }} />
+        <div className="relative max-w-5xl mx-auto px-6 pt-6 pb-5 flex items-start justify-between gap-4">
+          <div className="text-center flex-1">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="insert-coin font-display text-[13px] tracking-[0.4em]"
+              style={{ color: 'var(--c-accent)' }}
+            >
+              INSERT COIN · FREE PLAY
+            </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="font-display tracking-widest leading-none"
-              style={{ color: 'var(--c-hero-text)', fontSize: 'clamp(2.4rem, 6vw, 5rem)', textShadow: '0 0 28px rgba(217,119,87,0.20)' }}
+              className="font-display tracking-widest leading-none mt-1"
+              style={{ color: 'var(--c-hero-text)', fontSize: 'clamp(2.2rem, 5.5vw, 4.2rem)', textShadow: '0 0 28px rgba(217,119,87,0.20)' }}
             >
-              AI BATTLE ARENA
+              CHOOSE YOUR FIGHTER
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
-              className="text-sm mt-1.5 tracking-widest uppercase"
+              className="text-[11px] mt-1.5 tracking-[0.3em] uppercase"
               style={{ color: 'var(--c-hero-muted)' }}
             >
-              Bring your own keys · Pick your fighters · Watch them roast
+              AI Battle Arena · Bring your own keys · Watch them roast
             </motion.p>
           </div>
-          <div className="flex items-center gap-2 shrink-0 mt-1">
+          <div className="shrink-0 mt-1 absolute right-6 top-6">
             <ThemeToggle />
           </div>
         </div>
-
       </header>
 
-      {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-12 space-y-8 pt-4">
+      {/* ── MAIN ── */}
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 pb-12 space-y-7 pt-5">
 
         {serverError && (
           <div className="rounded-xl px-4 py-3 text-sm text-center"
@@ -270,64 +336,58 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── API KEYS ── */}
-        <KeysPanel keys={keys} onChange={setKeys} />
+        {/* ── THE STAGE ── */}
+        <section
+          className="arena-dark stage-floor scanlines relative rounded-2xl overflow-hidden px-3 sm:px-8 pt-4 pb-6"
+          style={{ border: '1px solid var(--c-border)' }}
+          aria-label="Selected fighters"
+        >
+          <div className="grid items-end gap-2" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+            <StageSide side="a" fighter={selA} active={activeSide === 'a'} hasKey={!missingA} onClick={() => setActiveSide('a')} />
 
-        {/* ── VS SELECTOR ── */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>
-              SELECT FIGHTERS
-            </h2>
-            {selA && selB && (
-              <span className="text-xs px-2 py-0.5 rounded font-medium"
-                style={{ background: 'var(--c-accent-bg)', color: 'var(--c-accent)', border: '1px solid var(--c-accent-bg)' }}>
-                both chosen
-              </span>
-            )}
-          </div>
+            {/* VS emblem */}
+            <div className="flex flex-col items-center self-center pb-10 px-1 sm:px-3">
+              <motion.div
+                className="font-display leading-none select-none"
+                style={{
+                  fontSize: 'clamp(2.2rem, 6vw, 3.8rem)',
+                  color: '#EF4444',
+                  textShadow: '0 0 30px rgba(239,68,68,0.5)',
+                }}
+                animate={bothChosen ? { scale: [1, 1.12, 1] } : {}}
+                transition={{ duration: 0.9, repeat: Infinity }}
+                aria-hidden="true"
+              >
+                VS
+              </motion.div>
+              {bothChosen && (
+                <div className="insert-coin font-display text-[11px] tracking-[0.3em] mt-1" style={{ color: '#22C55E' }}>
+                  READY?
+                </div>
+              )}
+            </div>
 
-          <div className="grid gap-3" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
-            <FighterSlot
-              side="a" fighter={selA} active={activeSide === 'a'}
-              hasKey={!missingA} onClick={() => setActiveSide('a')}
-            />
-            <VSBadge />
-            <FighterSlot
-              side="b" fighter={selB} active={activeSide === 'b'}
-              hasKey={!missingB} onClick={() => setActiveSide('b')}
-            />
+            <StageSide side="b" fighter={selB} active={activeSide === 'b'} hasKey={!missingB} onClick={() => setActiveSide('b')} />
           </div>
         </section>
 
-        {/* ── FIGHTER ROSTER ── */}
+        {/* ── ROSTER GRID ── */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-baseline gap-2">
               <span className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>ROSTER</span>
               <span className="text-xs" style={{ color: 'var(--c-text-3)' }}>
-                — picking for
-                <span className="font-bold ml-1" style={{ color: activeSide === 'a' ? CORNER_A_COLOR : CORNER_B_COLOR }}>
-                  CORNER {activeSide.toUpperCase()}
+                picking for
+                <span className="font-bold ml-1 font-display tracking-widest" style={{ color: activeSide === 'a' ? CORNER_A_COLOR : CORNER_B_COLOR }}>
+                  {activeSide === 'a' ? 'P1' : 'P2'}
                 </span>
               </span>
             </div>
-            <button
-              onClick={() => setShowCustom(v => !v)}
-              className="text-xs px-3 py-1.5 rounded-lg transition-colors"
-              style={{
-                background: 'var(--c-raised)',
-                border: '1px solid var(--c-border)',
-                color: 'var(--c-text-2)',
-              }}
-            >
-              {showCustom ? 'Hide custom' : '+ Custom model'}
-            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5">
             {allFighters.map(f => (
-              <RosterCard
+              <RosterTile
                 key={f.id}
                 fighter={f}
                 isA={selA?.id === f.id}
@@ -337,6 +397,23 @@ export default function Home() {
                 onClick={selectFighter}
               />
             ))}
+
+            {/* "+" tile — add a custom challenger */}
+            <motion.button
+              onClick={() => setShowCustom(v => !v)}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.95 }}
+              className="rounded-xl outline-none flex flex-col items-center justify-center gap-1 min-h-[124px] transition-colors"
+              style={{
+                background: 'transparent',
+                border: `2px dashed ${showCustom ? '#8B5CF6' : 'var(--c-border-2)'}`,
+                color: showCustom ? '#8B5CF6' : 'var(--c-text-3)',
+              }}
+              aria-expanded={showCustom}
+            >
+              <span className="font-display text-4xl leading-none">+</span>
+              <span className="font-display text-xs tracking-[0.25em]">CUSTOM</span>
+            </motion.button>
           </div>
 
           <AnimatePresence>
@@ -361,13 +438,12 @@ export default function Home() {
           </AnimatePresence>
         </section>
 
-        {/* ── BATTLE SETTINGS ── */}
+        {/* ── FIGHT CARD (mode / rounds / topic) ── */}
         <section className="rounded-2xl p-4 sm:p-5 space-y-5" style={{ background: 'var(--c-card)', border: '1px solid var(--c-border)' }}>
-          <h2 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>BATTLE SETTINGS</h2>
+          <h2 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>TONIGHT&rsquo;S CARD</h2>
 
           {/* Mode */}
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-widest" style={{ color: 'var(--c-text-3)' }}>Mode</label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {MODES.map(m => (
                 <motion.button
@@ -381,12 +457,17 @@ export default function Home() {
                     borderColor: mode === m.id ? 'var(--c-accent)' : 'var(--c-border)',
                     boxShadow: mode === m.id ? '0 0 8px var(--c-accent-glow)' : undefined,
                   }}
+                  aria-pressed={mode === m.id}
                 >
-                  <div className="text-[11px] font-bold tracking-widest mb-1" style={{ color: mode === m.id ? 'var(--c-accent)' : 'var(--c-text-3)' }}>{m.short}</div>
-                  <div className="text-xs font-semibold" style={{ color: mode === m.id ? 'var(--c-accent)' : 'var(--c-text)' }}>{m.name}</div>
+                  <div className="font-display text-base tracking-widest" style={{ color: mode === m.id ? 'var(--c-accent)' : 'var(--c-text-2)' }}>
+                    {m.short}
+                  </div>
+                  <div className="text-xs font-semibold mt-0.5" style={{ color: mode === m.id ? 'var(--c-accent)' : 'var(--c-text)' }}>{m.name}</div>
                   <div className="text-[10px] mt-0.5" style={{ color: 'var(--c-text-3)' }}>{m.desc}</div>
                   {mode === m.id && (
-                    <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full" style={{ background: 'var(--c-accent)' }} />
+                    <div className="absolute top-2 right-2 font-display text-[10px] tracking-widest" style={{ color: 'var(--c-accent)' }}>
+                      MAIN EVENT
+                    </div>
                   )}
                 </motion.button>
               ))}
@@ -397,26 +478,30 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs uppercase tracking-widest" style={{ color: 'var(--c-text-3)' }}>Rounds</label>
-              <select
-                className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors"
-                style={{ background: 'var(--c-raised)', border: '1px solid var(--c-border)', color: 'var(--c-text)' }}
-                value={rounds}
-                onChange={e => setRounds(Number(e.target.value))}
-              >
+              <div className="flex gap-1.5" role="radiogroup" aria-label="Number of rounds">
                 {[1, 2, 3, 4, 5].map(n => (
-                  <option key={n} value={n}>{n} {n === 1 ? 'round' : 'rounds'}</option>
+                  <button
+                    key={n}
+                    onClick={() => setRounds(n)}
+                    role="radio"
+                    aria-checked={rounds === n}
+                    className="flex-1 py-2.5 rounded-lg font-display text-lg tracking-wider outline-none transition-all duration-150"
+                    style={{
+                      background: rounds === n ? 'var(--c-accent-bg)' : 'var(--c-raised)',
+                      border: `1px solid ${rounds === n ? 'var(--c-accent)' : 'var(--c-border)'}`,
+                      color: rounds === n ? 'var(--c-accent)' : 'var(--c-text-2)',
+                    }}
+                  >
+                    {n}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-xs uppercase tracking-widest" style={{ color: 'var(--c-text-3)' }}>Topic (optional)</label>
               <input
                 className="w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors"
-                style={{
-                  background: 'var(--c-raised)',
-                  border: '1px solid var(--c-border)',
-                  color: 'var(--c-text)',
-                }}
+                style={{ background: 'var(--c-raised)', border: '1px solid var(--c-border)', color: 'var(--c-text)' }}
                 placeholder="JavaScript, cooking, space…"
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
@@ -425,17 +510,27 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── API KEYS (the coin slot) ── */}
+        <KeysPanel keys={keys} onChange={setKeys} />
+
         {/* ── FIGHT BUTTON ── */}
         <motion.button
           onClick={handleStart}
           disabled={!canStart}
           whileHover={canStart ? { scale: 1.015 } : {}}
           whileTap={canStart ? { scale: 0.975 } : {}}
-          className="w-full py-5 rounded-2xl font-display text-3xl tracking-widest transition-all duration-200 outline-none"
+          animate={canStart ? {
+            boxShadow: [
+              '0 0 24px rgba(217,119,87,0.35)',
+              '0 0 48px rgba(217,119,87,0.6)',
+              '0 0 24px rgba(217,119,87,0.35)',
+            ],
+          } : {}}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="w-full py-5 rounded-2xl font-display text-4xl tracking-[0.2em] transition-all duration-200 outline-none"
           style={canStart ? {
             background: 'linear-gradient(135deg, #D97757 0%, #C45C38 100%)',
             color: '#fff',
-            boxShadow: '0 0 32px rgba(217,119,87,0.4)',
           } : {
             background: 'var(--c-raised)',
             color: 'var(--c-text-3)',
@@ -445,6 +540,11 @@ export default function Home() {
         >
           {getStartLabel()}
         </motion.button>
+        {bothChosen && canStart && (
+          <p className="text-center text-xs -mt-4 pt-1 font-display tracking-[0.3em]" style={{ color: 'var(--c-text-3)' }}>
+            {selA.name.toUpperCase()} VS {selB.name.toUpperCase()} · {rounds} {rounds === 1 ? 'ROUND' : 'ROUNDS'} · {MODES.find(m => m.id === mode)?.short}
+          </p>
+        )}
       </main>
     </div>
   );

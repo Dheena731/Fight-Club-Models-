@@ -1,14 +1,28 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import PixelCreature from '../creatures/PixelCreature';
 import { getCreature } from '../creatures/pixelData';
 
-// Classic SF2-style HP bar. flip=true → bar fills right-to-left (fighter B).
+// Classic SF2-style HP bar with a fighting-game "ghost" lag bar:
+// the colored fill snaps down on impact, a white segment lingers and
+// drains a beat later so the eye reads how big the hit was.
+// flip=true → bar fills right-to-left (fighter B).
 export default function HPBar({ fighter, hp, maxHp = 100, flip = false }) {
   const pct = Math.max(0, Math.min(100, (hp / maxHp) * 100));
   const color = pct > 50 ? (fighter?.color ?? '#fff') : pct > 25 ? '#FACC15' : '#EF4444';
   const danger = pct <= 25;
   const creature = getCreature(fighter?.id ?? fighter?.provider);
   const name = (fighter?.name ?? '???').toUpperCase();
+
+  // Ghost bar trails the real HP after a delay.
+  const [ghost, setGhost] = useState(pct);
+  useEffect(() => {
+    if (pct < ghost) {
+      const t = setTimeout(() => setGhost(pct), 450);
+      return () => clearTimeout(t);
+    }
+    setGhost(pct);
+  }, [pct, ghost]);
 
   return (
     <div className={`flex items-center gap-2 ${flip ? 'flex-row-reverse' : ''}`}>
@@ -27,7 +41,7 @@ export default function HPBar({ fighter, hp, maxHp = 100, flip = false }) {
 
         {/* bar track */}
         <div className="relative w-full h-3 rounded-sm overflow-hidden" style={{ background: '#0a0a0f', border: '1px solid #1e1e2e' }}>
-          {/* yellow warning drain ghost */}
+          {/* danger pulse */}
           {danger && (
             <motion.div
               className="absolute inset-0 opacity-20"
@@ -36,11 +50,21 @@ export default function HPBar({ fighter, hp, maxHp = 100, flip = false }) {
               style={{ background: '#EF4444' }}
             />
           )}
+
+          {/* ghost lag bar — white, drains after the hit */}
+          <motion.div
+            className="absolute top-0 h-full"
+            style={{ [flip ? 'right' : 'left']: 0, background: 'rgba(255,255,255,0.85)' }}
+            animate={{ width: `${Math.max(ghost, pct)}%` }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          />
+
+          {/* real HP — snaps down on impact */}
           <motion.div
             className="absolute top-0 h-full rounded-sm"
             style={{ [flip ? 'right' : 'left']: 0 }}
             animate={{ width: `${pct}%` }}
-            transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
           >
             <div className="w-full h-full" style={{ background: color }} />
             {/* shine */}

@@ -1,29 +1,52 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fighterColor } from '../lib/colors';
+import * as sfx from '../lib/sfx';
+import { encodeReplayUrl } from '../lib/replay';
+import { recordBattle } from '../lib/streaks';
+import { downloadShareCard } from '../lib/shareCard';
 import CompactRound from '../components/arena/CompactRound';
 import FighterSprite from '../components/FighterSprite';
 import ThemeToggle from '../components/ThemeToggle';
 
-function ShareCard({ result }) {
+function SharePanel({ result }) {
+  const [copied, setCopied] = useState(false);
   const winner = result.winnerId
     ? (result.winnerId === result.fighters?.a?.id ? result.fighters.a : result.fighters.b)
     : null;
 
   const text = winner
-    ? `${winner.name} just won ${result.ko ? 'by K.O.' : 'on points'} in AI Battle Arena!`
+    ? `${winner.name} just won ${result.ko ? 'by K.O.' : 'on points'} in AI Battle Arena! 🥊`
     : `The AI Battle Arena ended in a DRAW!`;
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const replayUrl = useMemo(() => encodeReplayUrl(result), [result]);
 
-  function handleShare() {
+  function copyReplay() {
+    navigator.clipboard.writeText(`${text} Watch the replay: ${replayUrl}`).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function shareToX() {
+    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(replayUrl)}`;
+    window.open(intent, '_blank', 'noopener');
+  }
+
+  function nativeShare() {
     if (navigator.share) {
-      navigator.share({ title: 'AI Battle Arena', text, url: shareUrl }).catch(() => {});
+      navigator.share({ title: 'AI Battle Arena', text, url: replayUrl }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(`${text} ${shareUrl}`)
-        .then(() => alert('Copied to clipboard!'));
+      copyReplay();
     }
   }
+
+  const btn = {
+    background: 'var(--c-accent-bg)',
+    color: 'var(--c-accent)',
+    border: '1px solid var(--c-accent)',
+  };
 
   return (
     <motion.div
@@ -34,13 +57,23 @@ function ShareCard({ result }) {
       style={{ background: 'var(--c-raised)', border: '1px solid var(--c-border)' }}
     >
       <p className="text-sm" style={{ color: 'var(--c-text-2)' }}>{text}</p>
-      <button
-        onClick={handleShare}
-        className="px-6 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-105"
-        style={{ background: 'var(--c-accent-bg)', color: 'var(--c-accent)', border: '1px solid var(--c-accent)' }}
-      >
-        Share Result ↗
-      </button>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button onClick={shareToX} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-105" style={btn}>
+          Share to X ↗
+        </button>
+        <button onClick={copyReplay} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-105" style={btn}>
+          {copied ? 'Copied! ✓' : 'Copy replay link'}
+        </button>
+        <button onClick={() => downloadShareCard(result)} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-105" style={btn}>
+          Download card 🖼
+        </button>
+        <button onClick={nativeShare} className="px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-105" style={btn}>
+          Share… ↗
+        </button>
+      </div>
+      <p className="text-[11px]" style={{ color: 'var(--c-text-3)' }}>
+        The replay link replays this whole fight for anyone — no login, no server storage.
+      </p>
     </motion.div>
   );
 }
@@ -67,8 +100,27 @@ function HPSummaryBar({ fighter, hp }) {
 }
 
 export default function Result() {
-  const { state: result } = useLocation();
+  const { state: result, hash } = useLocation();
   const navigate = useNavigate();
+  const [streak, setStreak] = useState(0);
+
+  // If we got here from a replay URL hash, reconstruct result
+  useEffect(() => {
+    if (!result && hash) {
+      import('../lib/replay').then(({ decodeReplayFromHash }) => {
+        const replay = decodeReplayFromHash();
+        if (replay) navigate('/result', { state: replay, replace: true });
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Crowd goes wild for the champion; track win streaks
+  useEffect(() => {
+    if (result?.winnerId) {
+      sfx.crowd(true);
+      setStreak(recordBattle(result));
+    }
+  }, [result]);
 
   if (!result) { navigate('/'); return null; }
 
@@ -154,6 +206,15 @@ export default function Result() {
           >
             {winner ? (
               <>
+                <motion.div
+                  initial={{ scale: 2.4, opacity: 0, rotate: -4 }}
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.15 }}
+                  className="font-display text-xl tracking-[0.5em] mb-1"
+                  style={{ color: '#FACC15', textShadow: '0 0 24px #FACC1566' }}
+                >
+                  {ko ? '★ KNOCKOUT ★' : '★ WINNER ★'}
+                </motion.div>
                 <div
                   className="font-display tracking-widest leading-none"
                   style={{ fontSize: 'clamp(3rem, 10vw, 7rem)', color: winnerColor, textShadow: `0 0 60px ${winnerColor}66` }}
@@ -195,8 +256,18 @@ export default function Result() {
           />
         </div>
 
+        {/* Win streak */}
+        {streak > 0 && (
+          <div
+            className="text-center py-2 px-4 rounded-xl font-display tracking-widest"
+            style={{ background: 'var(--c-accent-bg)', border: '1px solid var(--c-accent)', color: 'var(--c-accent)' }}
+          >
+            🔥 {streak}-FIGHT WIN STREAK
+          </div>
+        )}
+
         {/* Share */}
-        <ShareCard result={result} />
+        <SharePanel result={result} />
 
         {/* Round Recap */}
         <div className="space-y-3">
