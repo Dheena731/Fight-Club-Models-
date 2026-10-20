@@ -15,6 +15,7 @@ The first release target is one short, replayable chapter in a compact connected
 3. [Phased implementation plan](ROADMAP.md) — build order, acceptance gates, tests, current status.
 4. [AI, credentials, and multiplayer](AI_AND_SECURITY.md) — challenge fairness, credential lifecycle, later shared play.
 5. [Original character atlas](CHARACTERS.md) — provider-to-character identity and art constraints.
+6. [Built-in model review](MODEL_COMPATIBILITY.md) — sourced model IDs and lifecycle caveats; no live availability claim.
 
 The user's detailed AI Frontier brief is the source for this plan. Existing root-level [GAME_DESIGN.md](../../GAME_DESIGN.md), [ROADMAP.md](../../ROADMAP.md), [TODO.md](../../TODO.md), [MARKETING.md](../../MARKETING.md), and [PRODUCTION_BIBLE.md](../../PRODUCTION_BIBLE.md) describe earlier arena or platform directions. Preserve them for context; resolve conflicts in favor of this blueprint. [PRODUCT.md](../../PRODUCT.md) and [DESIGN.md](../../DESIGN.md) document the **current** arena UI until replacements ship.
 

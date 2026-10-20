@@ -138,6 +138,9 @@ function StageSide({ side, fighter, active, hasKey, onClick }) {
             <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--c-text-3)' }}>
               {creature.name} · {fighter.tagline}
             </div>
+            {fighter.modelStatus && fighter.modelStatus !== 'stable' && <div className="text-[11px] mt-1" style={{ color: 'var(--c-warn)' }}>
+              {fighter.modelStatus.toUpperCase()} MODEL · VERIFY AT COIN SLOT
+            </div>}
             <div className="flex flex-col gap-1 mt-2 px-1">
               {statsFor(fighter.id).map(([label, value]) => (
                 <StatBar key={label} label={label} value={value} color={color} />
@@ -210,6 +213,7 @@ function RosterTile({ fighter, isA, isB, activeSide, hasKey, onClick }) {
         {fighter.name.toUpperCase()}
       </div>
       <div className="text-[10px] py-1" style={{ color: 'var(--c-text-3)' }}>{creature.name}</div>
+      {fighter.modelStatus === 'deprecated' && <div className="text-[10px] pb-1" style={{ color: 'var(--c-warn)' }}>DEPRECATED MODEL</div>}
     </motion.button>
   );
 }

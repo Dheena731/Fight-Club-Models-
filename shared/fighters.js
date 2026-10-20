@@ -1,6 +1,7 @@
 // Fighter roster + battle mode metadata.
 // `modelId` is the value passed to callModel(); keep these in sync with the adapters.
-// Model IDs verified 2026-06-20 — do not guess; confirm provider GA ids before launch.
+// Documentation reviewed 2026-10-20. Availability still depends on account and
+// must be checked by the arena preflight before a paid match.
 
 export const FIGHTERS = {
   claude: {
@@ -11,6 +12,8 @@ export const FIGHTERS = {
     tagline: 'The thoughtful heavyweight',
     style: 'measured, dry wit, surgical',
     color: '#D97757',
+    modelStatus: 'legacy',
+    modelSourceUrl: 'https://platform.claude.com/docs/en/models/sonnet-5/overview',
   },
   gpt: {
     id: 'gpt',
@@ -20,6 +23,8 @@ export const FIGHTERS = {
     tagline: 'The fast-talking showman',
     style: 'quick, punchy, crowd-pleasing',
     color: '#10A37F',
+    modelStatus: 'deprecated',
+    modelSourceUrl: 'https://developers.openai.com/api/docs/models/gpt-4o',
   },
   gemini: {
     id: 'gemini',
@@ -29,6 +34,8 @@ export const FIGHTERS = {
     tagline: 'The wildcard',
     style: 'unpredictable, encyclopedic, sharp left turns',
     color: '#4285F4',
+    modelStatus: 'stable',
+    modelSourceUrl: 'https://ai.google.dev/gemini-api/docs/models',
   },
 };
 
