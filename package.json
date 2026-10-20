@@ -1,8 +1,8 @@
 {
-  "name": "ai-battle-arena",
+  "name": "ai-frontier",
   "version": "0.1.0",
   "private": true,
-  "description": "A game-feel arena where AI models battle in Roast / Injection / Impersonation modes.",
+  "description": "A pixel RPG with offline adventure and an optional live AI model arena.",
   "type": "module",
   "scripts": {
     "dev": "concurrently -n server,client -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
@@ -10,7 +10,8 @@
     "dev:client": "npm --prefix client run dev",
     "ping": "node server/scripts/ping.js",
     "battle": "node server/scripts/battle-cli.js",
-    "install:all": "npm install && npm --prefix client install"
+    "install:all": "npm install && npm --prefix client install",
+    "test": "node --test server/lib/*.test.js server/routes/*.test.js shared/*.test.js shared/rpg/*.test.js client/src/lib/*.test.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",

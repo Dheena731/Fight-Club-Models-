@@ -21,7 +21,7 @@ app.use('/api/battle', battleRouter);
 app.use('/api/model', modelRouter);
 
 const server = app.listen(PORT, () => {
-  console.log(`AI Battle Arena server on http://localhost:${PORT}`);
+  console.log(`AI Frontier server on http://localhost:${PORT}`);
 });
 
 server.on('error', (err) => {

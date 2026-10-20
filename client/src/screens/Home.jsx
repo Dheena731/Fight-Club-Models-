@@ -1,30 +1,36 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMeta } from '../lib/api';
-import { loadKeys, getKeyForFighter, FIGHTER_PROVIDER } from '../lib/keys';
+import {
+  loadKeys,
+  getKeyForFighter,
+  FIGHTER_PROVIDER,
+  fighterNeedsKey,
+  allRequiredKeysPresent,
+} from '../lib/keys';
 import { fighterColor } from '../lib/colors';
 import { getCreature } from '../components/creatures/pixelData';
 import PixelCreature from '../components/creatures/PixelCreature';
 import ModelInventory from '../components/ModelInventory';
-import KeysPanel from '../components/KeysPanel';
+import CoinSlot from '../components/CoinSlot';
 import ThemeToggle from '../components/ThemeToggle';
+import { useGameDispatch, useGameState } from '../game/GameContext';
 import * as sfx from '../lib/sfx';
 
 const MODES = [
   { id: 'roast',         name: 'Roast Battle',     short: 'ROAST',  desc: 'Witty burns, no mercy' },
-  { id: 'injection',     name: 'Prompt Injection', short: 'INJECT', desc: 'Break the prompt, not the UI' },
-  { id: 'impersonation', name: 'Impersonation',    short: 'MIMIC',  desc: 'Parody then out-perform' },
+  { id: 'injection',     name: 'Jailbreak Duel',   short: 'JAILBREAK', desc: 'Trick them into breaking character' },
+  { id: 'impersonation', name: 'Impersonation',    short: 'MIMIC',  desc: 'Parody them, then outclass them' },
 ];
 
 const CORNER_A_COLOR = '#EF4444';
 const CORNER_B_COLOR = '#3B82F6';
 
-/* ── Playful tale-of-the-tape stats, deterministic per fighter ── */
+/* ── Fictional tale-of-the-tape stats, not measured model performance ── */
 function statsFor(id) {
   let h = 2166136261;
   for (const c of String(id)) h = ((h ^ c.charCodeAt(0)) * 16777619) >>> 0;
-  const pick = (n) => 5 + ((h >> (n * 5)) % 6); // 5..10
+  const pick = (n) => 5 + ((h >>> (n * 5)) % 6); // fictional game-flavor stats, 5..10
   return [
     ['POW', pick(0)],
     ['WIT', pick(1)],
@@ -63,7 +69,7 @@ function StageSide({ side, fighter, active, hasKey, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-center gap-0 outline-none w-full group"
+      className="relative flex flex-col items-center gap-0 outline-none w-full min-w-0 group"
       aria-label={`${playerTag} — ${fighter ? fighter.name : 'empty slot'}${active ? ' (selecting)' : ''}`}
     >
       {/* player tag */}
@@ -122,7 +128,7 @@ function StageSide({ side, fighter, active, hasKey, onClick }) {
       {/* nameplate */}
       <div className="mt-2 w-full max-w-[240px] text-center">
         <div
-          className="font-display text-2xl tracking-wider truncate px-2"
+          className="font-display text-lg sm:text-2xl tracking-wider truncate px-1 sm:px-2"
           style={{ color: fighter ? color : 'var(--c-text-3)' }}
         >
           {fighter ? fighter.name.toUpperCase() : active ? 'PICK FROM ROSTER' : 'TAP TO SELECT'}
@@ -130,7 +136,7 @@ function StageSide({ side, fighter, active, hasKey, onClick }) {
         {fighter && (
           <>
             <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--c-text-3)' }}>
-              {fighter.tagline}
+              {creature.name} · {fighter.tagline}
             </div>
             <div className="flex flex-col gap-1 mt-2 px-1">
               {statsFor(fighter.id).map(([label, value]) => (
@@ -139,7 +145,7 @@ function StageSide({ side, fighter, active, hasKey, onClick }) {
             </div>
             <div
               className="font-display text-[12px] tracking-[0.25em] mt-2"
-              style={{ color: hasKey ? '#22C55E' : '#F59E0B' }}
+              style={{ color: hasKey ? 'var(--c-ok)' : 'var(--c-warn)' }}
             >
               {hasKey ? '● READY' : '⚠ INSERT KEY'}
             </div>
@@ -182,7 +188,11 @@ function RosterTile({ fighter, isA, isB, activeSide, hasKey, onClick }) {
         </span>
       )}
       {!hasKey && (
-        <span className="absolute top-1.5 right-1.5 z-10 text-[10px] font-bold text-amber-500" title="API key needed">
+        <span
+          className="absolute top-1.5 right-1.5 z-10 text-[10px] font-bold"
+          style={{ color: 'var(--c-warn)' }}
+          title="API key needed"
+        >
           🔒
         </span>
       )}
@@ -199,20 +209,15 @@ function RosterTile({ fighter, isA, isB, activeSide, hasKey, onClick }) {
       >
         {fighter.name.toUpperCase()}
       </div>
+      <div className="text-[10px] py-1" style={{ color: 'var(--c-text-3)' }}>{creature.name}</div>
     </motion.button>
   );
 }
 
-/* ── Helpers ──────────────────────────────────────────────────── */
-function missingKey(fighter, keys) {
-  if (!fighter) return false;
-  if (fighter._spec) return !fighter._spec.apiKey && fighter._spec.provider !== 'ollama';
-  return !getKeyForFighter(fighter.id, keys);
-}
-
 /* ── Home — the character-select screen ──────────────────────── */
 export default function Home() {
-  const navigate = useNavigate();
+  const dispatch = useGameDispatch();
+  const { arenaReturn } = useGameState();
   const [fighters, setFighters] = useState([]);
   const [mode, setMode] = useState('roast');
   const [rounds, setRounds] = useState(3);
@@ -224,6 +229,7 @@ export default function Home() {
   const [keys, setKeys] = useState(loadKeys);
   const [serverError, setServerError] = useState(null);
   const [showCustom, setShowCustom] = useState(false);
+  const [coinOpen, setCoinOpen] = useState(false);
 
   useEffect(() => {
     getMeta()
@@ -251,32 +257,42 @@ export default function Home() {
     }
   }
 
-  function buildSpec(f) {
-    if (!f) return null;
-    if (f._spec) return { name: f._spec.name, provider: f._spec.provider, model: f._spec.model, apiKey: f._spec.apiKey, baseURL: f._spec.baseURL };
-    return { id: f.id, apiKey: getKeyForFighter(f.id, keys) };
-  }
 
-  const missingA = missingKey(selA, keys);
-  const missingB = missingKey(selB, keys);
+  const missingA = fighterNeedsKey(selA, keys);
+  const missingB = fighterNeedsKey(selB, keys);
   const bothChosen = selA && selB && selA.id !== selB.id;
-  const canStart = bothChosen && !missingA && !missingB;
+  // Select is keyless — keys gate at COMMIT (Coin Slot), not on the roster.
+  const canReady = bothChosen;
+  const keysReady = bothChosen && allRequiredKeysPresent([selA, selB], keys);
 
   function getStartLabel() {
     if (!selA || !selB) return 'SELECT TWO FIGHTERS';
-    if (missingA) return `ADD ${(selA._spec ? selA.name : FIGHTER_PROVIDER[selA.id] ?? selA.name).toUpperCase()} KEY`;
-    if (missingB) return `ADD ${(selB._spec ? selB.name : FIGHTER_PROVIDER[selB.id] ?? selB.name).toUpperCase()} KEY`;
-    return `FIGHT!`;
+    if (!keysReady) return 'READY? · INSERT COIN';
+    return 'FIGHT!';
   }
 
-  function handleStart() {
-    if (!canStart) return;
+  function launchFight(nextKeys = keys) {
     sfx.bell();
-    navigate('/battle', {
-      state: {
-        fighterAId: buildSpec(selA),
-        fighterBId: buildSpec(selB),
-        mode, rounds,
+    const specFor = (f) => {
+      if (!f) return null;
+      if (f._spec) {
+        return {
+          name: f._spec.name,
+          provider: f._spec.provider,
+          model: f._spec.model,
+          apiKey: f._spec.apiKey || nextKeys[f._spec.provider] || '',
+          baseURL: f._spec.baseURL,
+        };
+      }
+      return { id: f.id, apiKey: getKeyForFighter(f.id, nextKeys) };
+    };
+    dispatch({
+      type: 'START_FIGHT',
+      loadout: {
+        fighterAId: specFor(selA),
+        fighterBId: specFor(selB),
+        mode,
+        rounds,
         topic: topic.trim() || undefined,
         fighters: {
           a: { id: selA.id, name: selA.name, tagline: selA.tagline, color: selA.color || fighterColor(selA.id) },
@@ -286,13 +302,19 @@ export default function Home() {
     });
   }
 
+  function handleStart() {
+    if (!canReady) return;
+    // Gate keys here — llm-fighter style: configure agents only when committing a real fight.
+    setCoinOpen(true);
+  }
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--c-bg)' }}>
+    <div className="h-svh overflow-y-auto flex flex-col" style={{ background: 'var(--c-bg)' }}>
 
       {/* ── MARQUEE HEADER ── */}
-      <header className="relative overflow-hidden" style={{ background: 'var(--c-hero-bg)', borderBottom: '1px solid var(--c-border)' }}>
+      <header className="relative overflow-hidden shrink-0" style={{ background: 'var(--c-hero-bg)', borderBottom: '1px solid var(--c-border)' }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'var(--c-hero-glow)' }} />
-        <div className="relative max-w-5xl mx-auto px-6 pt-6 pb-5 flex items-start justify-between gap-4">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-5 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 sm:gap-4">
           <div className="text-center flex-1">
             <motion.p
               initial={{ opacity: 0 }}
@@ -300,13 +322,13 @@ export default function Home() {
               className="insert-coin font-display text-[13px] tracking-[0.4em]"
               style={{ color: 'var(--c-accent)' }}
             >
-              INSERT COIN · FREE PLAY
+              INSERT COIN - OPEN ARENA
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
               className="font-display tracking-widest leading-none mt-1"
-              style={{ color: 'var(--c-hero-text)', fontSize: 'clamp(2.2rem, 5.5vw, 4.2rem)', textShadow: '0 0 28px rgba(217,119,87,0.20)' }}
+              style={{ color: 'var(--c-hero-text)', fontSize: 'clamp(2.2rem, 5.5vw, 4.2rem)', textShadow: '0 0 28px rgba(255,182,39,0.20)' }}
             >
               CHOOSE YOUR FIGHTER
             </motion.h1>
@@ -314,13 +336,40 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.15 }}
-              className="text-[11px] mt-1.5 tracking-[0.3em] uppercase"
+              className="text-sm mt-2 max-w-md mx-auto leading-snug"
+              style={{ color: 'var(--c-hero-text)' }}
+            >
+              Coach P1 with prompt cards, then watch two AI models trade live rounds. Their anonymized model-judge scores are for entertainment.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="text-[11px] mt-2 tracking-[0.25em] uppercase"
               style={{ color: 'var(--c-hero-muted)' }}
             >
-              AI Battle Arena · Bring your own keys · Watch them roast
+              No signup - bring a provider key only when you ring the bell
             </motion.p>
           </div>
-          <div className="shrink-0 mt-1 absolute right-6 top-6">
+          <div className="shrink-0 order-first sm:order-none self-end sm:absolute sm:right-6 sm:top-6 flex items-center gap-2 mb-1 sm:mb-0">
+            <button type="button" onClick={() => dispatch({ type: arenaReturn ? 'RETURN_WORLD' : 'RETURN_TITLE' })}
+              className="font-display text-xs tracking-wider px-3 py-2 min-h-[44px]"
+              style={{ color: 'var(--c-accent)', border: '1px solid var(--c-border)' }}>
+              {arenaReturn ? '← WORLD' : '← TITLE'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCoinOpen(true)}
+              className="font-display text-xs tracking-[0.2em] px-3 py-2 rounded-lg min-h-[44px]"
+              style={{
+                background: 'var(--c-raised)',
+                border: '1px solid var(--c-border)',
+                color: keysReady || (!selA && !selB) ? 'var(--c-text-2)' : 'var(--c-accent)',
+              }}
+              aria-label="Open coin slot for API keys"
+            >
+              COIN SLOT
+            </button>
             <ThemeToggle />
           </div>
         </div>
@@ -331,7 +380,7 @@ export default function Home() {
 
         {serverError && (
           <div className="rounded-xl px-4 py-3 text-sm text-center"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444' }}>
+            style={{ background: 'var(--c-danger-bg)', border: '1px solid var(--c-danger)', color: 'var(--c-danger)' }}>
             {serverError}
           </div>
         )}
@@ -342,7 +391,7 @@ export default function Home() {
           style={{ border: '1px solid var(--c-border)' }}
           aria-label="Selected fighters"
         >
-          <div className="grid items-end gap-2" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+          <div className="grid items-end gap-2" style={{ gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)' }}>
             <StageSide side="a" fighter={selA} active={activeSide === 'a'} hasKey={!missingA} onClick={() => setActiveSide('a')} />
 
             {/* VS emblem */}
@@ -384,6 +433,10 @@ export default function Home() {
               </span>
             </div>
           </div>
+
+          <p className="text-xs mb-3" style={{ color: 'var(--c-text-3)' }}>
+            POW, WIT, and SPD are fictional game stats, not measured model abilities.
+          </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5">
             {allFighters.map(f => (
@@ -440,7 +493,14 @@ export default function Home() {
 
         {/* ── FIGHT CARD (mode / rounds / topic) ── */}
         <section className="rounded-2xl p-4 sm:p-5 space-y-5" style={{ background: 'var(--c-card)', border: '1px solid var(--c-border)' }}>
-          <h2 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>TONIGHT&rsquo;S CARD</h2>
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <h2 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>TONIGHT&rsquo;S CARD</h2>
+            {!bothChosen && (
+              <span className="text-xs" style={{ color: 'var(--c-text-3)' }}>
+                Applies to whoever you pick above
+              </span>
+            )}
+          </div>
 
           {/* Mode */}
           <div className="space-y-2">
@@ -510,42 +570,63 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── API KEYS (the coin slot) ── */}
-        <KeysPanel keys={keys} onChange={setKeys} />
-
-        {/* ── FIGHT BUTTON ── */}
-        <motion.button
-          onClick={handleStart}
-          disabled={!canStart}
-          whileHover={canStart ? { scale: 1.015 } : {}}
-          whileTap={canStart ? { scale: 0.975 } : {}}
-          animate={canStart ? {
-            boxShadow: [
-              '0 0 24px rgba(217,119,87,0.35)',
-              '0 0 48px rgba(217,119,87,0.6)',
-              '0 0 24px rgba(217,119,87,0.35)',
-            ],
-          } : {}}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-full py-5 rounded-2xl font-display text-4xl tracking-[0.2em] transition-all duration-200 outline-none"
-          style={canStart ? {
-            background: 'linear-gradient(135deg, #D97757 0%, #C45C38 100%)',
-            color: '#fff',
-          } : {
-            background: 'var(--c-raised)',
-            color: 'var(--c-text-3)',
-            cursor: 'not-allowed',
-            border: '1px solid var(--c-border)',
-          }}
-        >
-          {getStartLabel()}
-        </motion.button>
-        {bothChosen && canStart && (
-          <p className="text-center text-xs -mt-4 pt-1 font-display tracking-[0.3em]" style={{ color: 'var(--c-text-3)' }}>
-            {selA.name.toUpperCase()} VS {selB.name.toUpperCase()} · {rounds} {rounds === 1 ? 'ROUND' : 'ROUNDS'} · {MODES.find(m => m.id === mode)?.short}
-          </p>
-        )}
+        {/* Spacer so page content never sits under the sticky CTA below */}
+        <div aria-hidden="true" className="h-24" />
       </main>
+
+      {/* ── FIGHT BUTTON — sticky, so it's reachable without hunting for it.
+             Keys gate at Coin Slot, not here. ── */}
+      <div
+        className="sticky bottom-0 z-30 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur"
+        style={{ background: 'linear-gradient(to top, var(--c-bg) 65%, transparent)' }}
+      >
+        <div className="max-w-5xl mx-auto w-full">
+          <motion.button
+            onClick={handleStart}
+            disabled={!canReady}
+            whileHover={canReady ? { scale: 1.015 } : {}}
+            whileTap={canReady ? { scale: 0.975 } : {}}
+            animate={canReady ? {
+              boxShadow: [
+                '0 0 24px var(--c-accent-glow)',
+                '0 0 48px var(--c-accent-glow)',
+                '0 0 24px var(--c-accent-glow)',
+              ],
+            } : {}}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-full py-4 sm:py-5 rounded-2xl font-display text-3xl sm:text-4xl tracking-[0.2em] transition-all duration-200 outline-none"
+            style={canReady ? {
+              background: 'linear-gradient(135deg, var(--c-accent) 0%, #E09A14 100%)',
+              color: '#0a0a0f',
+            } : {
+              background: 'var(--c-raised)',
+              color: 'var(--c-text-3)',
+              cursor: 'not-allowed',
+              border: '1px solid var(--c-border)',
+            }}
+          >
+            {getStartLabel()}
+          </motion.button>
+          {bothChosen && (
+            <p className="text-center text-xs mt-1.5 font-display tracking-[0.2em]" style={{ color: 'var(--c-text-3)' }}>
+              {selA.name.toUpperCase()} VS {selB.name.toUpperCase()} · {rounds} {rounds === 1 ? 'ROUND' : 'ROUNDS'} · {MODES.find(m => m.id === mode)?.short}
+              {(missingA || missingB) ? ' · KEYS NEEDED AT COIN SLOT' : ''}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <CoinSlot
+        open={coinOpen}
+        onClose={() => setCoinOpen(false)}
+        fighters={[selA, selB]}
+        keys={keys}
+        onChange={setKeys}
+        onReady={(nextKeys) => {
+          setCoinOpen(false);
+          if (bothChosen) launchFight(nextKeys);
+        }}
+      />
     </div>
   );
 }

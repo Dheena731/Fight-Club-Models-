@@ -1,10 +1,16 @@
 # Product
 
+> **AI Frontier product brief.** The RPG is the opening experience; the original live arena is an optional, separately priced-by-provider destination. The build order and limits are in [docs/ai-frontier/README.md](docs/ai-frontier/README.md).
+
+## RPG opening
+
+Players can start offline, select Wardens, Research Guild, or Observatory, complete a faction mandate with an ally, and pursue The Lantern Signal across three connected regions. The early game should feel like a compact pixel adventure, not a credential setup page. The lore codex labels historical facts and fictional adaptations separately. Saves are local to the browser; character bonuses are game-balanced fiction, not model benchmarks. The playable chapter is a vertical slice, not an open world or multiplayer release.
+
 ## Register
 
 product
 
-## Users
+## Arena users
 
 AI enthusiasts, builders, and evaluators who want to compare model behavior in a fast, entertaining battle format. They arrive with provider keys or local model access, choose two fighters, pick a mode, and watch the app stream a judged multi-round match.
 

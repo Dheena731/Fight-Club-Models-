@@ -1,50 +1,55 @@
 # Design
 
-Visual system for AI Battle Arena (this repo's client). Mood: **arcade fight night** — a dark
-arena stage where pixel creatures brawl, wrapped in a themeable app shell. The stage is always
-dark (`.arena-dark`); the shell honors light/dark via CSS variables.
+> **Dual-mode design system.** The RPG's implemented title, world, dialogue, and menus use `client/src/rpg/frontier.css`; the optional arena retains the tokens below in `client/src/index.css`. The full direction is in [docs/ai-frontier/GAME_DESIGN.md](docs/ai-frontier/GAME_DESIGN.md).
 
-## Colors
+## RPG visual hierarchy
 
-Theme tokens live in `client/src/index.css` (`:root` dark, `[data-theme="light"]` light).
+The title introduces the adventure before any provider setup. The faction choice presents three original pixel silhouettes, a starting region, and a short playstyle. Each faction opens on its own region and mandate scene. In-world HUD prioritizes the active faction objective until it is complete, then The Lantern Signal. A dark ink backdrop, warm lantern gold, cool source/codex cyan, strong panel borders, and square pixel controls carry the retro feel across the world and menus. Narrative text uses a readable body face; pixel lettering is reserved for compact headings and buttons. The codex labels historical record and fictional adaptation separately.
 
-| Token | Dark | Role |
-|---|---|---|
-| `--c-bg` | `#0a0a0f` | App + arena background |
-| `--c-card` / `--c-raised` | `#13131a` / `#0f0f16` | Panels, tiles |
-| `--c-border` / `--c-border-2` | `#1e1e2e` / `#2e2e40` | Rules, tracks |
-| `--c-text` (+`-2`, `-3`) | `#e8e8f0` @ 100/60/48% | Text ramp |
-| `--c-accent` | `#D97757` | Brand accent (Claude coral) — CTAs, active states |
+AI Battle Arena uses a dark arcade fight-night system: a pixel stage with strong P1/P2 identity, surrounded by a restrained product shell. The arena always stays dark; the shell supports dark and light themes.
 
-Fight palette (not themed — the stage is always dark):
-- **Corner A red** `#EF4444` / **Corner B blue** `#3B82F6` — P1/P2 identity
-- **Crit gold** `#FACC15` — big hits, winner stamps, judge moments
-- Fighter colors: Claude `#D97757`, GPT `#10A37F`, Gemini `#4285F4`, custom `#8B5CF6`
-- HP bar ramps color→yellow→red at 50%/25%; ghost lag bar is white
+## Color system
+
+Tokens live in `client/src/index.css`.
+
+| Token | Dark value | Role |
+|---|---:|---|
+| `--c-bg` | `#0A0A0F` | App and arena background |
+| `--c-card` | `#13131A` | Panels and roster tiles |
+| `--c-raised` | `#0F0F16` | Inputs and nested surfaces |
+| `--c-border` | `#1E1E2E` | Rules and inactive controls |
+| `--c-text` | `#E8E8F0` | Primary text |
+| `--c-accent` | `#FFB627` | Primary actions and selected tactics |
+
+Amber is the product accent. Fighter colors remain identity signals: Claude coral, GPT green, Gemini blue, and custom violet. P1 red and P2 blue are corner signals, not brand colors. Red is reserved for danger, hits, and K.O. states.
 
 ## Typography
 
-- **Display / HUD:** Bebas Neue (`.font-display`), uppercase, tracked wide — names, announcer, buttons
-- **Body:** Inter — dialogue, settings, descriptions
-- HUD numbers tabular
+- Bebas Neue: display headlines, HUD values, round labels, and action buttons
+- Inter: instructions, dialogue, provider details, and trust copy
+- Wide tracking belongs to short arcade labels, not body paragraphs
+
+## Core screens
+
+- Home: value proposition, fighter stage, roster, match settings, and Coin Slot
+- VS: a short, skippable theatrical transition that makes no provider calls
+- Corner: P1 plans one prompt card per round before any paid battle call starts
+- Fight: Pixi stage plus React HUD, streaming speech, impact grammar, and round log
+- Result: winner moment, fight recap, rematch, and sharing
+
+## Interaction rules
+
+- Every primary control is at least 44 px.
+- Motion communicates state: entry, wind-up, impact, verdict, and K.O.
+- Hit grammar is flash, shake, HP update, then log settlement.
+- Reduced-motion preferences remove nonessential animation.
+- The sticky fight action must never prevent content from scrolling clear of it.
+- Keys are masked, session-only by default, and paired with precise retention/cost copy.
 
 ## Signature components
 
-- `PixelCreature` / `FighterSprite` — canvas pixel-art fighters with idle/attack/hurt/ko/win states
-- `HPBar` — SF2-style with portrait, danger flash, white ghost lag bar
-- `DamageFloat` — red damage numbers; gold + callout (SAVAGE!/BRUTAL!/…) at damage ≥ 22
-- `RoundAnnouncer` — ROUND N / FIGHT! / K.O. squish overlay
-- Home is a character-select screen: stage + platforms, P1/P2 roster grid, POW/WIT/SPD stat bars, INSERT COIN marquee
-
-## Motion & sound
-
-- Impact grammar: white hit-stop frame (~90ms) → whole-stage shake scaled by damage (7/13/22px) → HP snap + ghost drain (450ms lag)
-- Ease-outs only (`[0.22, 1, 0.36, 1]`); springs for entrances
-- `prefers-reduced-motion`: global CSS kills animations; shake/flash also gated in JS
-- SFX are procedural WebAudio (`client/src/lib/sfx.js`): bell, punch, tick, crowd, ko — **muted by default**, 🔊 toggle persists
-
-## Rules
-
-- Neon/glow is voltage, not wallpaper — reserve glow for live/interactive elements and KO/winner moments
-- Fighter identity = color + creature + name, never color alone
-- Every battle moment should survive a screenshot (share cards are the growth engine)
+- `PixelCreature` and the Pixi fighter sprites
+- `HPBar`, `RoundAnnouncer`, and damage floats
+- `CoinSlot` for provider commitment and preflight
+- `CornerPlanner` for player agency
+- `CompactRound` for readable post-verdict history

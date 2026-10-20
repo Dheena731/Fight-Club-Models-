@@ -1,8 +1,8 @@
 import express from 'express';
 import { runBattle } from '../lib/battle.js';
 import { FIGHTERS, MODES } from '../../shared/fighters.js';
-import { resolveFighter } from '../../shared/resolveFighter.js';
 import { publicProviders } from '../../shared/providers.js';
+import { normalizeCardSequence } from '../../shared/cards.js';
 
 const router = express.Router();
 
@@ -30,43 +30,60 @@ function specName(spec) {
   return spec.id || spec.name || spec.model;
 }
 
-function validate(body) {
-  const { fighterAId, fighterBId, mode } = body || {};
+export function validateBattleRequest(body) {
+  const { fighterAId, fighterBId, mode, rounds = 3, cards } = body || {};
   if (!isValidSpec(fighterAId) || !isValidSpec(fighterBId)) return 'Invalid fighter spec';
   if (specName(fighterAId) === specName(fighterBId)) return 'Fighters must be different';
   if (!MODES[mode]) return 'Invalid mode';
+  const roundCount = Number(rounds);
+  if (!Number.isInteger(roundCount) || roundCount < 1 || roundCount > 5) return 'Rounds must be an integer from 1 to 5';
+  try {
+    normalizeCardSequence(cards, roundCount);
+  } catch (error) {
+    return error.message;
+  }
   return null;
 }
 
 // One-shot full battle.
 router.post('/', async (req, res) => {
-  const err = validate(req.body);
+  const err = validateBattleRequest(req.body);
   if (err) return res.status(400).json({ error: err });
+  const controller = new AbortController();
+  res.on('close', () => controller.abort());
   try {
-    const result = await runBattle(req.body);
-    res.json(result);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+    const result = await runBattle({ ...req.body, signal: controller.signal });
+    if (!res.destroyed) res.json(result);
+  } catch {
+    if (!res.destroyed && !controller.signal.aborted) res.status(500).json({ error: 'Battle could not finish. Check your provider connection and try again.' });
   }
 });
 
 // Streaming battle (SSE) — turns/rounds arrive live for the animation.
 router.post('/stream', async (req, res) => {
-  const err = validate(req.body);
+  const err = validateBattleRequest(req.body);
   if (err) return res.status(400).json({ error: err });
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
-  const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  const controller = new AbortController();
+  res.on('close', () => controller.abort());
+  const send = (event, data) => {
+    if (!res.destroyed && !controller.signal.aborted) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
 
   try {
-    const result = await runBattle({ ...req.body, onRound: (round) => send('round', round) });
+    const result = await runBattle({
+      ...req.body,
+      signal: controller.signal,
+      onEvent: (event, data) => send(event, data),
+    });
     send('end', result);
-  } catch (e) {
-    send('error', { error: e.message });
+  } catch {
+    send('error', { error: 'Battle could not finish. Check your provider connection and try again.' });
   } finally {
-    res.end();
+    if (!res.destroyed) res.end();
   }
 });
 

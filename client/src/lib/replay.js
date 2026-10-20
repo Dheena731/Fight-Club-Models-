@@ -18,20 +18,23 @@ function fromB64(b64) {
   return new TextDecoder().decode(bytes);
 }
 
-/** Result object → full shareable URL. */
+/** Result object → full shareable URL (hash on origin; no router path). */
 export function encodeReplayUrl(result) {
   const payload = encodeURIComponent(toB64(JSON.stringify(result)));
-  return `${window.location.origin}/result${PREFIX}${payload}`;
+  const url = new URL(window.location.href);
+  url.hash = `${PREFIX.slice(1)}${payload}`;
+  return url.toString();
 }
 
 /** Parse a replay from the current URL hash. Returns the result or null. */
 export function decodeReplayFromHash() {
   const h = window.location.hash;
-  if (!h.startsWith(PREFIX)) return null;
+  if (!h.startsWith(PREFIX) || h.length > 100_000) return null;
   try {
     const result = JSON.parse(fromB64(decodeURIComponent(h.slice(PREFIX.length))));
     // sanity: must look like a battle result
-    if (!result?.fighters?.a || !Array.isArray(result?.rounds)) return null;
+    if (!result?.fighters?.a?.id || !result?.fighters?.b?.id
+      || !Array.isArray(result?.rounds) || result.rounds.length > 5) return null;
     return result;
   } catch {
     return null;

@@ -33,7 +33,9 @@ export function resolveFighter(spec) {
   if (!model) throw new Error('Fighter needs a model id');
 
   const preset = getProvider(provider);
-  const resolvedBaseURL = baseURL || preset.baseURL || null;
+  // Known providers always use the registry endpoint. Only the explicit custom
+  // provider may supply a user-controlled URL, which the server validates.
+  const resolvedBaseURL = preset.requiresBaseURL ? baseURL : (preset.baseURL || null);
   if (preset.requiresBaseURL && !resolvedBaseURL) {
     throw new Error('This provider needs a baseURL');
   }

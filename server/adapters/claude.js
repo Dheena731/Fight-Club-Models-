@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-// Anthropic adapter. Per the Claude API rules for claude-opus-4-8:
+// Anthropic adapter. Current Claude 5 models use adaptive thinking by default:
 //  - DO NOT send temperature / top_p / top_k / budget_tokens (they 400)
 //  - cap output with max_tokens
 //  - check stop_reason === "refusal" before reading content
@@ -11,7 +11,7 @@ function getClient(apiKey) {
 }
 
 export async function claudeAdapter(systemPrompt, userMessage, opts = {}) {
-  const model = opts.model || 'claude-opus-4-8';
+  const model = opts.model || 'claude-sonnet-5';
   const maxTokens = opts.maxTokens || Number(process.env.MAX_TOKENS_PER_TURN) || 150;
   const start = Date.now();
 
@@ -20,7 +20,7 @@ export async function claudeAdapter(systemPrompt, userMessage, opts = {}) {
     max_tokens: maxTokens,
     system: systemPrompt,
     messages: [{ role: 'user', content: userMessage }],
-  });
+  }, { signal: opts.signal });
 
   const latencyMs = Date.now() - start;
 

@@ -10,7 +10,7 @@ export const PROVIDERS = {
   anthropic: {
     id: 'anthropic', name: 'Anthropic (Claude)', kind: 'anthropic',
     free: false, baseURL: null, keysUrl: 'https://console.anthropic.com/settings/keys',
-    sampleModels: ['claude-opus-4-8', 'claude-haiku-4-5'],
+    sampleModels: ['claude-sonnet-5', 'claude-haiku-4-5'],
   },
   openai: {
     id: 'openai', name: 'OpenAI', kind: 'openai',
@@ -21,7 +21,7 @@ export const PROVIDERS = {
     id: 'google', name: 'Google (Gemini)', kind: 'gemini',
     free: true, baseURL: null, keysUrl: 'https://aistudio.google.com/apikey',
     note: 'Generous free tier via AI Studio',
-    sampleModels: ['gemini-1.5-pro', 'gemini-1.5-flash'],
+    sampleModels: ['gemini-3.6-flash', 'gemini-3.5-flash-lite'],
   },
   openrouter: {
     id: 'openrouter', name: 'OpenRouter', kind: 'openai',

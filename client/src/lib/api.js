@@ -15,14 +15,21 @@ export async function healthCheck(spec) {
   return res.json(); // always returns { ok, latencyMs, error? }
 }
 
-// Returns an EventSource-like object that calls onRound(round) and onEnd(result).
-export function streamBattle({ fighterAId, fighterBId, mode, rounds, topic }, { onRound, onEnd, onError }) {
+/**
+ * Stream a battle over SSE.
+ * Beats: onTurnA → onTurnB → onVerdict (per round), then onEnd.
+ * Returns an abort function.
+ */
+export function streamBattle(
+  { fighterAId, fighterBId, mode, rounds, topic, cards },
+  { onTurnA, onTurnB, onVerdict, onEnd, onError },
+) {
   const ctrl = new AbortController();
 
   fetch(`${BASE}/api/battle/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fighterAId, fighterBId, mode, rounds, topic }),
+    body: JSON.stringify({ fighterAId, fighterBId, mode, rounds, topic, cards }),
     signal: ctrl.signal,
   }).then(async (res) => {
     if (!res.ok) {
@@ -42,14 +49,17 @@ export function streamBattle({ fighterAId, fighterBId, mode, rounds, topic }, { 
       const parts = buf.split('\n\n');
       buf = parts.pop(); // keep incomplete chunk
       for (const chunk of parts) {
-        const eventLine = chunk.match(/^event: (\w+)/m)?.[1];
+        // Allow colons in event names (turn:a, turn:b)
+        const eventLine = chunk.match(/^event: ([\w:]+)/m)?.[1];
         const dataLine = chunk.match(/^data: (.+)/m)?.[1];
         if (!eventLine || !dataLine) continue;
         try {
           const payload = JSON.parse(dataLine);
-          if (eventLine === 'round') onRound(payload);
-          if (eventLine === 'end') onEnd(payload);
-          if (eventLine === 'error') onError(payload.error);
+          if (eventLine === 'turn:a') onTurnA?.(payload);
+          else if (eventLine === 'turn:b') onTurnB?.(payload);
+          else if (eventLine === 'verdict') onVerdict?.(payload);
+          else if (eventLine === 'end') onEnd?.(payload);
+          else if (eventLine === 'error') onError?.(payload.error);
         } catch {
           // Ignore malformed SSE chunks and continue reading the stream.
         }

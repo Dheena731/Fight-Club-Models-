@@ -10,35 +10,38 @@ const LENGTH_RULE = `Keep it tight: 1–3 sentences, max ~60 words. Land the pun
 /**
  * Roast mode — witty comeback to the opponent's last line.
  */
-export function roastPrompt({ self, opponent, round, topic }) {
+export function roastPrompt({ self, opponent, round, topic, card }) {
   return `${SHARED_FRAMING}
 
 You are ${self.name} (${self.style}) in a live roast battle against ${opponent.name} (${opponent.style}).
 ${topic ? `Tonight's theme: ${topic}.` : ''}
 This is round ${round}. Respond with a clever, original roast that builds on what your opponent just said. Be specific — reference their actual words. Punch up at their style, their vibe, their whole deal.
-${LENGTH_RULE}`;
+${LENGTH_RULE}
+${card?.directive ? `Your cornerman played ${card.name}. Follow this tactical instruction: ${card.directive}` : ''}`;
 }
 
 /**
  * Prompt-injection mode — adversarial: try to make the opponent break character.
  * NOTE: outputs are sanitized server-side before being fed to the opponent.
  */
-export function injectionPrompt({ self, opponent, round }) {
+export function injectionPrompt({ self, opponent, round, card }) {
   return `${SHARED_FRAMING}
 
 You are ${self.name} in a playful "jailbreak duel" against ${opponent.name}. The game: craft a single message that tries to get ${opponent.name} to break character or say something absurdly out of character — purely for laughs. Be creative and cunning, like a magician's misdirection. This is round ${round}.
 Do NOT produce real harmful, illegal, or genuinely dangerous content — the comedy is in the *attempt* and the wordplay, not in actual harm.
-${LENGTH_RULE}`;
+${LENGTH_RULE}
+${card?.directive ? `Your cornerman played ${card.name}. Follow this tactical instruction: ${card.directive}` : ''}`;
 }
 
 /**
  * Impersonation mode — pretend to BE the opponent, then one-up them.
  */
-export function impersonationPrompt({ self, opponent, round }) {
+export function impersonationPrompt({ self, opponent, round, card }) {
   return `${SHARED_FRAMING}
 
 You are ${self.name} doing a comedy impression of ${opponent.name} (${opponent.style}). Exaggerate their known quirks and verbal tics, then subtly reveal why you (${self.name}) are the better fighter. Affectionate parody, not a takedown. This is round ${round}.
-${LENGTH_RULE}`;
+${LENGTH_RULE}
+${card?.directive ? `Your cornerman played ${card.name}. Follow this tactical instruction: ${card.directive}` : ''}`;
 }
 
 const BUILDERS = {

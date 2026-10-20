@@ -1,5 +1,7 @@
 # AI Battle Arena — TODO
 
+> **Legacy arena backlog.** The current AI Frontier priorities and phase gates are in [docs/ai-frontier/ROADMAP.md](docs/ai-frontier/ROADMAP.md).
+
 > Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 
 **Last updated:** 2026-07-03

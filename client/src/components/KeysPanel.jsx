@@ -60,7 +60,7 @@ export default function KeysPanel({ keys, onChange }) {
             className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded"
             style={{ background: 'var(--c-raised)', color: 'var(--c-text-3)', border: '1px solid var(--c-border)' }}
           >
-            local only
+            this visit
           </span>
           <span className="text-xs" style={{ color: 'var(--c-text-3)' }}>{open ? '▲' : '▼'}</span>
         </div>
@@ -79,8 +79,7 @@ export default function KeysPanel({ keys, onChange }) {
           >
             <div className="px-5 py-4 space-y-4" style={{ background: 'var(--c-card)' }}>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--c-text-3)' }}>
-                Keys are saved in browser localStorage and sent directly to the AI provider per-request.
-                They are never stored server-side or logged.
+                Keys stay in application memory until you leave the arena or reload. Authorized calls pass temporarily through the battle proxy.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

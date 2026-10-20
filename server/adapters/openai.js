@@ -21,7 +21,7 @@ export async function openaiAdapter(systemPrompt, userMessage, opts = {}) {
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userMessage },
     ],
-  });
+  }, { signal: opts.signal });
 
   const latencyMs = Date.now() - start;
   const choice = res.choices?.[0];

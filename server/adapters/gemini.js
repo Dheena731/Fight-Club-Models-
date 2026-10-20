@@ -7,18 +7,17 @@ function getClient(apiKey) {
 }
 
 export async function geminiAdapter(systemPrompt, userMessage, opts = {}) {
-  // TODO: confirm latest GA model id at build time.
-  const model = opts.model || 'gemini-1.5-pro';
+  const model = opts.model || 'gemini-3.6-flash';
   const maxTokens = opts.maxTokens || Number(process.env.MAX_TOKENS_PER_TURN) || 150;
   const start = Date.now();
 
   const genModel = getClient(opts.apiKey).getGenerativeModel({
     model,
     systemInstruction: systemPrompt,
-    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.9 },
+    generationConfig: { maxOutputTokens: maxTokens },
   });
 
-  const res = await genModel.generateContent(userMessage);
+  const res = await genModel.generateContent(userMessage, { signal: opts.signal });
   const latencyMs = Date.now() - start;
   const usage = res.response?.usageMetadata;
 

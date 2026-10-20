@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const MAX_CHARS = 120;
 
-export default function SpeechBubble({ text, side = 'left', visible }) {
+export default function SpeechBubble({ text, side = 'left', visible, pinned = false }) {
   const truncated = text && text.length > MAX_CHARS ? text.slice(0, MAX_CHARS).trim() + '…' : text;
   const isLeft = side === 'left';
 
@@ -10,8 +10,10 @@ export default function SpeechBubble({ text, side = 'left', visible }) {
     <AnimatePresence>
       {visible && truncated && (
         <motion.div
-          className="absolute bottom-full pointer-events-none z-10"
-          style={{ [isLeft ? 'left' : 'right']: 0, maxWidth: 220, marginBottom: 10 }}
+          className={pinned ? 'relative pointer-events-none z-10' : 'absolute bottom-full pointer-events-none z-10'}
+          style={pinned
+            ? { maxWidth: 220, marginBottom: 10 }
+            : { [isLeft ? 'left' : 'right']: 0, maxWidth: 220, marginBottom: 10 }}
           initial={{ opacity: 0, y: 10, scale: 0.88 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -6, scale: 0.93 }}

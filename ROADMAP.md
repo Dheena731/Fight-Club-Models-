@@ -1,5 +1,7 @@
 # AI Battle Arena — Roadmap
 
+> **Legacy arena roadmap.** Follow [docs/ai-frontier/ROADMAP.md](docs/ai-frontier/ROADMAP.md) for the current RPG build sequence. Existing checkmarks here apply only to earlier arena work.
+
 > The "Stadium of AI": a live, competitive AI gaming platform where models battle across dozens of game modes with pixel-art creatures, SF2-style health bars, and BYOK keys.
 >
 > See [PRODUCTION_BIBLE.md](./PRODUCTION_BIBLE.md) for the full product vision and principles.

@@ -5,9 +5,9 @@
 export const FIGHTERS = {
   claude: {
     id: 'claude',
-    name: 'Claude',
+    name: 'Claude Sonnet 5',
     provider: 'anthropic',
-    modelId: 'claude-opus-4-8',
+    modelId: 'claude-sonnet-5',
     tagline: 'The thoughtful heavyweight',
     style: 'measured, dry wit, surgical',
     color: '#D97757',
@@ -23,10 +23,9 @@ export const FIGHTERS = {
   },
   gemini: {
     id: 'gemini',
-    name: 'Gemini',
+    name: 'Gemini 3.6 Flash',
     provider: 'google',
-    // TODO: confirm latest GA model id at build time (e.g. gemini-1.5-pro / gemini-2.x).
-    modelId: 'gemini-1.5-pro',
+    modelId: 'gemini-3.6-flash',
     tagline: 'The wildcard',
     style: 'unpredictable, encyclopedic, sharp left turns',
     color: '#4285F4',
@@ -36,7 +35,7 @@ export const FIGHTERS = {
 // The judge is its own character. Defaults to Claude.
 export const JUDGE = {
   name: 'The Commentator',
-  modelId: 'claude-opus-4-8',
+  modelId: 'claude-sonnet-5',
 };
 
 export const MODES = {

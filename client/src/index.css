@@ -12,17 +12,25 @@
   --c-text:        #e8e8f0;
   --c-text-2:      rgba(232, 232, 240, 0.6);
   --c-text-3:      rgba(232, 232, 240, 0.48);
-  --c-accent:      #D97757;
-  --c-accent-bg:   rgba(217, 119, 87, 0.10);
-  --c-accent-glow: rgba(217, 119, 87, 0.25);
+  --c-accent:      #FFB627;
+  --c-accent-bg:   rgba(255, 182, 39, 0.12);
+  --c-accent-glow: rgba(255, 182, 39, 0.35);
   --c-hero-bg:     #0a0a0f;
   --c-hero-text:   #ffffff;
   --c-hero-muted:  rgba(232, 232, 240, 0.48);
-  --c-hero-glow:   radial-gradient(ellipse 60% 100% at 50% 0%, rgba(217,119,87,0.12), transparent 70%);
+  --c-hero-glow:   radial-gradient(ellipse 60% 100% at 50% 0%, rgba(255,182,39,0.14), transparent 70%);
+
+  /* Status hues — deliberately NOT amber, so they never compete with --c-accent */
+  --c-ok:          #22C55E;
+  --c-ok-bg:       rgba(34, 197, 94, 0.12);
+  --c-warn:        #FF6B4A;
+  --c-warn-bg:     rgba(255, 107, 74, 0.12);
+  --c-danger:      #EF4444;
+  --c-danger-bg:   rgba(239, 68, 68, 0.08);
 }
 
 [data-theme="light"] {
-  /* Claude's warm editorial palette */
+  /* Warm high-contrast daylight palette */
   --c-bg:          #FAF9F7;
   --c-card:        #FFFFFF;
   --c-raised:      #F2F0EC;
@@ -31,13 +39,22 @@
   --c-text:        #1F1B18;
   --c-text-2:      #6B6866;
   --c-text-3:      #7A7775;
-  --c-accent:      #D97757;
-  --c-accent-bg:   rgba(217, 119, 87, 0.08);
-  --c-accent-glow: rgba(217, 119, 87, 0.15);
+  --c-accent:      #FFB627;
+  --c-accent-bg:   rgba(255, 182, 39, 0.12);
+  --c-accent-glow: rgba(255, 182, 39, 0.25);
   --c-hero-bg:     #FAF9F7;
   --c-hero-text:   #1F1B18;
   --c-hero-muted:  #6B6866;
-  --c-hero-glow:   radial-gradient(ellipse 60% 100% at 50% 0%, rgba(217,119,87,0.11), transparent 70%);
+  --c-hero-glow:   radial-gradient(ellipse 60% 100% at 50% 0%, rgba(255,182,39,0.12), transparent 70%);
+
+  /* Darker/deeper than the dark-theme values — same hue family, tuned to hit
+     4.5:1 on the near-white card bg (the dark-theme hex values fail here). */
+  --c-ok:          #15803D;
+  --c-ok-bg:       rgba(21, 128, 61, 0.10);
+  --c-warn:        #C2410C;
+  --c-warn-bg:     rgba(194, 65, 12, 0.10);
+  --c-danger:      #B91C1C;
+  --c-danger-bg:   rgba(185, 28, 28, 0.08);
 }
 
 /* ── Base ───────────────────────────────────────────────────── */
@@ -63,6 +80,14 @@
     color: var(--c-text);
   }
   option { background: var(--c-card); color: var(--c-text); }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--c-raised) inset !important;
+    -webkit-text-fill-color: var(--c-text) !important;
+    caret-color: var(--c-text);
+  }
 }
 
 /* ── Utilities ──────────────────────────────────────────────── */
@@ -126,9 +151,6 @@
 
 /* ── Mobile responsive overrides ───────────────────────────── */
 @media (max-width: 480px) {
-  .arena-stage {
-    height: 280px !important;
-  }
   .stage-floor {
     background-size: 16px 16px !important;
   }

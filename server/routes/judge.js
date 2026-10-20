@@ -1,33 +1,84 @@
-import { claudeAdapter } from '../adapters/claude.js';
+import { callModel } from '../adapters/index.js';
 import { judgePrompt } from '../../shared/prompts.js';
-import { JUDGE } from '../../shared/fighters.js';
 
-// Scores one exchange. Returns { a:{wit,creativity,burns}, b:{...}, rationale, total:{a,b} }.
-// Falls back to a neutral score if the judge model returns unparseable output.
-export async function judgeRound({ a, b, mode, turnA, turnB }) {
-  const system = judgePrompt({ a, b, mode });
-  const userMessage = `${a.name} said: "${turnA}"\n\n${b.name} said: "${turnB}"\n\nScore both turns now.`;
+const AXES = ['wit', 'creativity', 'burns'];
 
-  let parsed;
-  try {
-    const res = await claudeAdapter(system, userMessage, { model: JUDGE.modelId, maxTokens: 300 });
-    parsed = JSON.parse(extractJson(res.text));
-  } catch {
-    parsed = {
-      a: { wit: 5, creativity: 5, burns: 5 },
-      b: { wit: 5, creativity: 5, burns: 5 },
-      rationale: 'The judge was speechless. Even split.',
-    };
-  }
-
-  const sum = (s) => (s ? (s.wit || 0) + (s.creativity || 0) + (s.burns || 0) : 0);
-  return { ...parsed, total: { a: sum(parsed.a), b: sum(parsed.b) } };
+function clampScore(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return 5;
+  return Math.max(1, Math.min(10, Math.round(number)));
 }
 
-// Models sometimes wrap JSON in prose/markdown — grab the outermost {...}.
-function extractJson(text) {
+function normalizeFighterScore(score = {}) {
+  return Object.fromEntries(AXES.map((axis) => [axis, clampScore(score[axis])]));
+}
+
+export function extractJudgeJson(text) {
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error('no json');
+  if (start === -1 || end === -1) throw new Error('Judge returned no JSON');
   return text.slice(start, end + 1);
+}
+
+export function parseJudgeText(text) {
+  const parsed = JSON.parse(extractJudgeJson(text));
+  return {
+    a: normalizeFighterScore(parsed.a),
+    b: normalizeFighterScore(parsed.b),
+    rationale: String(parsed.rationale || 'No commentary supplied.').slice(0, 320),
+  };
+}
+
+function mergeDecisions(decisions) {
+  const average = (side, axis) => Math.round(
+    decisions.reduce((sum, decision) => sum + decision[side][axis], 0) / decisions.length,
+  );
+
+  const a = Object.fromEntries(AXES.map((axis) => [axis, average('a', axis)]));
+  const b = Object.fromEntries(AXES.map((axis) => [axis, average('b', axis)]));
+  const sum = (score) => AXES.reduce((total, axis) => total + score[axis], 0);
+  const commentary = decisions.map((decision) => decision.rationale).filter(Boolean);
+
+  return {
+    a,
+    b,
+    rationale: decisions.length > 1
+      ? `Split decision. ${commentary.join(' / ')}`.slice(0, 420)
+      : commentary[0],
+    total: { a: sum(a), b: sum(b) },
+    judges: decisions.length,
+  };
+}
+
+/**
+ * Both fighters judge anonymized corners in parallel. Self-bias is symmetric,
+ * no third API key is required, and one judge may fail without forcing a draw.
+ */
+export async function judgeRound({ a, b, mode, turnA, turnB, signal, judgeCall = callModel }) {
+  signal?.throwIfAborted();
+  const red = { name: 'Red Corner' };
+  const blue = { name: 'Blue Corner' };
+  const system = judgePrompt({ a: red, b: blue, mode });
+  const userMessage = `RED CORNER said: "${turnA}"\n\nBLUE CORNER said: "${turnB}"\n\nScore both turns now.`;
+
+  const settled = await Promise.allSettled(
+    [a, b].map(async (judge) => {
+      const result = await judgeCall(judge, system, userMessage, { maxTokens: 300, signal });
+      return parseJudgeText(result.text);
+    }),
+  );
+  const decisions = settled
+    .filter((result) => result.status === 'fulfilled')
+    .map((result) => result.value);
+  signal?.throwIfAborted();
+
+  if (!decisions.length) {
+    const reasons = settled
+      .map((result) => result.status === 'rejected' ? result.reason?.message : null)
+      .filter(Boolean)
+      .join('; ');
+    throw new Error(`Judges unavailable${reasons ? `: ${reasons}` : ''}`);
+  }
+
+  return mergeDecisions(decisions);
 }

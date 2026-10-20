@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fighterColor } from '../lib/colors';
 import * as sfx from '../lib/sfx';
@@ -9,6 +8,7 @@ import { downloadShareCard } from '../lib/shareCard';
 import CompactRound from '../components/arena/CompactRound';
 import FighterSprite from '../components/FighterSprite';
 import ThemeToggle from '../components/ThemeToggle';
+import { useGameState, useGameDispatch } from '../game/GameContext';
 
 function SharePanel({ result }) {
   const [copied, setCopied] = useState(false);
@@ -17,7 +17,7 @@ function SharePanel({ result }) {
     : null;
 
   const text = winner
-    ? `${winner.name} just won ${result.ko ? 'by K.O.' : 'on points'} in AI Battle Arena! 🥊`
+    ? `${winner.name} just won ${result.ko ? 'by K.O.' : 'with more HP remaining'} in the Frontier Arena!`
     : `The AI Battle Arena ended in a DRAW!`;
 
   const replayUrl = useMemo(() => encodeReplayUrl(result), [result]);
@@ -72,7 +72,7 @@ function SharePanel({ result }) {
         </button>
       </div>
       <p className="text-[11px]" style={{ color: 'var(--c-text-3)' }}>
-        The replay link replays this whole fight for anyone — no login, no server storage.
+        This link shares a result recap. It does not play back the fight.
       </p>
     </motion.div>
   );
@@ -100,29 +100,22 @@ function HPSummaryBar({ fighter, hp }) {
 }
 
 export default function Result() {
-  const { state: result, hash } = useLocation();
-  const navigate = useNavigate();
+  const { result, loadout, arenaReturn } = useGameState();
+  const dispatch = useGameDispatch();
   const [streak, setStreak] = useState(0);
 
-  // If we got here from a replay URL hash, reconstruct result
   useEffect(() => {
-    if (!result && hash) {
-      import('../lib/replay').then(({ decodeReplayFromHash }) => {
-        const replay = decodeReplayFromHash();
-        if (replay) navigate('/result', { state: replay, replace: true });
-      });
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Crowd goes wild for the champion; track win streaks
-  useEffect(() => {
-    if (result?.winnerId) {
+    if (result?.winnerId && loadout) {
       sfx.crowd(true);
       setStreak(recordBattle(result));
     }
-  }, [result]);
+  }, [result, loadout]);
 
-  if (!result) { navigate('/'); return null; }
+  useEffect(() => {
+    if (!result) dispatch({ type: 'EXIT_TO_SELECT' });
+  }, [result, dispatch]);
+
+  if (!result) return null;
 
   const { fighters, rounds, finalHp, winnerId, ko } = result;
   const winner = winnerId
@@ -135,21 +128,18 @@ export default function Result() {
   const winnerIsA = winner?.id === fighters?.a?.id;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--c-bg)' }}>
+    <div className="h-svh overflow-y-auto flex flex-col" style={{ background: 'var(--c-bg)' }}>
 
-      {/* ── WINNER REVEAL (always dark/dramatic) ── */}
       <div
         className="relative overflow-hidden arena-dark scanlines"
         style={{
           background: `linear-gradient(to bottom, #0a0a0f 0%, ${winnerColor}0A 60%, var(--c-bg) 100%)`,
         }}
       >
-        {/* theme toggle */}
         <div className="absolute top-4 right-4 z-20">
           <ThemeToggle />
         </div>
 
-        {/* confetti */}
         {winner && Array.from({ length: 16 }).map((_, i) => (
           <motion.div
             key={i}
@@ -162,8 +152,6 @@ export default function Result() {
         ))}
 
         <div className="max-w-3xl mx-auto px-6 py-12 flex flex-col items-center gap-6">
-
-          {/* winner creature — big */}
           {winner && (
             <motion.div
               initial={{ scale: 0.4, opacity: 0 }}
@@ -179,7 +167,6 @@ export default function Result() {
             </motion.div>
           )}
 
-          {/* loser creature — small, K.O. — hidden on narrow screens to avoid overlap */}
           {loser && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -197,7 +184,6 @@ export default function Result() {
             </motion.div>
           )}
 
-          {/* result text */}
           <motion.div
             className="text-center"
             initial={{ scale: 0.7, opacity: 0 }}
@@ -222,7 +208,7 @@ export default function Result() {
                   {winner.name}
                 </div>
                 <div className="font-display text-2xl tracking-widest text-white/50 mt-2">
-                  {ko ? 'WINS BY K.O.' : 'WINS ON POINTS'}
+                  {ko ? 'WINS BY K.O.' : 'WINS WITH MORE HP'}
                 </div>
                 {loser && (
                   <div className="text-sm mt-2 text-white/30">
@@ -240,10 +226,7 @@ export default function Result() {
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
       <main className="max-w-3xl mx-auto w-full px-4 py-8 space-y-6">
-
-        {/* Final HP */}
         <div className="rounded-2xl p-5 space-y-3" style={{ background: 'var(--c-card)', border: '1px solid var(--c-border)' }}>
           <h3 className="font-display text-lg tracking-wider" style={{ color: 'var(--c-text-3)' }}>FINAL SCORE</h3>
           <HPSummaryBar
@@ -256,7 +239,6 @@ export default function Result() {
           />
         </div>
 
-        {/* Win streak */}
         {streak > 0 && (
           <div
             className="text-center py-2 px-4 rounded-xl font-display tracking-widest"
@@ -266,10 +248,8 @@ export default function Result() {
           </div>
         )}
 
-        {/* Share */}
         <SharePanel result={result} />
 
-        {/* Round Recap */}
         <div className="space-y-3">
           <h3 className="font-display text-xl tracking-wider" style={{ color: 'var(--c-text-3)' }}>FIGHT RECAP</h3>
           {rounds?.map((r, i) => (
@@ -283,16 +263,35 @@ export default function Result() {
           ))}
         </div>
 
-        {/* Play again */}
-        <motion.button
-          onClick={() => navigate('/')}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="w-full py-4 rounded-2xl font-display text-2xl tracking-widest transition-all duration-200 outline-none"
-          style={{ background: 'var(--c-raised)', color: 'var(--c-text-2)', border: '1px solid var(--c-border)' }}
-        >
-          FIGHT AGAIN
-        </motion.button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <motion.button
+            onClick={() => dispatch({ type: arenaReturn ? 'RETURN_WORLD' : 'RETURN_TITLE' })}
+            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+            className="flex-1 py-4 rounded-2xl font-display text-2xl tracking-widest"
+            style={{ background: 'var(--c-accent)', color: '#0a0a0f' }}>
+            {arenaReturn ? 'RETURN TO WORLD' : 'TITLE SCREEN'}
+          </motion.button>
+          {loadout && (
+            <motion.button
+              onClick={() => dispatch({ type: 'REMATCH' })}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex-1 py-4 rounded-2xl font-display text-2xl tracking-widest transition-all duration-200 outline-none"
+              style={{ background: 'linear-gradient(135deg, var(--c-accent) 0%, #E09A14 100%)', color: '#0a0a0f' }}
+            >
+              REMATCH
+            </motion.button>
+          )}
+          <motion.button
+            onClick={() => dispatch({ type: 'NEW_FIGHTERS' })}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="flex-1 py-4 rounded-2xl font-display text-2xl tracking-widest transition-all duration-200 outline-none"
+            style={{ background: 'var(--c-raised)', color: 'var(--c-text-2)', border: '1px solid var(--c-border)' }}
+          >
+            NEW FIGHTERS
+          </motion.button>
+        </div>
       </main>
     </div>
   );
