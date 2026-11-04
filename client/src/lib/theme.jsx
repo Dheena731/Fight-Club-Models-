@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { readPreference, writePreference } from './preferences.js';
 
 const ThemeCtx = createContext({ theme: 'dark', toggle: () => {} });
 
@@ -8,11 +9,11 @@ export function useTheme() {
 export { ThemeCtx };
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('aba:theme') || 'dark');
+  const [theme, setTheme] = useState(() => readPreference('aba:theme', 'dark') === 'light' ? 'light' : 'dark');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('aba:theme', theme);
+    writePreference('aba:theme', theme);
   }, [theme]);
 
   return (

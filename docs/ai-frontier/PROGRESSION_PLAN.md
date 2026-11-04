@@ -103,10 +103,11 @@ shared/rpg/
   profile.js                # catalog, local profile, equip validation, snapshot
   profile.test.js           # unknown/unowned IDs, duplicates, corruption
 client/src/rpg/
-  Title.jsx                # panoramic menu, trainer and starter setup
+  JourneyTitle.jsx         # active panoramic menu, trainer and starter setup
   Adventure.jsx            # journey/practice/circuit and shared game menus
   AdventureScene.jsx       # Pixi tile world, actors and camera
   CompanionArt.jsx         # original character portrait/battle presentation
+  FieldMap.jsx             # actual paths, landmarks and player position
   Locker.jsx               # equipment and identity preview
   locker.css
   journey.css              # coherent GBA frames/tokens/responsive UI
@@ -118,7 +119,7 @@ docs/ai-frontier/
   WORK_LOG.md               # evidence and checkpoint state
 ```
 
-Split only when a real system needs it. Existing `worldState.js` remains available for migration/legacy tests. Never save credentials, provider response text or an arbitrary transient React panel in an adventure/profile snapshot.
+Split only when a real system needs it. `Title.jsx`, `World.jsx`, `WorldScene.jsx` and `worldState.js` are legacy/reference modules, not the active Journey route; the old rules remain available for save import/tests. The UI-safe persistence boundary is `client/src/lib/adventureStorage.js`. Never save credentials, provider response text or an arbitrary transient React panel in an adventure/profile snapshot.
 
 ## Integration contracts for the first implementation
 
@@ -133,6 +134,8 @@ State includes version, mode (`journey`, `practice`, `circuit`), trainerName, st
 Actions: `MOVE {dx,dy}`, `INTERACT`, `DISMISS_DIALOGUE`, `BATTLE_MOVE {moveId}`, `SWITCH_COMPANION {companionId}`, `USE_ITEM {itemId,companionId}`, `RETREAT`, `CONTINUE_RESULT`, `REST`, `START_PRACTICE`, `START_CIRCUIT`. Invalid actions do not advance turns or create rewards. Export additional selectors rather than requiring the UI to recalculate rules.
 
 `adventureSave.js` exports `ADVENTURE_SAVE_KEY`, `loadAdventure(storage?)`, `saveAdventure(state,storage?)`, `toAdventureSave(state)` and `fromAdventureSave(value)`. Use a distinct v3 key, preserve old keys, import a valid v2/v1 snapshot and map old hero IDs to the corresponding starter. Save/load errors remain visible to the player.
+
+Implemented recovery additions: snapshots carry a stable `runId` and `mapRevision`. Pre-expansion v3 maps migrate to safe checkpoints, or the matching new encounter adjacency if a battle is active. A write from another run is rejected unless Begin Journey explicitly confirms `{replace:true}`. Circuit best records use the separate `ai-frontier:circuit:v1` key and are persisted at result boundaries. Shared save errors throw; the UI boundary converts them into usable recovery controls, including controls inside active native dialogs. This prevents stale-run replacement, not arbitrary same-run multi-tab conflict merging or public cheating.
 
 ### Identity lane
 

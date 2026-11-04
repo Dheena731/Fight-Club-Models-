@@ -86,14 +86,14 @@ function grantFlag(state, flag, xp = 0) {
 export function beginBattle(state, encounterId) {
   const enemy = ENCOUNTERS[encounterId];
   return { ...state, dialogue: null, result: null, puzzle: null,
-    battle: { encounterId, enemy: { id: enemy.id, name: enemy.name, hp: enemy.maxHp, maxHp: enemy.maxHp, intent: enemyIntent(encounterId, 0) }, turn: 0, log: [`${enemy.name} appears. Read its intent before choosing.`] }, message: 'A deterministic local encounter begins.' };
+    battle: { encounterId, enemy: { id: enemy.id, name: enemy.name, hp: enemy.maxHp, maxHp: enemy.maxHp, intent: enemyIntent(encounterId, 0) }, turn: 0, log: [`${enemy.name}. Read the next intent before choosing.`] }, message: 'A deterministic local encounter begins.' };
 }
 export function adventureResult(state, outcome, encounterId = null) {
   const enemy = ENCOUNTERS[encounterId];
   const headings = { won: 'Victory!', lost: 'A safe return', retreated: 'Retreated safely', restored: 'The Lantern Signal returns' };
   return { outcome, encounterId, heading: headings[outcome],
     text: outcome === 'restored' ? 'Mara lights the town lantern. You earned the Lantern identity set. Open the Locker to equip it. Local / unverified.'
-      : outcome === 'won' ? `${enemy.name} is defeated.${state.mode === 'journey' ? ' Your progress is saved in this local Journey.' : ' No Journey XP or rewards were granted.'}`
+      : outcome === 'won' ? `${enemy.name}: encounter cleared.${state.mode === 'journey' ? ' Check the save indicator before leaving your Journey.' : ' No Journey XP or rewards were granted.'}`
         : 'Your quest progress is safe. The team has recovered. Retry when ready; no completion was granted.',
     rewards: state.mode !== 'journey' ? [] : outcome === 'restored' ? ['skin-lantern', 'badge-lantern-signal', 'title-lantern-keeper'] : outcome === 'won' ? [...enemy.rewardIds] : [],
   };
@@ -164,7 +164,7 @@ function interact(state) {
         const next = grantFlag(state, 'recruited');
         return talk({ ...next, team: [...next.team, createCompanion('mossback', next.team[0].xp)] }, object.name, 'You read the Wisp’s intent. Mossback would like to join! Team can switch the lead; switching in battle spends a turn.');
       }
-      return talk(state, object.name, 'A gathering signal leaves an opening. Ward against its following surge. After the Wisp, come back to meet Mossback.');
+      return talk(state, object.name, state.flags.recruited ? 'Mossback is traveling with you. The Archive lies south of Frontier Crossing; remember to rest before its final watch.' : 'A gathering signal leaves an opening. Ward against its following surge. After the Wisp, come back to meet Mossback.');
     }
     case 'archive-note':
       return talk(grantFlag(state, 'noteRead'), object.name, 'Remember this sequence: amber first, cyan second. Apply the clue at the relay. Gathering enemies also leave an opening for Recall.');

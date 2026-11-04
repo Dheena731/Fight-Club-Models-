@@ -1,10 +1,10 @@
 // Procedural SFX — WebAudio synth, zero assets to load.
 // Muted by default; user opt-in persists in localStorage.
+import { readPreference, writePreference } from './preferences.js';
 
 const MUTE_KEY = 'arena.muted';
 let ctx = null;
-let muted = true;
-try { muted = localStorage.getItem(MUTE_KEY) !== 'off'; } catch { /* Audio remains opt-in when storage is blocked. */ }
+let muted = readPreference(MUTE_KEY, 'on') !== 'off';
 
 function ac() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -18,7 +18,7 @@ export function isMuted() {
 
 export function toggleMute() {
   muted = !muted;
-  try { localStorage.setItem(MUTE_KEY, muted ? 'on' : 'off'); } catch { /* Keep the in-memory audio preference usable. */ }
+  writePreference(MUTE_KEY, muted ? 'on' : 'off');
   if (!muted) bell(); // audible confirmation
   return muted;
 }

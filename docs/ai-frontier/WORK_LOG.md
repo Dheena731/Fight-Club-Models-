@@ -43,3 +43,39 @@ P0: source inspection and documented integration contracts. No new implementatio
 - Browser QA uses `localhost:5174`, isolated from the user's existing `localhost:5173` save. Root found/fixed throwing save errors at UI boundaries, unsafe mode-exit presentation, obsolete React image prop warning, cramped map framing and trainer-like NPC placeholders.
 - Authored maps expanded to town 28×18, forest 28×18 and Archive 26×18. Legacy saves import to safe region spawns; test fixtures use named landmarks rather than obsolete coordinates.
 - Current status is integration/review, not a production or player-retention verdict. Exact final checks and walkthrough outcomes follow after validation.
+
+## Accepted local checkpoint — P0–P4
+
+### Independent review and corrections
+
+The independent reviewer found three initial issues: map upgrades invalidated old v3 positions, Circuit records were not saved at completion, and an old tab could overwrite a replacement Journey. Root corrected these with map revision migration (including active encounter adjacency), stable run IDs/explicit replacement, and a separate Circuit record. Four regression tests cover those reproductions.
+
+The follow-up found that Circuit's Retry Save selected the Journey writer and was inaccessible behind a native result dialog. The retry now selects the appropriate mode writer; recovery controls render inside the active dialog. A quota-failure/restored-storage regression proves the Circuit retry leaves the Journey snapshot unchanged. The reviewer did not issue a final blanket approval after this last correction; root acceptance is based on the targeted regression and integrated checks.
+
+Additional QA corrections: recent battle logs replace stale opening text, attack/impact motion respects reduced motion, NPCs have distinct original artwork, rest/route layouts are authored, the field map shows actual paths/player/landmarks, both tonic and tea have validated targets, and noncritical theme/audio preferences cannot crash boot when storage is blocked.
+
+### Final local checks
+
+- `npm test`: **93/93 passed**, including original provider/cancellation/security checks, all starters with/without recruitment, complete chapter traversal, stable-turn save/resume, migration/corruption, mode isolation, cosmetic ownership, art hashes and recovery regressions.
+- `npm --prefix client run lint`: **0 errors**, five pre-existing Fast Refresh warnings.
+- `npm --prefix client run build`: **passed**. Pixi chunk remains 555.51KB (162.26KB gzip), triggering Vite's >500KB warning. Image compression and target-device profiling are not completed release gates.
+- `git diff --check`: passed at checkpoints; user-owned `.claude/launch.json` and `.env.example` remain excluded.
+
+### Observed browser walkthrough (isolated QA origin)
+
+- Trainer/starter setup and explicit replacement protection; town/forest/Archive navigation; readable dialogue and named destinations.
+- Static Wisp turn/energy/HP feedback; refresh resumes exact turn 3, enemy HP 11/30, companion HP 36/36 and energy 4/5.
+- Recruited team visible; lead switches both ways. Rest checkpoint and Archive clue work. Wrong lamp resets; correct amber/cyan order restores relay.
+- Archive Warden defeated through intent/energy decisions; homecoming displays all three Lantern rewards and a direct Equip path.
+- Locker equips frame/title/three badges; preview labels example rival and local/unverified identity. Equipment persists through refresh and mode changes.
+- Journey-entered Practice retreats and returns without XP/reward changes. Title-entered Practice has no misleading Return to Journey action that could replace a different save.
+- All three Circuit rivals cleared; refresh returns to the protected level-5 Journey and displays the separate **3/3** record.
+- Actual field map and tonic/tea targets inspected at phone size. Invalid full-health/full-energy targets disabled; quantities and HP/energy update correctly.
+- Optional arena consent → keyless model selection → World return preserves position/progression. No credentials entered and no billable provider calls made.
+- Responsive spot checks include 360×740, 390×844 and 1280×720; no horizontal overflow observed in inspected screens. These are browser viewport checks, not physical-phone, gamepad, accessibility-assistive-device or exhaustive screen-combination certification.
+
+### Remaining work, not claimed complete
+
+P5 server-verified profiles/achievements and actual two-human invite duels; P6 mechanically different second world and observed player sessions. Full nine-companion gameplay/animation sets, bespoke back art for Mossback, compressed art delivery, soundtrack, target-device frame/memory measurements and release accessibility testing also remain. No market-fit, production scalability or ranked-fairness claim follows from the local tests.
+
+All agent work was integrated into the original checkout. Temporary managed agent checkouts were retained because the host archive helper reported an ownership conflict; no forced deletion or ownership override was attempted. Temporary ownership exceptions added solely to attempt archival were removed.
