@@ -30,4 +30,6 @@ Thumbs.db
 # misc
 coverage/
 .cache/
+__pycache__/
+**/skills/impeccable/scripts/bin/
 *.agents/
