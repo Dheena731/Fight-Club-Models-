@@ -42,7 +42,7 @@ export default function Boot() {
       className="h-svh w-full flex items-center justify-center overflow-hidden"
       style={{ background: '#000' }}
       role="status"
-      aria-label="Loading AI Frontier"
+      aria-label="Loading Cogimon"
     >
       <motion.div
         className="relative w-full max-w-3xl mx-8"
@@ -59,7 +59,7 @@ export default function Boot() {
             className="font-display tracking-[0.4em] text-2xl sm:text-4xl"
             style={{ color: '#FFB627', textShadow: '0 0 24px rgba(255,182,39,0.4)' }}
           >
-            AI FRONTIER
+            COGIMON
           </div>
           <div className="font-display text-xs tracking-[0.35em] text-white/30">
             {lineDone ? 'READY' : 'POWER ON…'}

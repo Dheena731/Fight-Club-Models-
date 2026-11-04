@@ -1,8 +1,10 @@
 # Product
 
-> **AI Frontier product brief.** The trainer/companion RPG is the opening experience; the original live arena is an optional, separately consented BYOK destination. Current scope, online trust boundaries and acceptance gates: [progression plan](docs/ai-frontier/PROGRESSION_PLAN.md), [implementation evidence](docs/ai-frontier/WORK_LOG.md).
+> **Cogimon product brief.** The trainer/companion RPG is the opening experience; the original live arena is an optional, separately consented BYOK destination. Current scope, online trust boundaries and acceptance gates: [progression plan](docs/ai-frontier/PROGRESSION_PLAN.md), [implementation evidence](docs/ai-frontier/WORK_LOG.md).
 
 ## RPG opening
+
+Cogimon is the brand for an AI creature companion adventure with warm GBA-style visuals. **The Lantern Signal** remains the first chapter title; the optional live-model destination is **Cogimon Arena**. Existing `ai-frontier:` save keys and `aba:` preference/credential-cleanup keys retain their names for compatibility.
 
 Players name a human trainer and choose Emberquill, Kitewhisk or Duplet as their first companion. The Lantern Signal connects a sunlit town, forest route and Archive through quests, recruitment, a Recall puzzle, intent-based battles and a restored-town homecoming. Practice and Rival Circuit are separate local modes. The Locker turns chapter achievements into cosmetic identity, not live-model power. Saves/rewards are local and unverified; this is a bounded chapter, not an open world or human multiplayer release.
 
@@ -16,11 +18,11 @@ AI enthusiasts, builders, and evaluators who want to compare model behavior in a
 
 ## Product Purpose
 
-AI Battle Arena turns model comparison into a live arcade-style matchup. Success means a user can configure keys, pick fighters, understand readiness, start a battle confidently, and follow the outcome through clear HP, round, and result feedback.
+Cogimon is a companion adventure through a fictional world shaped by AI. Players choose a starter, explore, solve clues, and restore The Lantern Signal. Cogimon Arena adds optional live model matchups, with explicit provider setup and clear HP, round, and result feedback.
 
 ## Brand Personality
 
-Playful, sharp, kinetic. The product should feel like a compact arcade cabinet for AI model duels: lively during fights, but calm and legible while users configure the match.
+Warm, curious and companion-led. The adventure should feel like a sunlit handheld RPG with memorable original creatures. Cogimon Arena keeps the kinetic arcade character of model duels, with calm, legible match setup.
 
 ## Anti-references
 
@@ -28,7 +30,7 @@ Avoid generic SaaS landing-page polish, decorative dashboard chrome, and overbea
 
 ## Design Principles
 
-1. Make the setup path obvious: configure keys, choose fighters, tune the match, then fight.
+1. Lead with the Journey and starter choice; introduce provider setup at the optional arena entrance.
 2. Keep product controls familiar and readable; save dramatic motion and spectacle for the arena.
 3. Show readiness and blockers inline so users understand why the fight button is disabled.
 4. Preserve the arcade identity through fighter art, HP, color, and moment-specific motion.

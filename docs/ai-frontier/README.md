@@ -1,4 +1,4 @@
-# AI Frontier development blueprint
+# Cogimon development blueprint
 
 Status: first playable chapter and the Phase 2 faction branch are implemented; the later phases remain planned. [The repository README](../../README.md) describes what currently works.
 
@@ -6,7 +6,7 @@ Status: first playable chapter and the Phase 2 faction branch are implemented; t
 
 ## Product decision
 
-AI Frontier is a browser RPG about exploring a fictional world shaped by AI history. The player moves through connected regions, meets characters, completes quests, develops a character, and fights keyless tactical encounters. A dedicated arena preserves the existing real-model battle feature. Providers inspire factions; supported models become distinct characters. Fictional abilities and balanced stats must never be presented as measured model performance.
+Cogimon is a browser RPG about exploring a fictional world shaped by AI history. The player moves through connected regions, meets characters, completes quests, develops a character, and fights keyless tactical encounters. A dedicated arena preserves the existing real-model battle feature. Providers inspire factions; supported models become distinct characters. Fictional abilities and balanced stats must never be presented as measured model performance.
 
 The first release target is one short, replayable chapter in a compact connected world. Expand only after players can complete it without developer assistance. Do not advertise multiplayer or an open world until those features work.
 
@@ -19,7 +19,7 @@ The first release target is one short, replayable chapter in a compact connected
 5. [Original character atlas](CHARACTERS.md) — provider-to-character identity and art constraints.
 6. [Built-in model review](MODEL_COMPATIBILITY.md) — sourced model IDs and lifecycle caveats; no live availability claim.
 
-The user's detailed AI Frontier brief is the source for this plan. Existing root-level [GAME_DESIGN.md](../../GAME_DESIGN.md), [ROADMAP.md](../../ROADMAP.md), [TODO.md](../../TODO.md), [MARKETING.md](../../MARKETING.md), and [PRODUCTION_BIBLE.md](../../PRODUCTION_BIBLE.md) describe earlier arena or platform directions. Preserve them for context; resolve conflicts in favor of this blueprint. [PRODUCT.md](../../PRODUCT.md) and [DESIGN.md](../../DESIGN.md) document the **current** arena UI until replacements ship.
+The user's original AI Frontier brief is the source for this plan; the product is now named Cogimon. Existing root-level [GAME_DESIGN.md](../../GAME_DESIGN.md), [ROADMAP.md](../../ROADMAP.md), [TODO.md](../../TODO.md), [MARKETING.md](../../MARKETING.md), and [PRODUCTION_BIBLE.md](../../PRODUCTION_BIBLE.md) describe earlier arena or platform directions. Preserve them for context; resolve conflicts in favor of this blueprint. [PRODUCT.md](../../PRODUCT.md) and [DESIGN.md](../../DESIGN.md) document the current RPG and arena surfaces.
 
 ## Decisions already made
 

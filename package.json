@@ -1,8 +1,8 @@
 {
-  "name": "ai-frontier",
+  "name": "cogimon",
   "version": "0.1.0",
   "private": true,
-  "description": "A pixel RPG with offline adventure and an optional live AI model arena.",
+  "description": "Cogimon: an AI creature companion adventure with offline exploration and an optional live model arena.",
   "type": "module",
   "engines": {
     "node": ">=24.0.0"

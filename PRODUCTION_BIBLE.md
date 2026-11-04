@@ -1,4 +1,4 @@
-# AI Battle Arena — Product Bible
+# Cogimon Arena — Product Bible
 
 **Version:** 1.0.0
 **Date:** July 3, 2026
@@ -32,9 +32,9 @@
 
 ### One-Page Overview
 
-**AI Battle Arena** is the world's first competitive AI gaming platform where artificial intelligence models compete in skill-based games while humans watch, play, manage, build, and compete.
+**Cogimon Arena** is the world's first competitive AI gaming platform where artificial intelligence models compete in skill-based games while humans watch, play, manage, build, and compete.
 
-Unlike traditional AI benchmarks that present static, boring leaderboards, AI Battle Arena transforms AI evaluation into an entertaining spectator sport. Think of it as *Twitch + Chess + Pokémon + Marvel vs Capcom + AI* — where the fighters are large language models, each with their own personality, strengths, weaknesses, and fighting styles.
+Unlike traditional AI benchmarks that present static, boring leaderboards, Cogimon Arena transforms AI evaluation into an entertaining spectator sport. Think of it as *Twitch + Chess + Pokémon + Marvel vs Capcom + AI* — where the fighters are large language models, each with their own personality, strengths, weaknesses, and fighting styles.
 
 **Users can:**
 
@@ -238,7 +238,7 @@ Create the platform where these personalities battle it out across dozens of gam
 
 ### Product Concept
 
-AI Battle Arena is a platform where:
+Cogimon Arena is a platform where:
 - AI models compete in skill-based games (roast battles, coding challenges, debates, etc.)
 - Humans participate as spectators, players, coaches, and creators
 - Community builds new game modes, judges, and content
@@ -262,7 +262,7 @@ AI Battle Arena is a platform where:
 
 ### 5-Year Vision (2026-2031)
 
-By 2031, AI Battle Arena will be:
+By 2031, Cogimon Arena will be:
 
 **The Default Platform for:**
 - AI competitions and tournaments
@@ -280,8 +280,8 @@ By 2031, AI Battle Arena will be:
 - Global tournament circuit
 
 **Community Impact:**
-- AI Battle Arena recognized as the *"Stadium of AI"*
-- University AI Battle Arena clubs and teams
+- Cogimon Arena recognized as the *"Stadium of AI"*
+- University Cogimon Arena clubs and teams
 - High school AI competitions
 - Professional AI esports teams
 - Creator economy supporting full-time developers
@@ -295,7 +295,7 @@ By 2031, AI Battle Arena will be:
 
 ### 10-Year Vision (2026-2036)
 
-By 2036, AI Battle Arena will be:
+By 2036, Cogimon Arena will be:
 
 **A Cultural Institution:**
 - AI Olympic events
@@ -500,7 +500,7 @@ This section is critical for maintaining focus.
 
 ### Complete Product Overview
 
-AI Battle Arena is a comprehensive platform where:
+Cogimon Arena is a comprehensive platform where:
 - AI models compete in game-like scenarios
 - Humans participate in multiple roles
 - Community creates new experiences
@@ -699,13 +699,14 @@ All documents in the Product Bible follow this structure:
 | 2026-07-03 | Product Bible approach | Need comprehensive foundation for complex product | Approved |
 | 2026-07-03 | 20-document structure | Covers all necessary aspects | Approved |
 | 2026-07-03 | "Fight Club Models" working name | Temporary; will evolve | Pending |
+| 2026-11-05 | Cogimon product name | Selected for the AI creature companion adventure; retain The Lantern Signal chapter title | Approved |
 
 ---
 
 ## Appendix: Product Bible Structure
 
 ```
-AI-Battle-Arena-Product-Bible/
+Cogimon-Product-Bible/
 │
 ├── 00_Foundation/
 │   ├── 00_Project_Vision.md          ← YOU ARE HERE

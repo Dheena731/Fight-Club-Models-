@@ -117,7 +117,7 @@ function interact(state) {
         ? 'Amber light reaches the distant hills. The Lantern Signal is complete.'
         : 'The lantern is cold. Its signal is missing.');
     case 'arena':
-      return { ...state, transition: 'arena', message: 'The Frontier Arena hosts live AI model matches. Provider calls may cost money.' };
+      return { ...state, transition: 'arena', message: 'The Cogimon Arena hosts live AI model matches. Provider calls may cost money.' };
     case 'grove-gate':
     case 'frontier-gate':
     case 'archive-gate':
@@ -155,7 +155,7 @@ function interact(state) {
 }
 
 export function currentObjective(state) {
-  if (state.flags.questComplete) return 'The Lantern Signal is complete. Explore or visit the Frontier Arena.';
+  if (state.flags.questComplete) return 'The Lantern Signal is complete. Explore or visit the Cogimon Arena.';
   if (!state.flags.questStarted) return CHAPTER.steps[0];
   if (!state.flags.shardFound) return CHAPTER.steps[1];
   if (!state.flags.wispDefeated) return CHAPTER.steps[2];

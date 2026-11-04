@@ -1,4 +1,4 @@
-// Original fiction for the first AI Frontier chapter. Coordinates are tile units.
+// Original fiction for the first Cogimon chapter. Coordinates are tile units.
 export const TILE = 32;
 export const WORLD_SIZE = { width: 20, height: 12 };
 
@@ -18,7 +18,7 @@ export const REGIONS = {
     objects: [
       { id: 'guide', type: 'npc', x: 5, y: 5, name: 'Mara the Keeper', color: '#f0ab6c' },
       { id: 'lantern', type: 'landmark', x: 10, y: 5, name: 'Relay Lantern', color: '#f9c56d' },
-      { id: 'arena', type: 'arena', x: 15, y: 5, name: 'Frontier Arena', color: '#e97677' },
+      { id: 'arena', type: 'arena', x: 15, y: 5, name: 'Cogimon Arena', color: '#e97677' },
       { id: 'grove-gate', type: 'exit', x: 18, y: 6, name: 'Moss Circuit', to: 'grove', entry: { x: 2, y: 6 }, color: '#74c9a9' },
       { id: 'archive-gate', type: 'exit', x: 4, y: 9, name: 'Forgotten Archive', to: 'archive', entry: { x: 16, y: 8 }, color: '#a695e9' },
     ],

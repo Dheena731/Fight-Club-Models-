@@ -1,6 +1,6 @@
-# AI Frontier
+# Cogimon
 
-A browser-based pixel RPG with a playable first chapter and an optional live AI model arena. The adventure is original fiction; its character stats are game flavor, not measured model performance. [Development blueprint](docs/ai-frontier/README.md).
+An AI creature companion adventure in a browser, with warm GBA-style pixel visuals, a playable first chapter, **The Lantern Signal**, and an optional live AI model arena. The adventure is original fiction; its character stats are game flavor, not measured model performance. [Development blueprint](docs/ai-frontier/README.md).
 
 The GBA companion redesign is being implemented against the [complete progression plan](docs/ai-frontier/PROGRESSION_PLAN.md), with checkpoint evidence in the [work log](docs/ai-frontier/WORK_LOG.md).
 
@@ -15,6 +15,8 @@ The GBA companion redesign is being implemented against the [complete progressio
 The first chapter is a bounded playable slice, not a finished open-world game. A lore codex separates sourced AI history from invented game abilities. Multiplayer, more chapters, deeper RPG combat, and a fully reviewed BYOK challenge system remain planned. See the [roadmap](docs/ai-frontier/ROADMAP.md).
 
 PixiJS renders exploration and the arena; React owns readable HUD, dialogue, controls, and menus.
+
+Cogimon is the product brand. The repository name `Fight-Club-Models-`, `docs/ai-frontier` paths and legacy browser keys remain stable: `ai-frontier:adventure:v3`, `ai-frontier:circuit:v1`, `ai-frontier:profile:v1`, `ai-frontier:save:v2`, `ai-frontier:save:v1` and `aba:theme`. The rebrand preserves existing progress and preferences; obsolete `aba:provider-keys` entries still receive the documented credential cleanup.
 
 ## Stack
 

@@ -52,7 +52,7 @@ export async function renderShareCard(result) {
   ctx.font = display(30);
   ctx.fillStyle = 'rgba(232,232,240,0.45)';
   ctx.textAlign = 'center';
-  ctx.fillText('⚔  AI BATTLE ARENA', W / 2, 68);
+  ctx.fillText('COGIMON ARENA', W / 2, 68);
 
   // fighter names
   ctx.font = display(72);
@@ -121,7 +121,7 @@ export async function downloadShareCard(result) {
   link.href = url;
   const aName = result.fighters?.a?.name ?? 'a';
   const bName = result.fighters?.b?.name ?? 'b';
-  link.download = `battle-${aName}-vs-${bName}.png`.toLowerCase().replace(/\s+/g, '-');
+  link.download = `cogimon-${aName}-vs-${bName}.png`.toLowerCase().replace(/\s+/g, '-');
   link.click();
   URL.revokeObjectURL(url);
 }

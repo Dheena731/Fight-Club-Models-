@@ -1,6 +1,6 @@
-# AI Battle Arena — Full Project Analysis
+# Cogimon Arena — Full Project Analysis
 
-> **Repository:** `Fight-Club-Models-` | **Codename:** AI Battle Arena
+> **Repository:** `Fight-Club-Models-` | **Original codename:** AI Battle Arena (now Cogimon Arena)
 > A live, game-feel web application where AI language models fight each other in comedic battle modes, scored by a judge model, with Street Fighter 2-style pixel-art presentation.
 
 ---
@@ -26,7 +26,7 @@
 
 ## 1. What Is This?
 
-AI Battle Arena is a **spectacle-first AI model comparison tool** disguised as a fighting game. Instead of sterile benchmark tables, you watch two language models trade roasts (or try to inject each other, or impersonate each other) while a judge model scores every round. The whole thing is rendered as a pixel-art arcade fight with animated HP bars, speech bubbles, floating damage numbers, and a round announcer.
+Cogimon Arena is a **spectacle-first AI model comparison tool** disguised as a fighting game. Instead of sterile benchmark tables, you watch two language models trade roasts (or try to inject each other, or impersonate each other) while a judge model scores every round. The whole thing is rendered as a pixel-art arcade fight with animated HP bars, speech bubbles, floating damage numbers, and a round announcer.
 
 **Who is it for?** AI enthusiasts, builders, and evaluators who want to compare model behaviour in a fast, entertaining format. Users bring their own API keys (BYOK) — nothing is stored server-side.
 

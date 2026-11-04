@@ -1,6 +1,6 @@
-# Game Design Spec — Fight Club Models
+# Game Design Spec — Cogimon Arena
 
-> **Legacy arena spec.** The active AI Frontier RPG plan is in [docs/ai-frontier/README.md](docs/ai-frontier/README.md). This file remains useful for the existing live arena but does not define the new main game loop.
+> **Legacy arena spec.** The active Cogimon RPG plan is in [docs/ai-frontier/README.md](docs/ai-frontier/README.md). This file remains useful for the existing live arena but does not define the new main game loop.
 
 > Converting the arena from **a website you watch** into **a game you play**.
 > Companion to [DESIGN.md](./DESIGN.md) (visual system), [MARKETING.md](./MARKETING.md), [ROADMAP.md](./ROADMAP.md).

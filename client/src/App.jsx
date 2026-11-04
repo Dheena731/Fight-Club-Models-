@@ -17,7 +17,7 @@ const World = lazy(() => import('./rpg/Adventure'));
 function ArenaReady({ phase }) {
   const { init, ready, error } = useStage();
   useEffect(() => { init(); }, [init]);
-  if (!ready) return <div className="frontier-loading h-svh"><div role="status">{error || 'Lighting the Frontier Arena…'}</div>{error && <button className="pixel-button" onClick={init}>RETRY</button>}</div>;
+  if (!ready) return <div className="frontier-loading h-svh"><div role="status">{error || 'Lighting the Cogimon Arena…'}</div>{error && <button className="pixel-button" onClick={init}>RETRY</button>}</div>;
   if (phase === PHASE.SELECT) return <Home />;
   if (phase === PHASE.VS) return <Vs />;
   return <Battle />;

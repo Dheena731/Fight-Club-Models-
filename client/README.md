@@ -1,8 +1,12 @@
-# React + Vite
+# Cogimon client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The React, Vite and PixiJS interface for Cogimon, an AI creature companion adventure. The Lantern Signal is the first playable chapter; Cogimon Arena is the optional live-model destination.
 
-Currently, two official plugins are available:
+Run from the repository root:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```sh
+npm run dev
+npm run check
+```
+
+See the [project README](../README.md) for setup and the [design system](../DESIGN.md) for Cogimon branding. Existing `ai-frontier:` and `aba:` browser keys are retained to preserve progress and preferences.

@@ -1,6 +1,6 @@
-# AI Battle Arena — TODO
+# Cogimon Arena — TODO
 
-> **Legacy arena backlog.** The current AI Frontier priorities and phase gates are in [docs/ai-frontier/ROADMAP.md](docs/ai-frontier/ROADMAP.md).
+> **Legacy arena backlog.** The current Cogimon priorities and phase gates are in [docs/ai-frontier/ROADMAP.md](docs/ai-frontier/ROADMAP.md).
 
 > Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked
 

@@ -326,7 +326,7 @@ export default function Home() {
               className="insert-coin font-display text-[13px] tracking-[0.4em]"
               style={{ color: 'var(--c-accent)' }}
             >
-              INSERT COIN - OPEN ARENA
+              COGIMON ARENA
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: -16 }}

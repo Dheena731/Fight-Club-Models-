@@ -8,7 +8,7 @@ The visual staging below is compatible with the new [AI-coaching proposal](AI_ID
 
 A battle takes over the game viewport. The player's active companion appears from the back in the near foreground; the opponent faces them across a small, region-specific battlefield. Introductions, commands, attacks, HP changes, recovery and rewards have readable stages. Team choice matters throughout the encounter.
 
-Use the familiar rhythm of an older handheld creature RPG while giving AI Frontier its own creatures, moves, effects and world. Offline battles are resolved by local game rules. The live-model entertainment arena continues to display actual provider outputs under its own scoring rules.
+Use the familiar rhythm of an older handheld creature RPG while giving Cogimon its own creatures, moves, effects and world. Offline battles are resolved by local game rules. The live-model entertainment arena continues to display actual provider outputs under its own scoring rules.
 
 ## Battle layout
 

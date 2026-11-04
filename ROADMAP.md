@@ -1,4 +1,4 @@
-# AI Battle Arena — Roadmap
+# Cogimon Arena — Roadmap
 
 > **Legacy arena roadmap.** Follow [docs/ai-frontier/ROADMAP.md](docs/ai-frontier/ROADMAP.md) for the current RPG build sequence. Existing checkmarks here apply only to earlier arena work.
 

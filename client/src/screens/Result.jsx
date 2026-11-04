@@ -17,8 +17,8 @@ function SharePanel({ result }) {
     : null;
 
   const text = winner
-    ? `${winner.name} just won ${result.ko ? 'by K.O.' : 'with more HP remaining'} in the Frontier Arena!`
-    : `The AI Battle Arena ended in a DRAW!`;
+    ? `${winner.name} just won ${result.ko ? 'by K.O.' : 'with more HP remaining'} in the Cogimon Arena!`
+    : `The Cogimon Arena ended in a DRAW!`;
 
   const replayUrl = useMemo(() => encodeReplayUrl(result), [result]);
 
@@ -36,7 +36,7 @@ function SharePanel({ result }) {
 
   function nativeShare() {
     if (navigator.share) {
-      navigator.share({ title: 'AI Battle Arena', text, url: replayUrl }).catch(() => {});
+      navigator.share({ title: 'Cogimon Arena', text, url: replayUrl }).catch(() => {});
     } else {
       copyReplay();
     }

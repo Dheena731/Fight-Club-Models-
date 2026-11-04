@@ -1,6 +1,8 @@
-# AI Frontier — GBA adventure redesign
+# Cogimon — GBA adventure redesign
 
 Design review checkpoint · 2026-11-04 · **Visual reference package. Implementation now follows the [progression delivery plan](../PROGRESSION_PLAN.md).**
+
+**Brand update · 2026-11-05:** Cogimon is the product name. Embedded original concept images remain unchanged and may show the former working title, AI Frontier. Prompt text is updated for future reuse; the existing image files, generation metadata and reference paths retain their original provenance.
 
 ## Confirmed direction
 

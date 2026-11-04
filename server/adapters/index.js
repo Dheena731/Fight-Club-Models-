@@ -23,7 +23,7 @@ export async function callModel(fighter, systemPrompt, userMessage, opts = {}) {
       return geminiAdapter(systemPrompt, userMessage, callOpts);
     case 'openai':
       // OpenRouter likes an X-Title header for its dashboard; harmless elsewhere.
-      if (f.provider === 'openrouter') callOpts.headers = { 'X-Title': 'AI Battle Arena' };
+      if (f.provider === 'openrouter') callOpts.headers = { 'X-Title': 'Cogimon' };
       return openaiAdapter(systemPrompt, userMessage, callOpts);
     default:
       throw new Error(`No adapter for kind: ${f.kind}`);

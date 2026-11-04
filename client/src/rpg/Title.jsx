@@ -20,8 +20,8 @@ export default function Title() {
     <main className={`frontier-title ${choosing ? 'is-choosing' : ''}`}>
       <div className="frontier-stars" aria-hidden="true" />
       <div className="frontier-title-content">
-        <p className="frontier-kicker">A PIXEL ADVENTURE THROUGH A FICTIONAL AI FRONTIER</p>
-        <h1>AI <span>FRONTIER</span></h1>
+        <p className="frontier-kicker">AN AI CREATURE ADVENTURE</p>
+        <h1>COGIMON</h1>
         <p className="frontier-title-lead">The lanterns have gone dark. Explore the frontier, uncover the signal, and restore the light.</p>
         <div className="frontier-hero-parade" aria-hidden="true">
           {HEROES.map((hero) => <div key={hero.id}><PixelCreature creature={getCreature(hero.id)} scale={0.8} /></div>)}

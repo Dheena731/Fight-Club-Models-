@@ -86,7 +86,7 @@ export default function World() {
 
   return <main className="frontier-game">
     <header className="frontier-hud">
-      <div className="frontier-hud-brand"><strong>AI FRONTIER</strong><span>{faction.name} · {region.name}</span></div>
+      <div className="frontier-hud-brand"><strong>COGIMON</strong><span>{faction.name} · {region.name}</span></div>
       <div className="frontier-hud-vitals" aria-label="Player health and experience">
         <span>HP <b>{state.hp}/30</b></span><span>EN <b>{state.energy}/5</b></span><span>LV <b>{state.level}</b></span>
         <span>REP <b>{state.faction.reputation}</b></span>
@@ -164,7 +164,7 @@ export default function World() {
     </Panel>}
     {state.panel === 'help' && <Panel title="Controls & Modes" onClose={close}>
       <p>Move with arrow keys or WASD. Press E/Space to interact. Open Journal (J), Map (M), Pack (I), or Lore (L). On touch devices, use the direction pad and INTERACT.</p>
-      <p>Story exploration and tactical battles work offline. The Frontier Arena runs real provider models with your own credentials and may incur provider charges.</p>
+      <p>Story exploration and tactical battles work offline. The Cogimon Arena runs real provider models with your own credentials and may incur provider charges.</p>
       <button className="pixel-button" onClick={() => { saveGame(state); dispatchGame({ type: 'RETURN_TITLE' }); }}>SAVE & TITLE</button>
     </Panel>}
     {state.panel === 'puzzle' && <Panel title="Archive Relay" onClose={close}>

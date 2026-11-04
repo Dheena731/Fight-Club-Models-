@@ -1,4 +1,4 @@
-# Landing Page + Marketing Plan — Fight Club Models
+# Landing Page + Marketing Plan — Cogimon Arena
 
 > `/ship-product` Phase 3 (design spec) and Phase 4 (marketing plan).
 > Decision: **standalone product, charged from v1.** Not a funnel for Burnstop.
@@ -9,7 +9,7 @@
 
 ## 1. Positioning
 
-> **Fight Club Models helps AI-curious developers find out which model is actually funnier, sharper, and harder to break — without reading a single benchmark table.**
+> **Cogimon Arena helps AI-curious developers find out which model is actually funnier, sharper, and harder to break — without reading a single benchmark table.**
 
 The buyer is *not* "developers". It is: **people who follow model releases, argue about them online, and make or consume content about them.** They already have opinions about Claude vs GPT. You are selling them a way to settle it that produces a clip.
 
@@ -112,7 +112,7 @@ It works. But it only works with the cap — **let hosted play reach the most ex
 **Launch day:**
 
 1. **Product Hunt** — 12:01am PT. Tagline: *"Make AI models fight. You're the cornerman."* First comment tells the personal story.
-2. **Show HN** — `Show HN: Fight Club Models – AI models roast each other, you play the prompt cards`. Technical and honest: the latency-to-genre reasoning from `GAME_DESIGN.md` §0 is a genuinely good HN comment. **Answer everything.** HN punishes hype and rewards candour.
+2. **Show HN** — `Show HN: Cogimon Arena – AI models roast each other, you play the prompt cards`. Technical and honest: the latency-to-genre reasoning from `GAME_DESIGN.md` §0 is a genuinely good HN comment. **Answer everything.** HN punishes hype and rewards candour.
 3. **r/LocalLLaMA** — read the self-promo rules first. **Lead with Ollama support** — that subreddit cares about local models more than about Claude vs GPT, and you already support it. That's your angle there, not the roast.
 4. **r/singularity, r/ArtificialInteligence** — lead with a battle result, link at the bottom.
 5. **X thread** — the annoyance → the build → the numbers, screenshots throughout.

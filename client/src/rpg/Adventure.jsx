@@ -215,7 +215,7 @@ export default function Adventure() {
   if (state.battle && !state.result) return <><BattleScreen state={state} dispatch={dispatch} profile={profile} onExit={exit} />{saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={retrySave}>Retry save</button><button onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div>}</>;
 
   return <main className="journey-game">
-    <header className="journey-hud"><button className="journey-brand-button" onClick={() => setPanel('menu')} aria-label="Open game menu"><span aria-hidden="true">✦</span> AI FRONTIER</button>
+    <header className="journey-hud"><button className="journey-brand-button" onClick={() => setPanel('menu')} aria-label="Open Cogimon menu"><img src="/cogimon-icon.svg" width="24" height="24" alt="" /> COGIMON</button>
       <div className="journey-location"><strong>{region.name}</strong><span>{state.mode === 'journey' ? 'The Lantern Signal' : state.mode === 'practice' ? 'Practice · separate progress' : 'Rival Circuit · separate progress'}</span></div>
       <nav aria-label="Adventure menu"><button onClick={() => setPanel('team')}>Team</button><button onClick={() => setPanel('journal')}>Journal</button><button onClick={() => setPanel('locker')}>Locker</button><button aria-label="More game options" onClick={() => setPanel('menu')}>☰</button></nav>
     </header>

@@ -4,9 +4,13 @@
 
 ## RPG visual hierarchy
 
+Cogimon uses a cream wordmark with a plum outline and an amber pixel spark with two eyes (`client/public/cogimon-icon.svg`) as its favicon and menu mark. The optional model destination is branded Cogimon Arena. The chapter remains The Lantern Signal, and original companion names remain unchanged.
+
+Cogimon is the product brand: an AI creature companion adventure in a warm GBA visual world. **The Lantern Signal** names the first chapter. Use Cogimon on product surfaces and Cogimon Arena for the optional live-model destination; keep existing `ai-frontier:` and `aba:` browser keys stable for save/preference compatibility and credential cleanup.
+
 The panoramic title introduces a sunlit world before any provider setup. Starter choice uses expressive original avatars, clear roles and unrestricted inspection. Exploration is Pixi-rendered; native dialogue/menu controls remain readable and keyboard accessible. Daylight jade/leaf/ochre terrain, terracotta architecture and plum outlines carry the GBA direction. Cloud panels (`#F4F6ED`), plum ink (`#2B2438`), jade actions (`#35654F`) and restrained gold selection/rewards remain consistent across setup, exploration, dedicated combat, results and Locker. Adventure level is labelled prestige in the arena; local badges never imply verified public achievements.
 
-AI Battle Arena uses a dark arcade fight-night system: a pixel stage with strong P1/P2 identity, surrounded by a restrained product shell. The arena always stays dark; the shell supports dark and light themes.
+Cogimon Arena uses a dark arcade fight-night system: a pixel stage with strong P1/P2 identity, surrounded by a restrained product shell. The arena always stays dark; the shell supports dark and light themes.
 
 ## Color system
 

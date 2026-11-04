@@ -31,7 +31,7 @@ export default function JourneyTitle() {
   return <main className="journey-title">
     <img className="journey-title-panorama" src="/assets/frontier/title-panorama.png" alt="A trainer and three companions overlook a sunlit river town and distant observatory." />
     <div className="journey-title-shade" aria-hidden="true" />
-    <header className="journey-title-brand"><span className="journey-brand-star" aria-hidden="true">✦</span><h1>AI <span>Frontier</span></h1><p>A companion adventure</p></header>
+    <header className="journey-title-brand"><img className="journey-brand-star" src="/cogimon-icon.svg" alt="" /><h1>Cogimon</h1><p>An AI creature adventure</p></header>
     <section className="journey-title-menu" aria-label="Game menu">
       <p className="journey-menu-note">A signal is calling. Bring a friend.</p>
       {saved && <button className="journey-menu-option" onClick={() => dispatch({ type: 'ENTER_WORLD', adventure: saved })}>
