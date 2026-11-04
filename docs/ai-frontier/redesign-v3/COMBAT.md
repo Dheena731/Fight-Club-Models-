@@ -2,6 +2,8 @@
 
 Proposed for review · 2026-11-04 · See [the master brief](README.md).
 
+The visual staging below is compatible with the new [AI-coaching proposal](AI_IDENTITY.md). That proposal is still under discussion; the final command/teaching flow must be reviewed after choosing how centrally real models participate.
+
 ## The experience
 
 A battle takes over the game viewport. The player's active companion appears from the back in the near foreground; the opponent faces them across a small, region-specific battlefield. Introductions, commands, attacks, HP changes, recovery and rewards have readable stages. Team choice matters throughout the encounter.

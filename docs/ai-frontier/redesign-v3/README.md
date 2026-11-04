@@ -1,12 +1,14 @@
 # AI Frontier — GBA adventure redesign
 
-Design review checkpoint · 2026-11-04 · **Plan and visual concepts; application changes await review.**
+Design review checkpoint · 2026-11-04 · **Visual reference package. Implementation now follows the [progression delivery plan](../PROGRESSION_PLAN.md).**
 
 ## Confirmed direction
 
 The player is a trainer travelling with a small team of original AI companions. The visual target is the rich, warm pixel craft of Game Boy Advance adventures. The approved entrance direction is **A: a panoramic title screen**, with **B's detailed village art inside the game**. The requested scope for this checkpoint is a complete design plan and visual concepts to review together.
 
 Open [the visual review board](review.html), [the character bible](CHARACTERS.md), [the combat specification](COMBAT.md), and [the build plan](IMPLEMENTATION.md). Generated images are concept references; the production sprite and tile contracts are defined in the build plan.
+
+**AI identity discussion:** [the coaching proposal](AI_IDENTITY.md) and [cost scenarios](COSTS.md) retain the earlier options. The current delivery decision is deterministic, keyless creature adventure plus a separately consented real-model arena; live AI in ordinary creature battles is not part of this implementation.
 
 ## What needs to change
 

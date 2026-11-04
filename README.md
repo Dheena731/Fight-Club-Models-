@@ -2,6 +2,8 @@
 
 A browser-based pixel RPG with a playable first chapter and an optional live AI model arena. The adventure is original fiction; its character stats are game flavor, not measured model performance. [Development blueprint](docs/ai-frontier/README.md).
 
+The GBA companion redesign is being implemented against the [complete progression plan](docs/ai-frontier/PROGRESSION_PLAN.md), with checkpoint evidence in the [work log](docs/ai-frontier/WORK_LOG.md).
+
 ## Playable modes
 
 - **Story exploration:** choose one of three factions, begin in its region, choose a two-path mandate, work with an ally, then cross three connected regions to complete The Lantern Signal. Keyboard and touch movement are supported; progress saves locally.
