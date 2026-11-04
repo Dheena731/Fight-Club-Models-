@@ -2,6 +2,8 @@
 
 Status: first playable chapter and the Phase 2 faction branch are implemented; the later phases remain planned. [The repository README](../../README.md) describes what currently works.
 
+**New direction under review (2026-11-04):** the [GBA adventure redesign](redesign-v3/README.md) proposes a trainer with a small companion team, a panoramic title, detailed daylight world art and a complete battle redesign. It includes a [visual review board](redesign-v3/review.html), new character concepts and a replacement build plan. The user confirmed the GBA/trainer direction and panoramic-title/village-art combination. Production implementation awaits the remaining concept review; the current playable build has not yet migrated.
+
 ## Product decision
 
 AI Frontier is a browser RPG about exploring a fictional world shaped by AI history. The player moves through connected regions, meets characters, completes quests, develops a character, and fights keyless tactical encounters. A dedicated arena preserves the existing real-model battle feature. Providers inspire factions; supported models become distinct characters. Fictional abilities and balanced stats must never be presented as measured model performance.

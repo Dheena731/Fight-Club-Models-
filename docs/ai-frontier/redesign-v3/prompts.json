@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-11-04",
+  "generator": "built-in image_gen",
+  "fallbackUsed": false,
+  "entries": [
+    {
+      "id": "title-a",
+      "output": "assets/title-a-panorama.png",
+      "references": [],
+      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity title-screen direction concept for AI FRONTIER, an original browser RPG.\nPrimary request: Make a remarkable complete Game Boy Advance inspired 16-bit pixel RPG title screen. It must feel like a commercially art-directed game invitation. A young field trainer and three original AI companions look across a sunny river valley toward a richly detailed village and distant relay observatory. The companions are a coral owl scholar with a glowing feather, a jade fox scout with an origami golden tail, and a small cobalt twin-headed salamander with starlit fins.\nComposition: wide landscape 16:9 screenshot, no browser chrome or device mockup. Large beautifully hand-pixelled AI FRONTIER logo in upper center over open blue sky; landscape depth layers, river reflections, wind in trees, footpath leading toward village. Trainer and companions in foreground occupy lower right, three-quarter backs with readable silhouettes. Compact pixel menu on lower left with a clear selection arrow.\nExact on-screen text: \"AI FRONTIER\", \"Begin Journey\", \"Continue\", \"Practice\", \"Settings\". No other copy.\nPalette: full daylight GBA palette, clear cerulean sky, deep jade foliage, terracotta rooftops, ochre paths, warm sun, dark plum outlines, restrained coral accents. The world carries the color. Bright and inviting, tactile pixel clusters, convincing material detail, expressive creatures. Hand-placed hard-edged pixels, coherent low-resolution pixel scale; absolutely no anti-aliased vector look, blurry painting, 3D plastic, generic web cards, neon navy dashboard, glass panels, dense explanatory paragraphs, corporate logos or existing game characters. This is a concept for review, not an asset atlas."
+    },
+    {
+      "id": "title-b",
+      "output": "assets/title-b-village.png",
+      "references": [],
+      "prompt": "Use case: ui-mockup\nAsset type: alternate high-fidelity title-screen direction concept for AI FRONTIER, an original browser RPG.\nPrimary request: A Game Boy Advance inspired pixel RPG title screen built as a living top-down village diorama. Highly finished hand-pixelled 16-bit art, meaningful small details, cozy character and readable game UI. This direction should compose the page very differently from a panoramic cinematic poster.\nComposition: wide landscape 16:9 screenshot, no browser or console bezel. Most of the screen is a beautiful top-down starting town wrapped around a sunlit circular plaza, canal, stone bridge, red-roofed companion guild, gardens, animated-looking market flags and a great brass relay tree. A small trainer with a coral scholar owl follows a winding path through the scene. Other original companions are a jade origami-tailed fox and a cobalt twin-headed salamander near the guild. On the RIGHT quarter, a tall integrated off-white pixel menu panel with a small pixel logo and generous selectable lines; clear arrow next to primary action, decorative compass stamp rather than web icons. The scene is inviting and legible.\nExact text only: \"AI FRONTIER\", \"Begin Journey\", \"Continue\", \"Practice\", \"Settings\".\nPalette: saturated leaf green and turquoise water cover most of the scene, ochre stone, vermilion roofs, warm early afternoon highlights, plum-blue shadows. Crisp pixel clusters and selective dithering, evocative of 2000s handheld RPG craft. Avoid generic website hero layout, SaaS cards, neon black-and-gold, overly dark blue shell, blurry pseudo-pixels, 3D rendering, corporate logos or existing game characters. This is a direction probe, not a shipped interface."
+    },
+    {
+      "id": "emberquill",
+      "output": "assets/emberquill-avatar.png",
+      "references": [
+        {
+          "path": "assets/title-a-panorama.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for an original GBA-inspired browser RPG, AI Frontier.\nImage 1 is a STYLE REFERENCE for the world and creature art family only.\nStyle: excellent expressive 16-bit handheld RPG pixel art, shaped pixel clusters, a consistent dark-plum one-pixel outline at a logical 96x96 art scale, limited 12-16 color character palette, three-step pixel shading, crisp nearest-neighbor enlarged edges. Appealing character silhouette visible at thumbnail size, specific crafted details, three-quarter front view facing slightly left. One character only, full body including tail/feet, generous clean margin, centered, no crop, no lettering, no logo, no frame, no environment or platform, no glow haze. Genuinely transparent alpha background. This is a redesign concept/avatar; do not create an animation sheet.\nEmberquill: an original coral-and-copper owl companion, thoughtful and brave. Big amber eyes, asymmetric long brow feather like a quill, strong rounded chest, layered wing feathers that resemble a folded scholar's mantle, plum collar with a tiny brass clasp, one small luminous golden feather held at the wingtip. Talons visible. Intelligent face, charming confident attitude; richer anatomy and distinctive silhouette."
+    },
+    {
+      "id": "kitewhisk",
+      "output": "assets/kitewhisk-avatar.png",
+      "references": [
+        {
+          "path": "assets/title-a-panorama.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for an original GBA-inspired browser RPG, AI Frontier.\nImage 1 is a STYLE REFERENCE for the world and creature art family only.\nStyle: excellent expressive 16-bit handheld RPG pixel art, shaped pixel clusters, a consistent dark-plum one-pixel outline at a logical 96x96 art scale, limited 12-16 color character palette, three-step pixel shading, crisp nearest-neighbor enlarged edges. Appealing character silhouette visible at thumbnail size, specific crafted details, three-quarter front view facing slightly left. One character only, full body including tail/feet, generous clean margin, centered, no crop, no lettering, no logo, no frame, no environment or platform, no glow haze. Genuinely transparent alpha background. This is a redesign concept/avatar; do not create an animation sheet.\nKitewhisk: an original jade-and-mint fox scout companion, bright curious face, long triangular ears, cream muzzle/chest, alert paws, one dramatic fanned geometric origami tail made of ochre-gold folds with a mint underside. A short terracotta scarf wraps the neck. Energetic ready-to-dash pose. The tail must be unmistakable, five big angular folded panels rather than multiple ordinary fluffy tails."
+    },
+    {
+      "id": "duplet",
+      "output": "assets/duplet-avatar.png",
+      "references": [
+        {
+          "path": "assets/title-a-panorama.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for an original GBA-inspired browser RPG, AI Frontier.\nImage 1 is a STYLE REFERENCE for the world and creature art family only.\nStyle: excellent expressive 16-bit handheld RPG pixel art, shaped pixel clusters, a consistent dark-plum one-pixel outline at a logical 96x96 art scale, limited 12-16 color character palette, three-step pixel shading, crisp nearest-neighbor enlarged edges. Appealing character silhouette visible at thumbnail size, specific crafted details, three-quarter front view facing slightly left. One character only, full body including tail/feet, generous clean margin, centered, no crop, no lettering, no logo, no frame, no environment or platform, no glow haze. Genuinely transparent alpha background. This is a redesign concept/avatar; do not create an animation sheet.\nDuplet: an original cobalt-and-periwinkle twin-headed salamander companion, exactly TWO heads on one compact four-legged body and one curling tail. One head curious, the other quietly determined; friendly almond eyes, small pale-cyan translucent fin ears, sparse gold constellation markings and cream belly, clear separate neck silhouettes with small crescent fin ridges. Charming fantasy amphibian anatomy, neither dragon wings nor hydra menace."
+    },
+    {
+      "id": "crosswake",
+      "output": "assets/crosswake-avatar.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for original GBA-inspired browser RPG AI Frontier.\nImage 1 is a STYLE REFERENCE only. Make a different original species in the same expressive pixel-art family, matching its outline weight, three-step shading, eye treatment and craft.\nStyle: excellent 16-bit handheld RPG pixel art, deliberate shaped pixel clusters and dark plum outlines, limited cohesive palette, crisp enlarged pixel edges, highly appealing specific silhouette. Three-quarter front view facing slightly left, centered single character, full body and all limbs/tail within frame, comfortable margin. Genuinely transparent alpha background. No lettering, logo, decorative frame, environment, pedestal, cast ground shadow, floating particle haze or animation sheet. This is a character/avatar concept, not an exported battle atlas.\nCrosswake: a rose-coral octopus cartographer and friendly ferry guide. Exactly eight clearly organised arms with pale peach undersides, some curled and some grounded; compact round head, expressive gold eyes and confident smile. A short weathered indigo navigator's vest, small brass compass medallion, one arm holds a tiny folded sea chart, another forms a welcoming gesture. Rose and magenta skin, cream suction details, restrained turquoise details. Readable branching silhouette, not a mass of tangled tentacles."
+    },
+    {
+      "id": "zipcat",
+      "output": "assets/zipcat-avatar.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for original GBA-inspired browser RPG AI Frontier.\nImage 1 is a STYLE REFERENCE only. Make a different original species in the same expressive pixel-art family, matching its outline weight, three-step shading, eye treatment and craft.\nStyle: excellent 16-bit handheld RPG pixel art, deliberate shaped pixel clusters and dark plum outlines, limited cohesive palette, crisp enlarged pixel edges, highly appealing specific silhouette. Three-quarter front view facing slightly left, centered single character, full body and all limbs/tail within frame, comfortable margin. Genuinely transparent alpha background. No lettering, logo, decorative frame, environment, pedestal, cast ground shadow, floating particle haze or animation sheet. This is a character/avatar concept, not an exported battle atlas.\nZipcat: a lithe burnt-orange cheetah courier with dark plum spots, cream throat and paws, short broad swept-back ears, gold eyes, one long S-curved tail with a stepped lightning-shaped gold tip. Lean four-legged ready-to-sprint pose with one forepaw lifted, balanced athletic anatomy. A short deep-teal messenger scarf and tiny brass relay tag, minimal clothing. Energetic and cocky but friendly, pronounced streamlined silhouette, not a bulky housecat."
+    },
+    {
+      "id": "rampart",
+      "output": "assets/rampart-avatar.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for original GBA-inspired browser RPG AI Frontier.\nImage 1 is a STYLE REFERENCE only. Make a different original species in the same expressive pixel-art family, matching its outline weight, three-step shading, eye treatment and craft.\nStyle: excellent 16-bit handheld RPG pixel art, deliberate shaped pixel clusters and dark plum outlines, limited cohesive palette, crisp enlarged pixel edges, highly appealing specific silhouette. Three-quarter front view facing slightly left, centered single character, full body and all limbs/tail within frame, comfortable margin. Genuinely transparent alpha background. No lettering, logo, decorative frame, environment, pedestal, cast ground shadow, floating particle haze or animation sheet. This is a character/avatar concept, not an exported battle atlas.\nRampart: an original sturdy blue-slate bull guardian with a large protective brow, broad ivory forward-curving horns tipped in ochre, strong short legs, split hooves, small tufted tail, warm amber eyes and patient expression. A few weathered stone-like shoulder armor plates with moss-green seams, a simple brass ring/clasp centered at the collar, pale muzzle. Grounded wide stance, heroic protective character, soft enough to be a companion. Distinct from a robot or muscular humanoid."
+    },
+    {
+      "id": "latticewing",
+      "output": "assets/latticewing-avatar.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for original GBA-inspired browser RPG AI Frontier.\nImage 1 is a STYLE REFERENCE only; create a different original species in the same expressive pixel art family, with matching plum outline weight, three-step shading and eye treatment.\nStyle: excellent 16-bit handheld RPG pixel art, distinct shaped pixel clusters, controlled limited palette, crisp enlarged pixel edges, highly appealing character silhouette. Three-quarter front view facing slightly left, centered single full-body character, all limbs/tail/wings visible with generous margins. Genuinely transparent alpha background. No lettering, logo, frame, scenery, pedestal, floating haze, ground shadow or animation sheet. This is a portrait/avatar concept, not a frame-aligned production sprite.\nLatticewing: a small cheerful amber builder bee companion. Broad paired pale-mint wings with a strong honeycomb/lattice pattern, rounded fuzzy golden head and thorax, dark-plum and amber striped geometric abdomen, tiny working legs, two short antennae, large kind brown-gold eyes. A tiny indigo collar with a brass hexagonal clasp, one forelimb holds a small mint hexagonal light tile as if assembling a shared shelter. Wings visibly translucent with hard pixel-shaped highlights, no extra pair of wings. Friendly clever artisan expression, original non-humanoid creature."
+    },
+    {
+      "id": "mossback",
+      "output": "assets/mossback-avatar.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for original GBA-inspired browser RPG AI Frontier.\nImage 1 is a STYLE REFERENCE only; create a different original species in the same expressive pixel art family, with matching plum outline weight, three-step shading and eye treatment.\nStyle: excellent 16-bit handheld RPG pixel art, distinct shaped pixel clusters, controlled limited palette, crisp enlarged pixel edges, highly appealing character silhouette. Three-quarter front view facing slightly left, centered single full-body character, all limbs/tail/wings visible with generous margins. Genuinely transparent alpha background. No lettering, logo, frame, scenery, pedestal, floating haze, ground shadow or animation sheet. This is a portrait/avatar concept, not a frame-aligned production sprite.\nMossback: a calm lavender llama companion with very long upright ears, fluffy cream muzzle and chest, soft plum eyes, four short sturdy hooved legs. A compact leafy garden saddle is part of its visual identity: deep jade moss, a few round succulents and one small amber lantern tucked at its side, leather-like simple straps. A loosely folded indigo travel wrap and tiny brass garden clasp. Quiet content expression, long-necked quadruped silhouette with neat lilac curls, a small short tail. Foliage must read as an intentional tiny portable garden, not random clutter."
+    },
+    {
+      "id": "patchbyte",
+      "output": "assets/patchbyte-avatar.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "style reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body companion avatar concept for original GBA-inspired browser RPG AI Frontier.\nImage 1 is a STYLE REFERENCE only; create a different original species in the same expressive pixel art family, with matching plum outline weight, three-step shading and eye treatment.\nStyle: excellent 16-bit handheld RPG pixel art, distinct shaped pixel clusters, controlled limited palette, crisp enlarged pixel edges, highly appealing character silhouette. Three-quarter front view facing slightly left, centered single full-body character, all limbs/tail/wings visible with generous margins. Genuinely transparent alpha background. No lettering, logo, frame, scenery, pedestal, floating haze, ground shadow or animation sheet. This is a portrait/avatar concept, not a frame-aligned production sprite.\nPatchbyte: a charming original small violet salvage automaton companion, broad slightly asymmetric square head with one round ear port and one stepped antenna port, cyan expressive eyes in a deep plum face screen, visible softly glowing cyan heart-shaped core behind a brass-edged chest window. Small jointed arms and sturdy boot-shaped feet, mismatched repair panels and one terracotta cloth neck tab. Full standing body with a curious head tilt and one hand raised in greeting; high-quality 16-bit sprite aesthetic. Readable simple machine anatomy, warm personality, no brand marks, no resemblance to an existing film robot."
+    },
+    {
+      "id": "world",
+      "output": "assets/world-topdown.png",
+      "references": [
+        {
+          "path": "assets/title-b-village.png",
+          "role": "world style reference"
+        }
+      ],
+      "prompt": "Use case: ui-mockup\nAsset type: playable OVERWORLD screenshot concept, 16:9 landscape, for original GBA-inspired browser creature RPG AI Frontier.\nImage 1 supplies the approved detailed town art family, not camera perspective or menu layout. Draw a true orthographic top-down handheld RPG play view (roof tops and small front building walls, north-up square tiles), NOT isometric diorama perspective.\nPrimary request: Frontier Crossing, a carefully authored river village with terracotta-roofed Companion Guild, small healing garden, market awning, a stone canal bridge and a striking brass relay tree landmark. Deep jade tree masses, bright grass edges, ochre paths, clear turquoise water with hard pixel reflections. A small human trainer in coral travel cap/jacket and backpack is on the path near the bridge; a coral owl companion follows one step behind. Both use a coherent 24x32-style field sprite scale, the trainer is tiny relative to the town, not a giant portrait. Distinct small NPC field sprites, readable walking paths, one signpost and a tempting side route. The scene should feel like a real tilemap viewed through a 480x270 logical camera.\nUI is minimal: a modest location plaque in upper left with exact text \"Frontier Crossing\", three tiny companion party portraits in upper right, a small \"Menu\" label, and one local interaction prompt near the guild sign reading \"Read sign\". World occupies almost all the viewport. No bottom dashboard paragraph, no huge map name stamped across terrain, no website navigation, no giant buttons.\nStyle: precise 16-bit GBA pixels with consistent tile scale, tight color ramps, clear collision silhouettes, layered canopy and roof depth, warm and richly observed but readable. No painterly blur, low-poly 3D, neon dark shell, browser bezel, flat square-room placeholder map or existing game assets. This is a visual target for the planned tilemap, not a claim it is implemented."
+    },
+    {
+      "id": "battle",
+      "output": "assets/battle-concept.png",
+      "references": [
+        {
+          "path": "assets/emberquill-avatar.png",
+          "role": "character identity"
+        },
+        {
+          "path": "assets/title-a-panorama.png",
+          "role": "environment style"
+        }
+      ],
+      "prompt": "Use case: ui-mockup\nAsset type: high-fidelity full battle-screen concept, 16:9 landscape, for original GBA-inspired creature RPG AI Frontier.\nInput image 1 is the character identity for Emberquill. Image 2 is a world-art and palette reference, not a layout to copy.\nPrimary request: Beautiful readable classic handheld turn-based battle screen with a dedicated sunlit forest-river battlefield. Draw Emberquill's large BACK/three-quarter-back battle sprite near left foreground facing the far opponent. Preserve coral feathers, asymmetric quill brow, plum scholar mantle and gold feather. On far RIGHT, an original Static Wisp faces the player: a compact violet static cloud creature with pale mothlike fins and a small amber shard core, expressive eyes, no menacing horror. The environment has layered jade trees, grass, ochre stones, a ribbon of turquoise water and no distracting clutter over the sprites.\nBattle UI: upper LEFT compact light pixel HUD reading \"STATIC WISP  Lv 4\", \"HP 24/24\", with a green HP bar. Lower RIGHT just above the command strip, compact light pixel HUD reading \"EMBERQUILL  Lv 5\", \"HP 28/32\", \"EN 3/6\", plus three small party markers. Bottom 25 percent is a confidently structured light pixel command area: left two-thirds reads \"What will Emberquill do?\" and the right third has exactly four menu commands in a 2x2 block: \"Fight\", \"Team\", \"Pack\", \"Retreat\", selection arrow at Fight. One coherent double-line plum pixel border, generous text size, crisp pixel font. No extra words.\nStyle: crafted GBA 16-bit pixel clusters, clean readable battle silhouettes and planned negative space, warm daylight colors and plum ink. Actual game screenshot composition, no browser/console chrome, no floating web cards, no neon blue shell, no blur, no 3D rendering, no existing game characters or logos. This is a UI direction concept and must clearly show the battle choreography/layout, not a character lineup.",
+      "revision": {
+        "input": "superseded initial battle concept; not included",
+        "prompt": "Use case: precise-object-edit\nImage 1 is the edit target, an original AI Frontier battle concept.\nChange ONLY the three small red-and-white spherical party icons in the player HUD next to \"Lv 5\". Replace them with three ORIGINAL square companion seals: a coral square with a simple gold feather, a jade square with a simple pale leaf, and a cobalt square with a simple cyan droplet. Keep them tiny and clean at the existing scale, with dark plum pixel outlines and no circle/capsule design. Preserve the exact entire battle composition, all text and numbers, HUD frames, backgrounds, creature identities and pixel artwork unchanged. No other alterations. The three seals must not resemble any existing game's balls or logos."
+      }
+    },
+    {
+      "id": "trainer",
+      "output": "assets/trainer-avatar.png",
+      "references": [
+        {
+          "path": "assets/title-a-panorama.png",
+          "role": "style and wardrobe reference"
+        }
+      ],
+      "transparentBackground": true,
+      "prompt": "Use case: stylized-concept\nAsset type: standalone full-body TRAINER avatar concept, original AI Frontier GBA-style RPG.\nImage 1 is a style and wardrobe-color reference, and shows the original trainer from behind. Create the corresponding original front three-quarter trainer portrait in the same expressive pixel family.\nSubject: an approachable young adult field explorer with medium brown skin, short dark wavy hair under a plain clay-red travel cap, coral short travel jacket, cream shirt, dark charcoal rolled hiking trousers, sturdy brown boots, compact tan backpack with a brass compass buckle and a tiny attached field notebook. A pale jade neck scarf and small brass field instrument hanging from the belt. Relaxed ready-to-travel stance, one hand holding backpack strap, friendly curious brown eyes. Independent original design, no badges or marks from any existing franchise.\nStyle: charming crafted 16-bit handheld RPG pixel portrait, clean dark-plum outline and three-step shading, shaped hard pixel clusters; full body and backpack visible, centered single figure, generous clear margin. Match the companions' warm expressive craft. Genuinely transparent background, no text, logos, scene, floor shadow, frame, pedestal, device or sprite sheet. This is an appearance concept for the player trainer, not an animation atlas.",
+      "revision": {
+        "input": "superseded initial trainer concept; not included",
+        "prompt": "Use case: background-extraction\nImage 1 is the edit target. Make the original AI Frontier trainer a clean full-body transparent avatar.\nRemove ONLY the background, including every brown/dark smoky glow or halo around the figure and below the boots, to genuinely transparent alpha. Preserve the trainer's exact identity, face, pose, clothing, backpack, accessories, pixel-art edges and colours. Keep all hair, straps and boot details. Do not add a ground shadow, pedestal or gradient, do not redesign or crop the trainer. Transparent pixels should begin immediately outside the character silhouette with no lingering glow."
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Frontier · GBA redesign review</title>
+  <style>
+    :root{color-scheme:light;--ink:#24362e;--muted:#4a6155;--field:#eff5ed;--line:#bbccbb;--deep:#173f32;--accent:#ffd07d}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--field);color:var(--ink);font:17px/1.6 system-ui,sans-serif}a{color:inherit;text-underline-offset:4px}a:hover{color:#9b3c29}a:focus-visible{outline:3px solid #b15335;outline-offset:5px}img{display:block;max-width:100%;height:auto}h1,h2,h3{line-height:1.15;text-wrap:balance}h1{font-size:clamp(30px,5vw,64px);margin:12px 0 20px;max-width:18ch;letter-spacing:-.025em}h2{font-size:clamp(25px,3vw,38px);margin:0 0 12px}h3{font-size:20px;margin:0}p{max-width:70ch}header{background:var(--deep);color:#f0f6ec;padding:clamp(28px,6vw,76px) max(22px,calc((100vw - 1280px)/2))}header p{color:#d3e5d8}.status{font-size:14px;color:var(--accent);margin:0}.intro{font-size:20px;max-width:60ch}nav{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:26px}nav a{min-height:44px;display:flex;align-items:center;color:#f5d998}main{max-width:1324px;margin:auto;padding:0 22px 64px}section{padding:58px 0;border-bottom:1px solid var(--line);scroll-margin-top:20px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:20px}.section-head p{margin:0;color:var(--muted)}figure{margin:0}figcaption{padding:12px 0;color:var(--muted)}.scene{background:#dce9d8;border:2px solid #809e87}.scene img{width:100%}.note{font-size:15px;color:var(--muted)}.compare{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:start}.compare p{font-size:16px;margin-top:0}.roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 22px}.portrait{display:grid;place-items:center;aspect-ratio:1;background:#e1ecdf;overflow:hidden}.portrait img{height:100%;width:100%;object-fit:contain;padding:14px}.roster figcaption{border-bottom:1px solid var(--line);padding:15px 0 20px}.role{display:block;font-size:15px;margin-top:5px}.provider{font-size:13px;font-weight:650;color:#566c60}.palette{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0}.swatch{min-width:125px;flex:1}.swatch i{display:block;height:54px;border:1px solid #637c6b}.swatch span{display:block;font-size:13px;margin-top:6px}.journey{font-size:20px;max-width:80ch;padding:20px 0;border-top:2px solid var(--deep);border-bottom:2px solid var(--deep);line-height:1.8}.docs{display:flex;gap:20px 32px;flex-wrap:wrap;margin-top:24px}.docs a{min-height:44px;display:flex;align-items:center;font-weight:650}.trainer{display:grid;grid-template-columns:minmax(180px,.55fr) 1fr;gap:36px;align-items:center}.trainer .portrait{max-height:440px;aspect-ratio:4/5}.checkpoints{padding-left:24px;max-width:76ch}.checkpoints li{padding:8px 0}footer{padding:28px 22px;max-width:1324px;margin:auto;font-size:14px;color:var(--muted)}
+    .scene>figcaption{padding:12px 16px}.trainer .portrait{position:relative;height:440px;max-height:none}.trainer .portrait img{position:absolute;inset:0;height:100%;width:100%;object-fit:contain}
+    @media(max-width:740px){body{font-size:16px}.compare,.trainer{grid-template-columns:1fr}.roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 14px}.portrait img{padding:6px}section{padding:36px 0}.intro{font-size:18px}.journey{font-size:17px}.trainer .portrait{max-width:320px;width:100%;height:400px;margin:auto}.swatch{min-width:90px}h3{font-size:18px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <header>
+    <p class="status">Direction review · 4 November 2026</p>
+    <h1>A world worth stepping into.</h1>
+    <p class="intro">AI Frontier becomes a warm GBA-style adventure: you are the trainer, your companions have personalities, and battles earn their own stage.</p>
+    <p>Confirmed: panoramic title A, detailed village direction B, a small companion team. These images are visual concepts for review; the linked plan defines the playable implementation.</p>
+    <nav aria-label="Review sections"><a href="#title">The entrance</a><a href="#world">The world</a><a href="#combat">The battle</a><a href="#companions">The companions</a><a href="#plan">The plan</a></nav>
+  </header>
+  <main>
+    <section id="title">
+      <div class="section-head"><div><h2>The adventure starts on the title screen.</h2><p>Direction A · selected for the entrance</p></div><a href="assets/title-a-panorama.png">Open full concept</a></div>
+      <figure class="scene"><img src="assets/title-a-panorama.png" alt="Panoramic pixel-art title: a trainer and coral owl, jade fox and twin-headed blue companion overlook a river village and observatory." width="1672" height="940"><figcaption>The world, the destination and the companions carry the first impression. Live menu text, layered movement and save previews will be built separately.</figcaption></figure>
+    </section>
+    <section id="world">
+      <div class="section-head"><div><h2>A town with places to remember.</h2><p>Direction B informs the environment; the field camera stays top-down.</p></div></div>
+      <div class="compare">
+        <figure><a class="scene" href="assets/world-topdown.png"><img src="assets/world-topdown.png" alt="Top-down Frontier Crossing concept with river paths, a companion guild, bridge, market and trainer followed by an owl." loading="lazy" width="1672" height="940"></a><figcaption>Overworld camera target: small actors, readable paths and landmarks, minimal interface.</figcaption></figure>
+        <figure><a class="scene" href="assets/title-b-village.png"><img src="assets/title-b-village.png" alt="Village art-direction probe with a detailed guild, market, canal bridge and brass relay tree." loading="lazy" width="1672" height="940"></a><figcaption>The original B probe supplies architectural detail and warmth. Its oblique composition is a reference, not the playable camera.</figcaption></figure>
+      </div>
+    </section>
+    <section id="combat">
+      <div class="section-head"><div><h2>Battles get a stage of their own.</h2><p>Three companions. Four equipped moves. Clear turns and visible consequences.</p></div><a href="COMBAT.md">Read combat rules</a></div>
+      <figure class="scene"><a href="assets/battle-concept.png"><img src="assets/battle-concept.png" alt="Classic handheld battle concept with Emberquill viewed from behind, a distant Static Wisp, health and energy HUDs and Fight, Team, Pack and Retreat commands." loading="lazy" width="1672" height="940"></a><figcaption>Presentation target: a near/back companion, far/front opponent, readable HUD and a proper command area. Damage, switching, status, fainting and rewards have defined rules in the specification.</figcaption></figure>
+    </section>
+    <section id="companions">
+      <div class="section-head"><div><h2>Nine companions with a reason to choose them.</h2><p>Original transparent avatar concepts · tap any portrait to inspect it</p></div><a href="CHARACTERS.md">Character and move bible</a></div>
+      <div class="roster">
+        <figure><a class="portrait" href="assets/emberquill-avatar.png"><img src="assets/emberquill-avatar.png" alt="Emberquill, a coral owl scholar with a long quill brow, golden feather and plum mantle." loading="lazy"></a><figcaption><span class="provider">ANTHROPIC · STARTER</span><h3>Emberquill</h3><span class="role">Patient protector · Ember</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/kitewhisk-avatar.png"><img src="assets/kitewhisk-avatar.png" alt="Kitewhisk, a cheerful jade fox scout with a clay scarf and a golden origami fan tail." loading="lazy"></a><figcaption><span class="provider">OPENAI · STARTER</span><h3>Kitewhisk</h3><span class="role">Curious scout · Grove</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/duplet-avatar.png"><img src="assets/duplet-avatar.png" alt="Duplet, two cobalt salamander heads on one body, with cyan fins and golden constellation markings." loading="lazy"></a><figcaption><span class="provider">GOOGLE · STARTER</span><h3>Duplet</h3><span class="role">Two minds, one rhythm · Tide</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/crosswake-avatar.png"><img src="assets/crosswake-avatar.png" alt="Crosswake, a rose octopus navigator with eight arms, a compass and a folded map." loading="lazy"></a><figcaption><span class="provider">OPENROUTER</span><h3>Crosswake</h3><span class="role">Resourceful guide · Tide</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/zipcat-avatar.png"><img src="assets/zipcat-avatar.png" alt="Zipcat, an orange spotted courier cat with a teal scarf and a long lightning-tipped tail." loading="lazy"></a><figcaption><span class="provider">GROQ</span><h3>Zipcat</h3><span class="role">Restless sprinter · Ember</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/rampart-avatar.png"><img src="assets/rampart-avatar.png" alt="Rampart, a sturdy slate bull with ivory horns and moss-seamed stone shoulder plates." loading="lazy"></a><figcaption><span class="provider">XAI</span><h3>Rampart</h3><span class="role">Dependable guardian · Grove</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/latticewing-avatar.png"><img src="assets/latticewing-avatar.png" alt="Latticewing, a golden bee builder with patterned mint wings and a small hexagonal light tile." loading="lazy"></a><figcaption><span class="provider">TOGETHER</span><h3>Latticewing</h3><span class="role">Team builder · Grove</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/mossback-avatar.png"><img src="assets/mossback-avatar.png" alt="Mossback, a gentle lilac llama with a leafy portable garden and amber lantern." loading="lazy"></a><figcaption><span class="provider">OLLAMA</span><h3>Mossback</h3><span class="role">Quiet healer · Grove</span></figcaption></figure>
+        <figure><a class="portrait" href="assets/patchbyte-avatar.png"><img src="assets/patchbyte-avatar.png" alt="Patchbyte, a repaired violet automaton with cyan eyes, a heart core and a short coral scarf." loading="lazy"></a><figcaption><span class="provider">CUSTOM</span><h3>Patchbyte</h3><span class="role">Inventive tinkerer · Ember</span></figcaption></figure>
+      </div>
+      <p class="note">These are concept avatars, not animation sheets. Cleaned portraits, field sprites and front/back battle frames will share one production grid. Provider identity and fantasy combat roles remain separate.</p>
+    </section>
+    <section>
+      <div class="trainer">
+        <a class="portrait" href="assets/trainer-avatar.png"><img src="assets/trainer-avatar.png" alt="Original field trainer concept wearing a coral travel outfit and carrying a practical backpack and brass field instrument." loading="lazy"></a>
+        <div><h2>You are the trainer.</h2><p>Meet a companion before choosing a guild allegiance. Travel together, recruit through bond quests and change your visible follower when you reorder the team.</p><p>Trainer appearance, starter inspection, dialogue portraits, party management, the field map, items, settings, victory and recovery are all included in the plan.</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>Colour belongs to the world.</h2><p>Daylight sky, jade canopy, clay roofs and ochre paths replace the current uniform navy shell. Quiet light menus and plum ink keep the game readable.</p>
+      <div class="palette" aria-label="Proposed colour palette">
+        <div class="swatch"><i style="background:#83cbe3"></i><span>River sky · #83CBE3</span></div><div class="swatch"><i style="background:#35654f"></i><span>Deep jade · #35654F</span></div><div class="swatch"><i style="background:#a7c875"></i><span>Leaf light · #A7C875</span></div><div class="swatch"><i style="background:#b95643"></i><span>Clay roof · #B95643</span></div><div class="swatch"><i style="background:#d8b06c"></i><span>Ochre path · #D8B06C</span></div><div class="swatch"><i style="background:#2b2438"></i><span>Plum ink · #2B2438</span></div><div class="swatch"><i style="background:#f4f6ed"></i><span>Cloud panel · #F4F6ED</span></div>
+      </div>
+    </section>
+    <section id="plan">
+      <h2>Build a complete journey.</h2>
+      <p class="journey">Title → trainer → starter bond → guild → guided battle → town → route → recruit → Archive boss → rewards → restored town → save and return.</p>
+      <ol class="checkpoints"><li>Review the avatar and battle concepts; refine any identity that does not feel right.</li><li>Produce the real starter/trainer sheets, tile layers and shared game interface.</li><li>Finish and verify the title-to-first-battle-to-save loop.</li><li>Finish the connected chapter, recruitment and party tactics.</li><li>Complete the nine-character roster, Practice and Rival Circuit, then polish the retained live arena.</li><li>Measure performance and accessibility and observe complete first sessions.</li></ol>
+      <div class="docs"><a href="README.md">Full design brief</a><a href="CHARACTERS.md">Character bible</a><a href="COMBAT.md">Combat specification</a><a href="IMPLEMENTATION.md">Files, milestones and checks</a><a href="ASSETS.md">Asset provenance and prompts</a></div>
+    </section>
+  </main>
+  <footer>Review checkpoint, not a playable replacement. The existing game remains the baseline while these concepts are reviewed.</footer>
+</body>
+</html>
