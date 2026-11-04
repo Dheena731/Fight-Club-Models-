@@ -79,3 +79,27 @@ Additional QA corrections: recent battle logs replace stale opening text, attack
 P5 server-verified profiles/achievements and actual two-human invite duels; P6 mechanically different second world and observed player sessions. Full nine-companion gameplay/animation sets, bespoke back art for Mossback, compressed art delivery, soundtrack, target-device frame/memory measurements and release accessibility testing also remain. No market-fit, production scalability or ranked-fairness claim follows from the local tests.
 
 All agent work was integrated into the original checkout. Temporary managed agent checkouts were retained because the host archive helper reported an ownership conflict; no forced deletion or ownership override was attempted. Temporary ownership exceptions added solely to attempt archival were removed.
+
+## 2026-11-05 — GBA movement and story-led exploration
+
+### Branch and preservation
+
+Continued `codex/gba-redesign-plan` at `12fa7ea` after fetching and pulling with fast-forward-only; the remote was already current. Earlier Phase 2 changes remain preserved in `codex/backup-pre-gba-20261105` and stash `d72d396bd777b6a6028cfc26554c7328c7c73c5a`. Only the dependency/CI fixes and approved Impeccable 4.8 tooling update were carried over. Legacy World/WorldScene gameplay was not overlaid onto the active Adventure implementation.
+
+### Implemented
+
+- Held keyboard and captured touch movement now use a deterministic clock: 180ms walking, 105ms running. Shift and an accessible Run toggle share the same controller. Overlays, blur, hidden tabs, mode changes and region transitions clear held input; delayed frames cannot accumulate steps.
+- The existing directional artwork now has alternating foot placement and torso weight transfer, grounded shadows and bounded footprints. Companions follow the accepted cardinal trail through corners and begin on a walkable neighboring tile. Authored crops for all 16 field poses remove neighboring-pose fragments without changing character scale or source images; actual boot baselines align with the ground. Camera clamping, reduced motion and paused rendering are explicit. No new graphics dependency or raster asset was added.
+- Sunward Pass adds a connected 36×24 optional route after the Wisp, Sela’s clue/recovery/return quest, a one-time supply reward and Lantern Overlook discovery. Its map marker and coordinates appear after discovery; browser checks confirm the landmark list changes from five to six. Main objectives remain separate. Existing saves receive only the complete new schema defaults; partial new records still fail validation. The new passable gateway preserves old tile positions.
+- [WORLD_AND_STORY.md](WORLD_AND_STORY.md) records the playable chapter, character stakes, optional loop and proposed later acts. Later acts are explicitly unimplemented.
+- Updated dependency locks and lint compatibility run on Node 24. The new CI workflow specifies clean installs, checks and audits on Windows/Linux; hosted CI has not run in this session.
+
+### Local evidence
+
+- `npm run check`: **111/111 tests passed**, lint **0 errors / 6 Fast Refresh warnings**, production build passed. The warnings concern existing mixed exports; the Pixi chunk remains **555.68KB / 162.81KB gzip**, above Vite’s 500KB warning threshold.
+- `npm run audit`: **0 vulnerabilities** in both dependency trees. Root and client dependency lists are valid after clean installation.
+- Isolated Chrome QA at `127.0.0.1:15173` covered new Journey setup, walk/run cadence (4 vs 6 tiles in 650ms), stopping, wall collision, Journal/blur interruption, actual Sunward gateway travel, lens return/dialogue/save persistence, map landmarks, touch hold/release and a static reduced-motion idle frame.
+- Viewports inspected: 1280×800, 390×844, 320×740 and 844×390. Movement/action controls are at least 44×44px; inspected layouts and the scrollable map dialog have no horizontal overflow. Browser inspection also checked actual foot offsets, a cardinal follower trail, separate arrival positions, all four trainer facings and all four available companion presentations.
+- No page errors, failed requests or live provider calls occurred in the completed smoke pass. Reproduction script, JSON report and screenshots are local ignored artifacts under `.cache/gba-smoke.mjs` and `.cache/qa/gba/`; automated command output is `.cache/gba-final-check.txt`.
+
+This is a playable chapter extension, not a completed large open world. Physical-device performance, bespoke multi-frame character sheets, observed player sessions, later chapters and online multiplayer remain future work. Changes have not been committed or pushed.

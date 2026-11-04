@@ -1,10 +1,10 @@
-# AI Frontier — adventure, identity and arena delivery plan
+# Cogimon — adventure, identity and arena delivery plan
 
 Implementation plan · 2026-11-04
 
 ## Product decision
 
-AI Frontier is an original, GBA-inspired companion RPG played in a browser. The player is a human trainer, not a provider logo. A free, deterministic adventure builds attachment to a small team; optional real-model battles provide a separate competitive spectacle. Adventure levels and cosmetics never change live-model combat power.
+Cogimon is an original, GBA-inspired companion RPG played in a browser. The player is a human trainer, not a provider logo. A free, deterministic adventure builds attachment to a small team; optional real-model battles provide a separate competitive spectacle. Adventure levels and cosmetics never change live-model combat power.
 
 The approved visual lane is the panoramic entrance and detailed, daylight village from [redesign-v3](redesign-v3/README.md). This plan supersedes that package's **planning-only** stop condition, not its original-character/art-quality requirements. The coaching proposal remains a possible later experiment: real AI is not called during ordinary creature fights.
 
@@ -181,3 +181,9 @@ Each accepted phase receives a focused commit and push as the user requested. In
 ## Non-goals and risk register
 
 No open-world multiplayer, ranked ladder, real-AI-per-creature-turn, monetisation, paid cosmetics, vendor-logo skins, public anti-cheat guarantee or autonomous NPC service in the local slice. The main risks are content quality, art consistency, weak attachment, repetitive encounters, subjective live judging and unverified local state. A complete local loop reduces implementation uncertainty; only playtesting reduces the enjoyment/retention uncertainty.
+
+## Structured exploration extension · 2026-11-05
+
+The story direction is a structured main chapter with optional routes, secrets and side quests. [World and story](WORLD_AND_STORY.md) records the implemented Lantern Signal beats, character stakes, the new Sunward Pass route and honest proposals for the next acts. Sunward opens after the Static Wisp: its northern clue/recovery/return quest grants supplies once, while its southern memorial road leads to a persistent overlook discovery. It rejoins the existing chapter without changing main XP, cosmetics or completion gates. The field map and optional objective make the detour findable.
+
+The extension preserves revision-2 coordinates through a passable trailhead and narrowly migrates only the new optional fields. Automated checks cover each starter’s side route, reward idempotency, region reachability and old/nested/active-battle saves. This is added chapter content, not completion of P6’s distinct second-world or observed-player validation gate.

@@ -35,8 +35,10 @@ export const ITEMS = [
   { id: 'signal-shard', name: 'Signal Shard', description: 'Quest evidence for the Archive relay.' },
   { id: 'clear-circuit', name: 'Clear Circuit', description: 'A record of clearing the Static Wisp.' },
   { id: 'lantern-emblem', name: 'Lantern Emblem', description: 'Mara’s homecoming gift.' },
+  { id: 'keeper-lens', name: 'Keeper’s Lens', description: 'A weathered signal lens. Return it to Sela in Sunward Pass.' },
 ];
-export const FLAG_IDS = ['questStarted', 'shardFound', 'wispDefeated', 'recruited', 'noteRead', 'relayRestored', 'bossDefeated', 'questComplete'];
+export const SUNWARD_FLAG_IDS = ['lensQuestStarted', 'windClueRead', 'lensRecovered', 'lensReturned', 'overlookFound'];
+export const FLAG_IDS = ['questStarted', 'shardFound', 'wispDefeated', 'recruited', 'noteRead', 'relayRestored', 'bossDefeated', 'questComplete', ...SUNWARD_FLAG_IDS];
 export const QUESTS = [
   { id: 'signal', name: 'The Lantern Signal', flag: 'questStarted', objective: 'Ask Mara about the dark relay lantern.' },
   { id: 'shard', name: 'A Lost Light', flag: 'shardFound', objective: 'Recover the Signal Shard in Moss Circuit.' },
@@ -84,6 +86,35 @@ Object.assign(ADVENTURE_REGIONS.archive, {
 });
 const archivePositions = { 'frontier-gate': [24, 13], 'archive-note': [8, 12], relay: [13, 9], scholar: [17, 12], guardian: [13, 5] };
 ADVENTURE_REGIONS.archive.objects = ADVENTURE_REGIONS.archive.objects.map(object => ({ ...object, x: archivePositions[object.id][0], y: archivePositions[object.id][1], ...(object.type === 'exit' ? { entry: { x: 5, y: 14 } } : {}) }));
+
+// A passable trailhead preserves every valid position in existing revision-2 saves.
+ADVENTURE_REGIONS.grove.objects.push({ id: 'sunward-gate', type: 'exit', passable: true, x: 25, y: 10, name: 'Sunward Pass', to: 'sunward', entry: { x: 3, y: 16 }, color: '#d3ad64' });
+ADVENTURE_REGIONS.sunward = {
+  id: 'sunward', name: 'Sunward Pass', subtitle: 'Two ridge roads above the sleeping relay', biome: 'sunward',
+  width: 36, height: 24, spawn: { x: 3, y: 16 },
+  fieldPalette: { grass: '#adb66c', grass2: '#bdc77a', path: '#d2b27b', dark: '#5b6546', light: '#f5d98f' },
+  path: [
+    { x: 2, y: 15, w: 30, h: 3 }, { x: 8, y: 6, w: 3, h: 12 },
+    { x: 9, y: 6, w: 22, h: 3 }, { x: 28, y: 4, w: 3, h: 17 },
+    { x: 16, y: 18, w: 15, h: 3 }, { x: 16, y: 16, w: 3, h: 5 },
+  ],
+  solid: [
+    { x: 3, y: 3, w: 4, h: 10, kind: 'trees' }, { x: 11, y: 2, w: 5, h: 3 },
+    { x: 18, y: 1, w: 8, h: 4 }, { x: 12, y: 10, w: 4, h: 5 },
+    { x: 18, y: 10, w: 8, h: 4 }, { x: 32, y: 3, w: 3, h: 11 },
+    { x: 4, y: 20, w: 10, h: 3 }, { x: 20, y: 21, w: 7, h: 2 },
+    { x: 32, y: 18, w: 3, h: 5 },
+  ],
+  objects: [
+    { id: 'grove-gate', type: 'exit', x: 2, y: 16, name: 'Moss Circuit', to: 'grove', entry: { x: 24, y: 10 }, color: '#74c9a9' },
+    { id: 'routekeeper', type: 'npc', x: 7, y: 16, name: 'Sela the Routekeeper', color: '#c78e63' },
+    { id: 'ridge-sign', type: 'sign', x: 9, y: 14, name: 'Ridge Fork', color: '#bd936c' },
+    { id: 'wind-marker', type: 'lore', x: 18, y: 7, name: 'Wind Marker', color: '#e2c17d' },
+    { id: 'keeper-lens', type: 'pickup', x: 29, y: 5, name: 'Keeper’s Lens', hiddenFlag: 'lensRecovered', color: '#f7df9c' },
+    { id: 'pass-memorial', type: 'sign', x: 18, y: 18, name: 'Keepers’ Memorial', color: '#b9a58c' },
+    { id: 'sunward-overlook', type: 'lore', x: 29, y: 19, name: 'Lantern Overlook', color: '#eed990' },
+  ],
+};
 
 export const getMove = id => MOVES.find(move => move.id === id) || null;
 export const getEncounter = id => Object.hasOwn(ENCOUNTERS, id) ? ENCOUNTERS[id] : null;

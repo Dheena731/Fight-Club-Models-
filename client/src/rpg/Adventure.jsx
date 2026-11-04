@@ -1,8 +1,9 @@
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useGameDispatch, useGameState } from '../game/GameContext';
 import { COMPANIONS, ADVENTURE_REGIONS, ITEMS, MOVES } from '../../../shared/rpg/adventureContent.js';
-import { createAdventure, adventureReducer, activeCompanion, nearbyInteractable, adventureObjective, questProgress, unlockedRewardIds } from '../../../shared/rpg/adventure.js';
+import { createAdventure, adventureReducer, activeCompanion, nearbyInteractable, adventureObjective, sideObjective, questProgress, unlockedRewardIds } from '../../../shared/rpg/adventure.js';
 import { readAdventure, retryGameSave, writeAdventure as saveAdventure } from '../lib/adventureStorage.js';
+import { createMovementController, MOVEMENT_KEYS } from '../lib/adventureMovement.js';
 import { loadCircuitRecord, saveCircuitRecord } from '../../../shared/rpg/adventureSave.js';
 import { createProfile, loadProfile, saveProfile, syncAdventureProfile, profileSnapshot, getCosmetic } from '../../../shared/rpg/profile.js';
 import AdventureScene from './AdventureScene';
@@ -12,7 +13,6 @@ import Locker from './Locker';
 import FieldMap from './FieldMap';
 import * as sfx from '../lib/sfx';
 
-const MOVEMENT = { ArrowUp: [0, -1], KeyW: [0, -1], ArrowDown: [0, 1], KeyS: [0, 1], ArrowLeft: [-1, 0], KeyA: [-1, 0], ArrowRight: [1, 0], KeyD: [1, 0] };
 const MOVE_LIST = Array.isArray(MOVES) ? MOVES : Object.values(MOVES);
 
 function Meter({ value, max, label, energy = false }) {
@@ -78,8 +78,26 @@ export default function Adventure() {
   const [saveError, setSaveError] = useState(loaded.error); const [savedAt, setSavedAt] = useState('');
   const [showArenaConsent, setShowArenaConsent] = useState(false);
   const [muted, setMuted] = useState(sfx.isMuted);
-  const heldRef = useRef(null); const controlsRef = useRef(null);
+  const movementRef = useRef(null);
+  if (!movementRef.current) movementRef.current = createMovementController();
+  const shiftKeys = useRef(new Set()); const runToggle = useRef(false);
+  const [running, setRunning] = useState(false);
+  const paused = Boolean(panel || state.battle || state.dialogue || state.result || state.puzzle || showArenaConsent || state.transition || (state.mode === 'circuit' && state.circuit.completed));
+  const pausedRef = useRef(paused); pausedRef.current = paused;
+  const dialogueRef = useRef(state.dialogue); dialogueRef.current = state.dialogue;
   const companion = activeCompanion(state); const nearby = nearbyInteractable(state); const region = ADVENTURE_REGIONS[state.locationId];
+  const optionalObjective = sideObjective(state);
+  const updateRunning = useCallback(() => {
+    const value = runToggle.current || shiftKeys.current.size > 0;
+    movementRef.current.setRunning(value);
+    setRunning(value);
+  }, []);
+  const clearInputs = useCallback(() => {
+    movementRef.current.cancel();
+    shiftKeys.current.clear();
+    runToggle.current = false;
+    setRunning(false);
+  }, []);
 
   useEffect(() => {
     if (state.mode !== 'journey') return;
@@ -109,26 +127,63 @@ export default function Adventure() {
   }, [state.result]);
 
   useEffect(() => {
+    if (paused) clearInputs();
+  }, [paused, clearInputs]);
+  useEffect(() => { clearInputs(); }, [state.locationId, state.mode, state.transition, clearInputs]);
+  useEffect(() => {
+    let frame;
+    const step = (now) => {
+      const movement = !pausedRef.current && movementRef.current.tick(now);
+      if (movement) dispatch({ type: 'MOVE', dx: movement[0], dy: movement[1] });
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    const onVisibility = () => { if (document.hidden) clearInputs(); };
+    window.addEventListener('blur', clearInputs);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      cancelAnimationFrame(frame);
+      movementRef.current.cancel();
+      window.removeEventListener('blur', clearInputs);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [clearInputs]);
+  useEffect(() => {
     const onKey = (event) => {
-      if (event.target instanceof HTMLElement && event.target.closest('input,textarea,select,dialog')) return;
-      if (event.code === 'Escape') { setPanel(null); return; }
-      if (panel || state.battle || state.result || state.puzzle || showArenaConsent) return;
-      if (state.dialogue) { if (['Enter', 'Space', 'KeyE'].includes(event.code)) { event.preventDefault(); dispatch({ type: 'DISMISS_DIALOGUE' }); } return; }
-      const movement = MOVEMENT[event.code];
-      if (movement) { event.preventDefault(); dispatch({ type: 'MOVE', dx: movement[0], dy: movement[1] }); }
+      if (dialogueRef.current && ['KeyE', 'Space'].includes(event.code) && !event.target.closest?.('input,textarea,select,[contenteditable="true"]')) {
+        event.preventDefault();
+        if (!event.repeat) dispatch({ type: 'DISMISS_DIALOGUE' });
+        return;
+      }
+      if (event.target instanceof HTMLElement && event.target.closest('input,textarea,select,dialog,[contenteditable="true"]')) return;
+      if (event.code === 'Escape') { clearInputs(); setPanel(null); return; }
+      if (pausedRef.current) return;
+      const movement = MOVEMENT_KEYS[event.code];
+      if (movement) {
+        event.preventDefault();
+        if (event.repeat) return;
+        movementRef.current.press(event.code, movement);
+        const step = movementRef.current.tick(performance.now());
+        if (step) dispatch({ type: 'MOVE', dx: step[0], dy: step[1] });
+      }
+      else if (['ShiftLeft', 'ShiftRight'].includes(event.code)) { shiftKeys.current.add(event.code); updateRunning(); }
+      else if (event.repeat) return;
       else if (['KeyE', 'Space'].includes(event.code) && !event.target.closest?.('button')) { event.preventDefault(); dispatch({ type: 'INTERACT' }); }
-      else if (event.code === 'KeyJ') setPanel('journal');
-      else if (event.code === 'KeyT') setPanel('team');
-      else if (event.code === 'KeyI') setPanel('pack');
+      else if (event.code === 'KeyJ') { clearInputs(); setPanel('journal'); }
+      else if (event.code === 'KeyT') { clearInputs(); setPanel('team'); }
+      else if (event.code === 'KeyI') { clearInputs(); setPanel('pack'); }
+    };
+    const onKeyUp = (event) => {
+      movementRef.current.release(event.code);
+      if (shiftKeys.current.delete(event.code)) updateRunning();
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [panel, state.battle, state.result, state.dialogue, state.puzzle, showArenaConsent]);
-
-  useEffect(() => () => clearInterval(heldRef.current), []);
-  useEffect(() => { if (panel || state.battle || state.dialogue || state.result) clearInterval(heldRef.current); }, [panel, state.battle, state.dialogue, state.result]);
+    window.addEventListener('keyup', onKeyUp);
+    return () => { window.removeEventListener('keydown', onKey); window.removeEventListener('keyup', onKeyUp); };
+  }, [clearInputs, updateRunning]);
 
   function exit() {
+    clearInputs();
     const journey = state.mode === 'journey' ? state : state.returnJourney ? adventureReducer(state, { type: 'EXIT_MODE' }) : null;
     if (journey && !saveAdventure(journey)) { setSaveError('Could not save. Stay here and retry before leaving.'); return; }
     dispatchGame({ type: 'RETURN_TITLE' });
@@ -137,13 +192,18 @@ export default function Adventure() {
     setProfile(next);
     if (!saveProfile(next)) setSaveError('Your equipment could not be saved. Please allow browser storage and retry.');
   }
-  function move(dx, dy) { dispatch({ type: 'MOVE', dx, dy }); }
+  function move(dx, dy) { if (!pausedRef.current) dispatch({ type: 'MOVE', dx, dy }); }
   function hold(event, dx, dy) {
-    event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId);
-    clearInterval(heldRef.current); move(dx, dy); heldRef.current = setInterval(() => move(dx, dy), 150);
+    event.preventDefault();
+    if (pausedRef.current || event.button !== 0) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    movementRef.current.press(`pointer:${event.pointerId}`, [dx, dy]);
+    const step = movementRef.current.tick(performance.now());
+    if (step) move(...step);
   }
-  const stopHold = () => clearInterval(heldRef.current);
+  const stopHold = (event) => movementRef.current.release(`pointer:${event.pointerId}`);
   function startMode(type) {
+    clearInputs();
     if (state.mode === 'journey' && !saveAdventure(state)) { setSaveError('Could not save your Journey before changing modes. Please retry.'); return; }
     setPanel(null); dispatch({ type });
   }
@@ -160,14 +220,14 @@ export default function Adventure() {
       <nav aria-label="Adventure menu"><button onClick={() => setPanel('team')}>Team</button><button onClick={() => setPanel('journal')}>Journal</button><button onClick={() => setPanel('locker')}>Locker</button><button aria-label="More game options" onClick={() => setPanel('menu')}>☰</button></nav>
     </header>
 
-    <section className="journey-map-stage" aria-label="Exploration"><AdventureScene state={state} />
+    <section className="journey-map-stage" aria-label="Exploration"><AdventureScene state={state} motion={{ running, paused }} />
       <div className="journey-area-label"><span>{state.flags.questComplete ? 'THE SIGNAL SHINES' : 'CHAPTER ONE'}</span><strong>{region.name}</strong></div>
       {nearby && !state.dialogue && !state.result && <div className="journey-nearby"><kbd>E</kbd><span>{nearby.name}</span></div>}
     </section>
 
     <footer className="journey-explore-console"><div className="journey-companion-status"><CompanionArt id={companion.id} skinId={profile.loadout.skinId} /><div><strong>{companion.name} <small>Lv. {companion.level}</small></strong><Meter value={companion.hp} max={companion.maxHp} label="HP" /><span className="journey-save-status" role="status">{savedAt || 'Your companion is ready'}</span></div></div>
-      <div className="journey-objective"><span>Next on your journey</span><p>{adventureObjective(state)}</p>{state.message && <small aria-live="polite">{state.message}</small>}</div>
-      <div className="journey-explore-controls" ref={controlsRef}><div className="journey-dpad" aria-label="Movement controls">{[[0, -1, 'up', '▲'], [-1, 0, 'left', '◀'], [0, 1, 'down', '▼'], [1, 0, 'right', '▶']].map(([dx, dy, direction, symbol]) => <button key={direction} className={direction} aria-label={`Move ${direction}`} onPointerDown={(event) => hold(event, dx, dy)} onPointerUp={stopHold} onPointerCancel={stopHold} onLostPointerCapture={stopHold} onClick={(event) => { if (event.detail === 0) move(dx, dy); }}>{symbol}</button>)}</div><button className="journey-button is-primary journey-interact" disabled={!nearby || Boolean(state.dialogue || state.result)} onClick={() => dispatch({ type: 'INTERACT' })}>Interact <kbd>E</kbd></button></div>
+      <div className="journey-objective"><span>Next on your journey</span><p>{adventureObjective(state)}</p>{optionalObjective && <small className="journey-side-objective">{optionalObjective}</small>}{state.message && <small aria-live="polite">{state.message}</small>}</div>
+      <div className="journey-explore-controls"><div className="journey-dpad" aria-label="Movement controls">{[[0, -1, 'up', '▲'], [-1, 0, 'left', '◀'], [0, 1, 'down', '▼'], [1, 0, 'right', '▶']].map(([dx, dy, direction, symbol]) => <button key={direction} className={direction} aria-label={`Move ${direction}`} disabled={paused} style={{ touchAction: 'none' }} onPointerDown={(event) => hold(event, dx, dy)} onPointerUp={stopHold} onPointerCancel={stopHold} onLostPointerCapture={stopHold} onClick={(event) => { if (event.detail === 0) move(dx, dy); }}>{symbol}</button>)}</div><button className={`journey-button journey-run-control ${running ? 'is-running' : ''}`} disabled={paused} aria-pressed={running} onClick={() => { runToggle.current = !runToggle.current; updateRunning(); }}>Run <kbd>Shift</kbd></button><button className="journey-button is-primary journey-interact" disabled={!nearby || paused} onClick={() => dispatch({ type: 'INTERACT' })}>Interact <kbd>E</kbd></button></div>
     </footer>
     {saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={retrySave}>Retry save</button><button onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div>}
 
@@ -179,12 +239,12 @@ export default function Adventure() {
 
     {state.mode === 'circuit' && state.circuit.completed && !state.result && <GameDialog notice={saveNotice} title="Rival Circuit cleared"><p>You cleared all three local rivals. Your best run is {state.circuit.bestWins}/3. Journey rewards and XP are unchanged.</p><div className="journey-inline-actions">{state.returnJourney && <button className="journey-button is-primary" onClick={() => dispatch({ type: 'EXIT_MODE' })}>Return to Journey</button>}<button className="journey-button" onClick={() => dispatch({ type: 'START_CIRCUIT' })}>Run the circuit again</button><button className="journey-button" onClick={exit}>Return to title</button></div></GameDialog>}
     {panel === 'team' && <GameDialog notice={saveNotice} title="Your traveling team" onClose={() => setPanel(null)}><div className="journey-team-list">{state.team.map((member) => <article className="journey-team-member" key={member.id}><CompanionArt id={member.id} /><div><h3>{member.name} <small>Lv. {member.level}</small></h3><p>{COMPANIONS.find((entry) => entry.id === member.id)?.role} · {member.affinity}</p><Meter value={member.hp} max={member.maxHp} label="HP" /><p className="journey-muted">{member.xp} XP · {member.energy}/{member.maxEnergy} energy</p><button className="journey-button" disabled={member.id === state.activeId || member.hp === 0} onClick={() => dispatch({ type: 'SWITCH_COMPANION', companionId: member.id })}>{member.id === state.activeId ? 'Following you' : member.hp === 0 ? 'Needs a rest' : 'Make lead companion'}</button></div></article>)}</div><p className="journey-muted">Mossback can join your starter on this chapter’s route. Adventure stats never increase live-model arena power.</p></GameDialog>}
-    {panel === 'journal' && <GameDialog notice={saveNotice} title="The Lantern Signal" onClose={() => setPanel(null)}><p className="journey-journal-next">{adventureObjective(state)}</p><ol className="journey-journal-quests">{taskList.map((task, index) => <li className={task.done || task.complete ? 'is-complete' : ''} key={task.id || index}><span aria-hidden="true">{task.done || task.complete ? '◆' : '◇'}</span><div><strong>{task.name || task.title || `Lead ${index + 1}`}</strong><p>{task.description || task.objective || task.text}</p></div></li>)}</ol><p className="journey-muted">Ward protects a constraint. Recall applies earlier clues. Your choices, not provider credits, drive this journey.</p></GameDialog>}
+    {panel === 'journal' && <GameDialog notice={saveNotice} title="The Lantern Signal" onClose={() => setPanel(null)}><p className="journey-journal-next">{adventureObjective(state)}</p>{optionalObjective && <p className="journey-side-objective">{optionalObjective}</p>}<ol className="journey-journal-quests">{taskList.map((task, index) => <li className={task.done || task.complete ? 'is-complete' : ''} key={task.id || index}><span aria-hidden="true">{task.done || task.complete ? '◆' : '◇'}</span><div><strong>{task.name || task.title || `Lead ${index + 1}`}</strong><p>{task.description || task.objective || task.text}</p></div></li>)}</ol><p className="journey-muted">Ward protects a constraint. Recall applies earlier clues. Your choices, not provider credits, drive this journey.</p></GameDialog>}
     {panel === 'pack' && <GameDialog notice={saveNotice} title="The field pack" onClose={() => setPanel(null)}><PackContents state={state} dispatch={dispatch} />{ITEMS.some(item => !item.heal && !item.energy && state.inventory[item.id]) && <p className="journey-muted">Keepsakes: {ITEMS.filter(item => !item.heal && !item.energy && state.inventory[item.id]).map(item => item.name).join(' · ')}</p>}</GameDialog>}
     {panel === 'map' && <GameDialog notice={saveNotice} title="Your field map" onClose={() => setPanel(null)}><FieldMap state={state} /></GameDialog>}
     {panel === 'locker' && <GameDialog notice={saveNotice} title="The companion Locker" onClose={() => setPanel(null)} className="journey-locker-dialog"><Locker profile={profile} onChange={changeProfile} onClose={() => setPanel(null)} /><button className="journey-button" onClick={() => setPanel('preview')}>Preview arena entrance</button></GameDialog>}
     {panel === 'preview' && <GameDialog notice={saveNotice} title="Your arena entrance" onClose={() => setPanel('locker')} className="journey-preview-dialog"><IdentityPreview profile={profile} onBack={() => setPanel('locker')} /></GameDialog>}
-    {panel === 'menu' && <GameDialog notice={saveNotice} title="A moment on the road" onClose={() => setPanel(null)}>{state.circuit.bestWins > 0 && <p className="journey-muted">Rival Circuit record: {state.circuit.bestWins}/3 rivals cleared.</p>}<div className="journey-system-menu"><button className="journey-button" aria-pressed={!muted} onClick={() => setMuted(sfx.toggleMute())}>Sound effects: {muted ? 'Off' : 'On'}</button><button className="journey-button" onClick={() => setPanel('map')}>Field map</button><button className="journey-button" onClick={() => setPanel('pack')}>Open pack</button><button className="journey-button" onClick={() => startMode('START_PRACTICE')}>Practice battle</button><button className="journey-button" onClick={() => startMode('START_CIRCUIT')}>Rival Circuit</button><button className="journey-button" onClick={() => { setPanel(null); setShowArenaConsent(true); }}>Visit Live Arena</button><button className="journey-button is-primary" onClick={exit}>{state.mode === 'journey' ? 'Save & return to title' : 'Return to title'}</button></div><p className="journey-muted">Arrows / WASD: move · E: interact · J: Journal · T: Team · I: Pack. System reduced-motion settings are respected.</p></GameDialog>}
+    {panel === 'menu' && <GameDialog notice={saveNotice} title="A moment on the road" onClose={() => setPanel(null)}>{state.circuit.bestWins > 0 && <p className="journey-muted">Rival Circuit record: {state.circuit.bestWins}/3 rivals cleared.</p>}<div className="journey-system-menu"><button className="journey-button" aria-pressed={!muted} onClick={() => setMuted(sfx.toggleMute())}>Sound effects: {muted ? 'Off' : 'On'}</button><button className="journey-button" onClick={() => setPanel('map')}>Field map</button><button className="journey-button" onClick={() => setPanel('pack')}>Open pack</button><button className="journey-button" onClick={() => startMode('START_PRACTICE')}>Practice battle</button><button className="journey-button" onClick={() => startMode('START_CIRCUIT')}>Rival Circuit</button><button className="journey-button" onClick={() => { setPanel(null); setShowArenaConsent(true); }}>Visit Live Arena</button><button className="journey-button is-primary" onClick={exit}>{state.mode === 'journey' ? 'Save & return to title' : 'Return to title'}</button></div><p className="journey-muted">Arrows / WASD: move · Hold Shift or toggle Run: run · E: interact · J: Journal · T: Team · I: Pack. System reduced-motion settings are respected.</p></GameDialog>}
     {showArenaConsent && <GameDialog notice={saveNotice} title="Beyond the practice ring" onClose={() => { setShowArenaConsent(false); dispatch({ type: 'CLEAR_TRANSITION' }); }}><p>The Live Arena runs actual AI models using your provider credentials. Creature levels and cosmetics do not improve a model&apos;s score.</p><p>No model call happens on entry. You will choose models, connect credentials, review the call budget and explicitly start the match inside.</p><p className="journey-muted">This is a one-browser model show, not online human matchmaking. Local badges remain unverified.</p><div className="journey-inline-actions"><button className="journey-button is-primary" onClick={() => { const next = adventureReducer(state, { type: 'CLEAR_TRANSITION' }); if (state.mode === 'journey' && !saveAdventure(next)) { setSaveError('Could not save before entering the arena. Please retry.'); return; } dispatchGame({ type: 'ENTER_ARENA', adventure: next, identity: profileSnapshot(profile) }); }}>Enter model arena</button><button className="journey-button" onClick={() => { setShowArenaConsent(false); dispatch({ type: 'CLEAR_TRANSITION' }); }}>Stay on the frontier</button></div></GameDialog>}
   </main>;
 }

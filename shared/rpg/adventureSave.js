@@ -1,4 +1,4 @@
-import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, FLAG_IDS, ITEMS, MAP_REVISION, MAX_BATTLE_TURNS, STARTER_IDS } from './adventureContent.js';
+import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, FLAG_IDS, ITEMS, MAP_REVISION, MAX_BATTLE_TURNS, STARTER_IDS, SUNWARD_FLAG_IDS } from './adventureContent.js';
 import { adventureResult, beginBattle, createAdventure, createCompanion, enemyIntent, isAdventureWalkable, MODES, normalizeTrainerName } from './adventure.js';
 import { fromSave as fromLegacySave, toSave as toLegacySave } from './worldState.js';
 
@@ -34,6 +34,13 @@ function migrateV3Map(value) {
     }
   }
   return next;
+}
+
+function migrateSunwardFields(value) {
+  if (!record(value) || !record(value.flags) || !record(value.inventory)) return value;
+  // Only the complete pre-Sunward schema gets defaults; partial new records fail validation.
+  if (SUNWARD_FLAG_IDS.some(id => owns(value.flags, id)) || owns(value.inventory, 'keeper-lens')) return value;
+  return { ...value, flags: { ...value.flags, ...Object.fromEntries(SUNWARD_FLAG_IDS.map(id => [id, false])) }, inventory: { ...value.inventory, 'keeper-lens': 0 } };
 }
 
 function legacyHistory(value) {
@@ -73,11 +80,16 @@ function validFlags(flags, mode) {
     && (!flags.recruited || flags.wispDefeated)
     && (!flags.relayRestored || flags.noteRead && flags.wispDefeated)
     && (!flags.bossDefeated || flags.relayRestored)
-    && (!flags.questComplete || flags.bossDefeated);
+    && (!flags.questComplete || flags.bossDefeated)
+    && (!flags.lensQuestStarted || flags.wispDefeated)
+    && (!flags.windClueRead || flags.lensQuestStarted)
+    && (!flags.lensRecovered || flags.windClueRead)
+    && (!flags.lensReturned || flags.lensRecovered)
+    && (!flags.overlookFound || flags.wispDefeated);
 }
 
 function readV3(value, nested = false) {
-  value = migrateV3Map(value);
+  value = migrateSunwardFields(migrateV3Map(value));
   if (!record(value) || value.version !== 3 || value.chapterId !== CHAPTER_ID || !MODES.includes(value.mode)
     || value.mapRevision !== MAP_REVISION || typeof value.runId !== 'string' || !/^[a-zA-Z0-9:-]{1,80}$/.test(value.runId)
     || !STARTER_IDS.includes(value.starterId) || typeof value.trainerName !== 'string' || normalizeTrainerName(value.trainerName) !== value.trainerName
@@ -94,7 +106,9 @@ function readV3(value, nested = false) {
     team.push({ ...canonical, hp: member.hp, energy: member.energy });
   }
   if (!team.some(member => member.id === value.activeId && member.hp > 0)) return null;
-  if (!Array.isArray(value.discoveries) || value.discoveries.length > 3 || !value.discoveries.includes(value.locationId) || value.discoveries.some(id => !owns(ADVENTURE_REGIONS, id))) return null;
+  if (!Array.isArray(value.discoveries) || value.discoveries.length > Object.keys(ADVENTURE_REGIONS).length || !value.discoveries.includes(value.locationId) || value.discoveries.some(id => !owns(ADVENTURE_REGIONS, id))) return null;
+  if (value.inventory['keeper-lens'] !== Number(value.flags.lensRecovered && !value.flags.lensReturned)
+    || value.discoveries.includes('sunward') && !value.flags.wispDefeated) return null;
   const circuit = value.circuit;
   if (!record(circuit) || !integer(circuit.index, 0, 2) || !integer(circuit.wins, 0, 3) || !integer(circuit.bestWins, circuit.wins, 3)
     || typeof circuit.completed !== 'boolean' || circuit.completed !== (circuit.wins === 3)
