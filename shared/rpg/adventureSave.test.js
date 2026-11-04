@@ -12,7 +12,8 @@ function storage(entries = {}) {
 }
 function wisp() {
   const state = createAdventure({ trainerName: 'Ari', starterId: 'duplet' });
-  return act({ ...state, locationId: 'grove', discoveries: ['frontier', 'grove'], x: 15, y: 5, facing: 'right', flags: { ...state.flags, questStarted: true, shardFound: true }, inventory: { ...state.inventory, 'signal-shard': 1 } }, 'INTERACT');
+  const enemy = ADVENTURE_REGIONS.grove.objects.find(object => object.id === 'static');
+  return act({ ...state, locationId: 'grove', discoveries: ['frontier', 'grove'], x: enemy.x - 1, y: enemy.y, facing: 'right', flags: { ...state.flags, questStarted: true, shardFound: true }, inventory: { ...state.inventory, 'signal-shard': 1 } }, 'INTERACT');
 }
 const clone = value => JSON.parse(JSON.stringify(value));
 
@@ -72,7 +73,7 @@ test('corrupt/unknown schema, flags, positions, quantities, teams and record val
     value => { value.trainerName = 'x'.repeat(25); }, value => { value.trainerName = '<script>'; },
     value => { value.locationId = '__proto__'; }, value => { value.locationId = 'unknown'; },
     value => { value.x = -1; }, value => { value.y = 0; }, value => { value.x = 2.5; },
-    value => { value.x = 3; value.y = 2; }, value => { value.facing = 'northwest'; },
+    value => { value.x = ADVENTURE_REGIONS.frontier.solid[0].x; value.y = ADVENTURE_REGIONS.frontier.solid[0].y; }, value => { value.facing = 'northwest'; },
     value => { value.inventory.potion = -1; }, value => { value.inventory.potion = 0.5; },
     value => { value.inventory.potion = '2'; }, value => { value.inventory.potion = 100; },
     value => { value.inventory['signal-shard'] = 2; }, value => { delete value.inventory.ether; },
@@ -214,7 +215,8 @@ test('Practice/Circuit nested Journey survives save/refresh/exit with no transie
 
 test('puzzle progress is transient, but solved relay evidence and XP persist once', () => {
   let state = createAdventure();
-  state = { ...state, locationId: 'archive', discoveries: ['frontier', 'archive'], x: 10, y: 6,
+  const relay = ADVENTURE_REGIONS.archive.objects.find(object => object.id === 'relay');
+  state = { ...state, locationId: 'archive', discoveries: ['frontier', 'archive'], x: relay.x, y: relay.y + 1,
     flags: { ...state.flags, questStarted: true, shardFound: true, wispDefeated: true, noteRead: true },
     inventory: { ...state.inventory, 'signal-shard': 1, 'clear-circuit': 1 } };
   state = act(act(state, 'INTERACT'), 'PUZZLE_CHOICE', { lamp: 'amber' });

@@ -3,7 +3,8 @@
 
 const MUTE_KEY = 'arena.muted';
 let ctx = null;
-let muted = localStorage.getItem(MUTE_KEY) !== 'off'; // default muted
+let muted = true;
+try { muted = localStorage.getItem(MUTE_KEY) !== 'off'; } catch { /* Audio remains opt-in when storage is blocked. */ }
 
 function ac() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -17,7 +18,7 @@ export function isMuted() {
 
 export function toggleMute() {
   muted = !muted;
-  localStorage.setItem(MUTE_KEY, muted ? 'on' : 'off');
+  try { localStorage.setItem(MUTE_KEY, muted ? 'on' : 'off'); } catch { /* Keep the in-memory audio preference usable. */ }
   if (!muted) bell(); // audible confirmation
   return muted;
 }

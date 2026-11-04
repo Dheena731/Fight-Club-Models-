@@ -23,6 +23,8 @@ export const initialState = {
   fightBeat: FIGHT_BEAT.IDLE,
   bootError: null,
   arenaReturn: false,
+  adventure: null,
+  arenaIdentity: null,
 };
 
 export function gameReducer(state, action) {
@@ -32,13 +34,13 @@ export function gameReducer(state, action) {
 
     case 'ENTER_WORLD':
     case 'RETURN_WORLD':
-      return { ...state, phase: PHASE.WORLD, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false };
+      return { ...state, phase: PHASE.WORLD, adventure: action.adventure || state.adventure, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false };
 
     case 'RETURN_TITLE':
       return { ...state, phase: PHASE.TITLE, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false };
 
     case 'ENTER_ARENA':
-      return { ...state, phase: PHASE.SELECT, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: true };
+      return { ...state, phase: PHASE.SELECT, adventure: action.adventure || state.adventure, arenaIdentity: action.identity || null, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: true };
 
     case 'BOOT_ERROR':
       return { ...state, bootError: action.error };
@@ -47,7 +49,7 @@ export function gameReducer(state, action) {
       return {
         ...state,
         phase: PHASE.VS,
-        loadout: action.loadout,
+        loadout: { ...action.loadout, identity: action.loadout?.identity || state.arenaIdentity },
         result: null,
         fightBeat: FIGHT_BEAT.IDLE,
       };

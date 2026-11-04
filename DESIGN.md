@@ -1,10 +1,10 @@
 # Design
 
-> **Dual-mode design system.** The RPG's implemented title, world, dialogue, and menus use `client/src/rpg/frontier.css`; the optional arena retains the tokens below in `client/src/index.css`. The full direction is in [docs/ai-frontier/GAME_DESIGN.md](docs/ai-frontier/GAME_DESIGN.md).
+> **GBA companion design system.** The active RPG uses `client/src/rpg/journey.css`; Locker/Versus share `locker.css`. `frontier.css` preserves legacy fallback/loading surfaces. The optional arena retains the tokens below in `client/src/index.css`. Current decisions: [progression plan](docs/ai-frontier/PROGRESSION_PLAN.md).
 
 ## RPG visual hierarchy
 
-The title introduces the adventure before any provider setup. The faction choice presents three original pixel silhouettes, a starting region, and a short playstyle. Each faction opens on its own region and mandate scene. In-world HUD prioritizes the active faction objective until it is complete, then The Lantern Signal. A dark ink backdrop, warm lantern gold, cool source/codex cyan, strong panel borders, and square pixel controls carry the retro feel across the world and menus. Narrative text uses a readable body face; pixel lettering is reserved for compact headings and buttons. The codex labels historical record and fictional adaptation separately.
+The panoramic title introduces a sunlit world before any provider setup. Starter choice uses expressive original avatars, clear roles and unrestricted inspection. Exploration is Pixi-rendered; native dialogue/menu controls remain readable and keyboard accessible. Daylight jade/leaf/ochre terrain, terracotta architecture and plum outlines carry the GBA direction. Cloud panels (`#F4F6ED`), plum ink (`#2B2438`), jade actions (`#35654F`) and restrained gold selection/rewards remain consistent across setup, exploration, dedicated combat, results and Locker. Adventure level is labelled prestige in the arena; local badges never imply verified public achievements.
 
 AI Battle Arena uses a dark arcade fight-night system: a pixel stage with strong P1/P2 identity, surrounded by a restrained product shell. The arena always stays dark; the shell supports dark and light themes.
 

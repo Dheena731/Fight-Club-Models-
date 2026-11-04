@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { ThemeProvider } from './lib/theme';
 import { GameProvider, useGameState, PHASE } from './game/GameContext';
 import { StageProvider } from './stage/StageContext';
@@ -8,9 +8,11 @@ import Home from './screens/Home';
 import Vs from './screens/Vs';
 import Battle from './screens/Battle';
 import Result from './screens/Result';
-import Title from './rpg/Title';
-import World from './rpg/World';
 import './rpg/frontier.css';
+import './rpg/journey.css';
+
+const Title = lazy(() => import('./rpg/JourneyTitle'));
+const World = lazy(() => import('./rpg/Adventure'));
 
 function ArenaReady({ phase }) {
   const { init, ready, error } = useStage();
@@ -25,13 +27,13 @@ function GameShell() {
   const { phase } = useGameState();
 
   return (
-    <div className="h-svh overflow-hidden">
+    <Suspense fallback={<div className="journey-scene-loading" role="status">Opening the frontier…</div>}><div className="h-svh overflow-hidden">
       {phase === PHASE.BOOT && <Boot />}
       {phase === PHASE.TITLE && <Title />}
       {phase === PHASE.WORLD && <World />}
       {[PHASE.SELECT, PHASE.VS, PHASE.FIGHT].includes(phase) && <ArenaReady phase={phase} />}
       {phase === PHASE.RESULT && <Result />}
-    </div>
+    </div></Suspense>
   );
 }
 

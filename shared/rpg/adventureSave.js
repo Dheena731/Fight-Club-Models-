@@ -29,7 +29,7 @@ function migrate(value) {
   member.hp = Math.min(member.maxHp, old.hp);
   member.energy = Math.min(member.maxEnergy, old.energy);
   const next = {
-    ...state, locationId: old.locationId, x: old.x, y: old.y, flags, team: [member],
+    ...state, locationId: old.locationId, ...ADVENTURE_REGIONS[old.locationId].spawn, flags, team: [member],
     inventory: { ...state.inventory, 'signal-shard': flags.shardFound || old.inventory.includes('Signal Shard') ? 1 : 0, 'clear-circuit': flags.wispDefeated || old.inventory.includes('Clear Circuit') ? 1 : 0, 'lantern-emblem': flags.questComplete || old.inventory.includes('Lantern Emblem') ? 1 : 0 },
     discoveries: [...new Set(['frontier', old.locationId, ...old.discoveries])], legacy: legacyHistory(value),
     message: 'Legacy Journey imported. The original save is preserved until and after you save v3.',

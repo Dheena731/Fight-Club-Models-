@@ -27,3 +27,19 @@ Planning scores (complexity/size/weighted): G .9/.9/.9 lead; W1 .75/.75/.75 lead
 ### Evidence
 
 P0: source inspection and documented integration contracts. No new implementation or playtest result is claimed by this checkpoint. Subsequent accepted checks and remaining limitations will be appended here.
+
+## P1 / deterministic adventure and identity foundations
+
+- Accepted W1 source commit `3d5f9b6`, integrated as `605098c`: complete chapter for three starters, a recruitable companion, bounded intent-based battles, Practice/Circuit isolation, save-v3 import/resume/validation.
+- Accepted W2 source commit `10d825e`, integrated as `ec07c37`: five-item cosmetic catalog, validated local profile, Locker and existing Versus extension.
+- Root verification at the initial integration: 82 tests passed (including original providers/security), then 86 with UI persistence/flow and art tests. The first client production build passed; existing five Fast Refresh warnings and a >500KB Pixi chunk warning remain.
+- P0/P1 commits pushed to `codex/gba-redesign-plan`. No provider credits used.
+
+## P2–P4 / integrated game, validation in progress
+
+- Root implemented title/trainer/starter flow, Pixi exploration, dedicated battle/result commands, native-dialog menus, Journal/Team/Pack/Map, recovery, Locker/profile projection and non-billable identity preview.
+- Six original runtime raster assets plus ten reviewed portraits are project-local. Sources/prompts: [ART_PROMPTS.json](ART_PROMPTS.json), runtime `client/public/assets/frontier/manifest.json`.
+- Art limits: one facing pose per field direction, not a full multi-frame walk sheet; Mossback uses its portrait for field/back presentation; the other five companions have portrait art but are not recruitable in this chapter. Animation/palette cleanup and smaller image delivery remain release work.
+- Browser QA uses `localhost:5174`, isolated from the user's existing `localhost:5173` save. Root found/fixed throwing save errors at UI boundaries, unsafe mode-exit presentation, obsolete React image prop warning, cramped map framing and trainer-like NPC placeholders.
+- Authored maps expanded to town 28×18, forest 28×18 and Archive 26×18. Legacy saves import to safe region spawns; test fixtures use named landmarks rather than obsolete coordinates.
+- Current status is integration/review, not a production or player-retention verdict. Exact final checks and walkthrough outcomes follow after validation.

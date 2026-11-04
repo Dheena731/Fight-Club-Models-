@@ -61,6 +61,29 @@ ADVENTURE_REGIONS.frontier.objects.push(
 );
 ADVENTURE_REGIONS.archive.objects.push({ id: 'guardian', type: 'enemy', encounterId: 'archive-warden', x: 10, y: 3, name: 'Archive Warden', color: '#bba9ef' });
 
+// Authored space around the chapter beats, rather than recolored prototype rooms.
+Object.assign(ADVENTURE_REGIONS.frontier, {
+  width: 28, height: 18, spawn: { x: 12, y: 11 },
+  path: [{ x: 1, y: 9, w: 26, h: 3 }, { x: 12, y: 3, w: 3, h: 14 }, { x: 4, y: 10, w: 2, h: 6 }, { x: 20, y: 6, w: 3, h: 7 }],
+  solid: [{ x: 3, y: 3, w: 7, h: 4 }, { x: 20, y: 3, w: 5, h: 3 }, { x: 12, y: 14, w: 6, h: 3 }],
+});
+const townPositions = { guide: [10, 9], lantern: [13, 8], arena: [22, 8], 'grove-gate': [26, 10], 'archive-gate': [4, 15], rest: [9, 11], signpost: [17, 10], 'circuit-board': [20, 12], 'practice-board': [21, 10] };
+ADVENTURE_REGIONS.frontier.objects = ADVENTURE_REGIONS.frontier.objects.map(object => ({ ...object, x: townPositions[object.id][0], y: townPositions[object.id][1], ...(object.id === 'grove-gate' ? { entry: { x: 2, y: 10 } } : object.id === 'archive-gate' ? { entry: { x: 23, y: 13 } } : {}) }));
+Object.assign(ADVENTURE_REGIONS.grove, {
+  width: 28, height: 18, spawn: { x: 2, y: 10 },
+  path: [{ x: 1, y: 9, w: 25, h: 3 }, { x: 20, y: 8, w: 3, h: 8 }],
+  solid: [{ x: 4, y: 3, w: 5, h: 4 }, { x: 12, y: 2, w: 4, h: 4 }, { x: 20, y: 2, w: 5, h: 3 }, { x: 4, y: 13, w: 8, h: 3 }, { x: 24, y: 12, w: 3, h: 4 }],
+});
+const grovePositions = { 'frontier-gate': [1, 10], ranger: [9, 9], shard: [21, 14], static: [23, 8] };
+ADVENTURE_REGIONS.grove.objects = ADVENTURE_REGIONS.grove.objects.map(object => ({ ...object, x: grovePositions[object.id][0], y: grovePositions[object.id][1], ...(object.type === 'exit' ? { entry: { x: 25, y: 10 } } : {}) }));
+Object.assign(ADVENTURE_REGIONS.archive, {
+  width: 26, height: 18, spawn: { x: 23, y: 13 },
+  path: [{ x: 2, y: 12, w: 23, h: 3 }, { x: 12, y: 4, w: 3, h: 12 }],
+  solid: [{ x: 3, y: 3, w: 6, h: 5 }, { x: 18, y: 3, w: 5, h: 5 }, { x: 3, y: 10, w: 4, h: 1 }, { x: 19, y: 10, w: 4, h: 1 }],
+});
+const archivePositions = { 'frontier-gate': [24, 13], 'archive-note': [8, 12], relay: [13, 9], scholar: [17, 12], guardian: [13, 5] };
+ADVENTURE_REGIONS.archive.objects = ADVENTURE_REGIONS.archive.objects.map(object => ({ ...object, x: archivePositions[object.id][0], y: archivePositions[object.id][1], ...(object.type === 'exit' ? { entry: { x: 5, y: 14 } } : {}) }));
+
 export const getMove = id => MOVES.find(move => move.id === id) || null;
 export const getEncounter = id => Object.hasOwn(ENCOUNTERS, id) ? ENCOUNTERS[id] : null;
 export const getCompanion = id => COMPANIONS.find(companion => companion.id === id) || null;

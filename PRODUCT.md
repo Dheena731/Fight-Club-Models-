@@ -1,10 +1,10 @@
 # Product
 
-> **AI Frontier product brief.** The RPG is the opening experience; the original live arena is an optional, separately priced-by-provider destination. The build order and limits are in [docs/ai-frontier/README.md](docs/ai-frontier/README.md).
+> **AI Frontier product brief.** The trainer/companion RPG is the opening experience; the original live arena is an optional, separately consented BYOK destination. Current scope, online trust boundaries and acceptance gates: [progression plan](docs/ai-frontier/PROGRESSION_PLAN.md), [implementation evidence](docs/ai-frontier/WORK_LOG.md).
 
 ## RPG opening
 
-Players can start offline, select Wardens, Research Guild, or Observatory, complete a faction mandate with an ally, and pursue The Lantern Signal across three connected regions. The early game should feel like a compact pixel adventure, not a credential setup page. The lore codex labels historical facts and fictional adaptations separately. Saves are local to the browser; character bonuses are game-balanced fiction, not model benchmarks. The playable chapter is a vertical slice, not an open world or multiplayer release.
+Players name a human trainer and choose Emberquill, Kitewhisk or Duplet as their first companion. The Lantern Signal connects a sunlit town, forest route and Archive through quests, recruitment, a Recall puzzle, intent-based battles and a restored-town homecoming. Practice and Rival Circuit are separate local modes. The Locker turns chapter achievements into cosmetic identity, not live-model power. Saves/rewards are local and unverified; this is a bounded chapter, not an open world or human multiplayer release.
 
 ## Register
 

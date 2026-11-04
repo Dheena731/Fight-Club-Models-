@@ -181,7 +181,8 @@ test('invalid combat, unaffordable moves, invalid quantities and items spend no 
 test('switching consumes an enemy response; Ward, Recall and Fork apply actual rules', () => {
   let state = act(win(reachWisp('duplet')), 'CONTINUE_RESULT');
   state = dismiss(interactAt(state, 'ranger'));
-  state = { ...state, locationId: 'archive', x: 10, y: 2, flags: { ...state.flags, noteRead: true, relayRestored: true } };
+  const guardian = ADVENTURE_REGIONS.archive.objects.find(object => object.id === 'guardian');
+  state = { ...state, locationId: 'archive', x: guardian.x, y: guardian.y - 1, flags: { ...state.flags, noteRead: true, relayRestored: true } };
   state = act(state, 'INTERACT');
   const switched = act(state, 'SWITCH_COMPANION', { companionId: 'mossback' });
   assert.equal(switched.battle.turn, 1);
@@ -220,7 +221,8 @@ test('defeat, retreat and town rest are safe, non-rewarding and preserve evidenc
 test('fainted lead is replaced and the exact turn bound produces safe defeat', () => {
   let state = act(win(reachWisp('emberquill')), 'CONTINUE_RESULT');
   state = dismiss(interactAt(state, 'ranger'));
-  state = { ...state, locationId: 'archive', x: 10, y: 2, flags: { ...state.flags, noteRead: true, relayRestored: true } };
+  const guardian = ADVENTURE_REGIONS.archive.objects.find(object => object.id === 'guardian');
+  state = { ...state, locationId: 'archive', x: guardian.x, y: guardian.y - 1, flags: { ...state.flags, noteRead: true, relayRestored: true } };
   state = act(state, 'INTERACT');
   state = { ...state, team: state.team.map(member => ({ ...member, hp: member.id === state.activeId ? 1 : member.hp })) };
   state = act(act(state, 'BATTLE_MOVE', { moveId: 'strike' }), 'BATTLE_MOVE', { moveId: 'strike' });

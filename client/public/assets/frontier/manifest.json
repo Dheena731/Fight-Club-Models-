@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "date": "2026-11-04",
+  "generator": "built-in image_gen",
+  "notes": "Original runtime artwork. Field atlas frames use rounded source boundaries because the generated dimensions are not evenly divisible by four. Starter atlas has independently drawn front/back poses. Field walk cycle uses movement interpolation with four facing poses, not a finished multi-frame walk sheet. Portraits retain the reviewed concept art. Palette/frame animation cleanup and compressed delivery remain release gates.",
+  "assets": [
+    {
+      "file": "title-panorama.png",
+      "role": "title background, no baked UI",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2518042,
+      "sha256": "803df7e74d5ca7f67d91aa573c3f98fd8ea6334854af5298d63fa3109bcf7cc2",
+      "transparent": false
+    },
+    {
+      "file": "starter-battle-atlas.png",
+      "role": "three starters: front row then back row",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2179549,
+      "sha256": "caf85724b3d083a6e9e42cf01e957946c5591a1cd23e643a882e7d1a6c8f48c8",
+      "transparent": true,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "file": "field-atlas.png",
+      "role": "trainer, Emberquill, Kitewhisk, Duplet; south, west, east, north",
+      "width": 1246,
+      "height": 1263,
+      "bytes": 1419163,
+      "sha256": "f1b7f21a9580f278680fce8e329188ea655ab985d45c6118b2764ad4656dab82",
+      "transparent": true,
+      "columns": 4,
+      "rows": 4,
+      "anchor": [
+        0.5,
+        0.88
+      ]
+    },
+    {
+      "file": "environment-atlas.png",
+      "role": "cottage, guild, Archive / tree, lantern, gate",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2149682,
+      "sha256": "447160b6b24d22487df8cbee8b14a7a4c965bf08fc3d0ad777d187b0042113b4",
+      "transparent": true,
+      "columns": 3,
+      "rows": 2,
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "file": "enemy-atlas.png",
+      "role": "Static Wisp and Archive Warden",
+      "width": 1774,
+      "height": 887,
+      "bytes": 735108,
+      "sha256": "4b710696d27164119ec61d82d6f7710b01bdce492ab418c7a2b9d4c554d9643c",
+      "transparent": true,
+      "columns": 2,
+      "rows": 1
+    },
+    {
+      "file": "npc-atlas.png",
+      "role": "Mara, Ivo, Neri; front-facing overworld characters",
+      "width": 2172,
+      "height": 724,
+      "bytes": 768753,
+      "sha256": "ef2d74292bc0d8f1b73d29f22f26cf87d044ed989ea2b875602ae46ece706303",
+      "transparent": true,
+      "columns": 3,
+      "rows": 1,
+      "anchor": [
+        0.5,
+        0.91
+      ],
+      "cornerAlpha": 1
+    }
+  ],
+  "portraits": [
+    {
+      "id": "emberquill",
+      "file": "portraits/emberquill.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/emberquill-avatar.png"
+    },
+    {
+      "id": "kitewhisk",
+      "file": "portraits/kitewhisk.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/kitewhisk-avatar.png"
+    },
+    {
+      "id": "duplet",
+      "file": "portraits/duplet.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/duplet-avatar.png"
+    },
+    {
+      "id": "crosswake",
+      "file": "portraits/crosswake.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/crosswake-avatar.png"
+    },
+    {
+      "id": "zipcat",
+      "file": "portraits/zipcat.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/zipcat-avatar.png"
+    },
+    {
+      "id": "rampart",
+      "file": "portraits/rampart.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/rampart-avatar.png"
+    },
+    {
+      "id": "latticewing",
+      "file": "portraits/latticewing.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/latticewing-avatar.png"
+    },
+    {
+      "id": "mossback",
+      "file": "portraits/mossback.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/mossback-avatar.png"
+    },
+    {
+      "id": "patchbyte",
+      "file": "portraits/patchbyte.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/patchbyte-avatar.png"
+    },
+    {
+      "id": "trainer",
+      "file": "portraits/trainer.png",
+      "source": "docs/ai-frontier/redesign-v3/assets/trainer-avatar.png"
+    }
+  ]
+}
