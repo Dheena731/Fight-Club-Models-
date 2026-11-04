@@ -1,114 +1,95 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGameState, useGameDispatch } from '../game/GameContext';
-import { getCreature } from '../components/creatures/pixelData';
-import PixelCreature from '../components/creatures/PixelCreature';
-import * as sfx from '../lib/sfx';
+import { FIGHTERS } from '../../../shared/fighters.js';
+import { PROFILE_VERSION, PROFILE_COMPANIONS, createProfile, loadProfile, profileSnapshot } from '../../../shared/rpg/profile.js';
+import { FIGHTER_CREATURE, PROVIDER_CREATURE } from '../components/creatures/pixelData';
+import { CompanionPortrait, IdentityPreview } from '../rpg/Locker';
 
-const VS_MIN_MS = 1200;
-const SKIP_AFTER_MS = 650;
+const VS_MIN_MS = 2400;
 
-/**
- * VS splash. Provider credentials are already checked at the Coin Slot,
- * so this beat is purely theatrical and never spends an extra model call.
- */
+function ModelIdentity({ label, fighter, spec }) {
+  const builtin = Object.values(FIGHTERS).find((entry) => entry.id === fighter?.id);
+  return (
+    <div className="frontier-vs-model">
+      <h2>{label}</h2>
+      <p><strong>{fighter?.name ?? 'Selected model'}</strong></p>
+      <dl>
+        <dt>Actual model ID</dt><dd>{spec?.model ?? fighter?.modelId ?? builtin?.modelId ?? 'Not supplied'}</dd>
+        <dt>Provider route</dt><dd>{spec?.provider ?? fighter?.provider ?? builtin?.provider ?? 'Custom route'}</dd>
+      </dl>
+    </div>
+  );
+}
+
+/** Existing live-match handoff only. Identity display performs no model/provider calls. */
 export default function Vs() {
   const { loadout } = useGameState();
   const dispatch = useGameDispatch();
-  const [skippable, setSkippable] = useState(false);
+  const [identity] = useState(() => profileSnapshot(
+    loadout?.identity?.version === PROFILE_VERSION ? loadout.identity : loadProfile() ?? createProfile(),
+  ));
+  const [paused, setPaused] = useState(() => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false);
   const doneRef = useRef(false);
-
-  const a = loadout?.fighters?.a;
-  const b = loadout?.fighters?.b;
-  const colorA = a?.color ?? '#FFB627';
-  const colorB = b?.color ?? '#10A37F';
-
-  function finish() {
-    if (!skippable || doneRef.current) return;
+  const headingRef = useRef(null);
+  const hasLoadout = Boolean(loadout);
+  const finish = useCallback(() => {
+    if (doneRef.current) return;
     doneRef.current = true;
     dispatch({ type: 'VS_DONE' });
-  }
+  }, [dispatch]);
 
   useEffect(() => {
-    if (!loadout) {
+    if (!hasLoadout) {
       dispatch({ type: 'EXIT_TO_SELECT' });
       return undefined;
     }
+    if (paused) return undefined;
+    const timer = setTimeout(finish, VS_MIN_MS);
+    return () => clearTimeout(timer);
+  }, [hasLoadout, paused, finish, dispatch]);
 
-    sfx.bell();
-    const skipTimer = setTimeout(() => setSkippable(true), SKIP_AFTER_MS);
-    const finishTimer = setTimeout(() => {
-      doneRef.current = true;
-      dispatch({ type: 'VS_DONE' });
-    }, VS_MIN_MS);
-
-    return () => {
-      clearTimeout(skipTimer);
-      clearTimeout(finishTimer);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!skippable) return undefined;
-    const onKey = (event) => {
-      if (event.key === 'Enter' || event.key === ' ') finish();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [skippable]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { headingRef.current?.focus({ preventScroll: true }); }, []);
 
   if (!loadout) return null;
+  const a = loadout.fighters?.a;
+  const b = loadout.fighters?.b;
+  const mascotId = FIGHTER_CREATURE[b?.id] ?? PROVIDER_CREATURE[loadout.fighterBId?.provider] ?? 'patchbyte';
+  const mascot = PROFILE_COMPANIONS.find((entry) => entry.id === mascotId) ?? PROFILE_COMPANIONS[8];
 
   return (
-    <div
-      className="h-svh w-full overflow-hidden flex flex-col items-center justify-center"
-      style={{ background: '#0a0a0f' }}
-      onClick={finish}
-      role="button"
-      tabIndex={0}
-      aria-label={skippable ? 'Fighters locked. Continue to the corner.' : 'Fighters entering the arena.'}
-    >
-      <div className="relative w-full max-w-4xl px-6 grid items-center gap-4" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
-        <motion.div
-          className="flex flex-col items-center gap-3"
-          initial={{ x: '-120%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-        >
-          <PixelCreature creature={getCreature(a?.id)} scale={2.2} />
-          <div className="font-display text-3xl sm:text-5xl tracking-widest text-center" style={{ color: colorA }}>
-            {(a?.name ?? '???').toUpperCase()}
+    <main className="frontier-profile-ui frontier-vs" aria-labelledby="frontier-vs-heading"
+      onKeyDownCapture={(event) => { if (event.key === 'Tab') setPaused(true); }}>
+      <div className="frontier-vs-shell">
+        <header className="frontier-vs-header">
+          <h1 id="frontier-vs-heading" ref={headingRef} tabIndex={-1}>Fighters ready</h1>
+          <p>Live Arena · both models are configured in this browser. This is not human PvP or ranked matchmaking.</p>
+          <p role="status">{paused ? 'Automatic advance paused. Continue when you are ready.' : 'Continuing shortly. Skip or pause to inspect your identity.'}</p>
+          <div className="frontier-vs-actions">
+            <button type="button" className="frontier-profile-button frontier-profile-button--primary" onClick={finish}>Continue to corner</button>
+            <button type="button" className="frontier-profile-button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>
+              {paused ? 'Resume introduction' : 'Pause introduction'}
+            </button>
           </div>
-        </motion.div>
-
-        <motion.div
-          className="font-display text-5xl sm:text-7xl tracking-widest"
-          style={{ color: '#EF4444', textShadow: '0 0 40px rgba(239,68,68,0.5)' }}
-          initial={{ scale: 2.4, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 18, delay: 0.15 }}
-        >
-          VS
-        </motion.div>
-
-        <motion.div
-          className="flex flex-col items-center gap-3"
-          initial={{ x: '120%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-        >
-          <div style={{ transform: 'scaleX(-1)' }}>
-            <PixelCreature creature={getCreature(b?.id)} scale={2.2} />
-          </div>
-          <div className="font-display text-3xl sm:text-5xl tracking-widest text-center" style={{ color: colorB }}>
-            {(b?.name ?? '???').toUpperCase()}
-          </div>
-        </motion.div>
+        </header>
+        <div className="frontier-vs-sides">
+          <section aria-label="Your identity and model A">
+            <IdentityPreview profile={identity} heading="Your companion identity" />
+            <ModelIdentity label="Model A" fighter={a} spec={loadout.fighterAId} />
+          </section>
+          <div className="frontier-vs-separator" aria-hidden="true">VS</div>
+          <section aria-label="Model B, configured in this browser">
+            <figure className="frontier-vs-mascot">
+              <CompanionPortrait companionId={mascot.id} />
+              <figcaption>Arena mascot · {mascot.name}. Not another player’s companion.</figcaption>
+            </figure>
+            <ModelIdentity label="Model B" fighter={b} spec={loadout.fighterBId} />
+            <p className="frontier-profile-muted">Companion art is a cosmetic identity, not a model capability or ranking.</p>
+          </section>
+        </div>
+        <footer className="frontier-vs-footer">
+          <p>No model calls during this introduction. Next: prepare your corner.</p>
+        </footer>
       </div>
-
-      <p className="absolute bottom-8 inset-x-0 text-center px-4 font-display text-xs tracking-[0.35em] text-white/40">
-        {skippable ? 'FIGHTERS LOCKED - TAP TO CONTINUE' : 'FIGHTERS ENTERING'}
-      </p>
-    </div>
+    </main>
   );
 }

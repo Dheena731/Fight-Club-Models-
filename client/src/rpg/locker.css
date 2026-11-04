@@ -1,0 +1,92 @@
+.frontier-profile-ui, .frontier-identity, .frontier-portrait {
+  --locker-cloud: #f3f5fa;
+  --locker-white: #fff;
+  --locker-plum: #382941;
+  --locker-muted: #63526c;
+  --locker-jade: #216650;
+  --locker-jade-light: #e3f1e9;
+  --locker-clay: #a0442e;
+  --locker-edge: #b4a8bc;
+}
+.frontier-profile-ui {
+  width: 100%; height: 100svh; overflow-y: auto;
+  background: var(--locker-cloud); color: var(--locker-plum);
+  font: 16px/1.5 Inter, system-ui, sans-serif; overflow-wrap: anywhere; color-scheme: light;
+}
+:is(.frontier-profile-ui, .frontier-identity, .frontier-portrait) *, :is(.frontier-profile-ui, .frontier-identity, .frontier-portrait) *::before, :is(.frontier-profile-ui, .frontier-identity, .frontier-portrait) *::after { box-sizing: border-box; }
+:is(.frontier-profile-ui, .frontier-identity) :is(h1, h2, h3) { color: var(--locker-plum); text-wrap: balance; line-height: 1.3; }
+.frontier-profile-ui h1 { font: 900 2rem/1.2 'Courier New', monospace; letter-spacing: -.025em; margin: 0 0 8px; }
+:is(.frontier-profile-ui, .frontier-identity) h2 { font-size: 1.25rem; font-weight: 750; margin: 0 0 14px; }
+:is(.frontier-profile-ui, .frontier-identity) h3 { font-size: 1rem; font-weight: 750; margin: 0; }
+:is(.frontier-profile-ui, .frontier-identity) p { max-width: 68ch; margin: 6px 0; }
+.frontier-profile-ui :focus-visible { outline: 3px solid var(--locker-clay); outline-offset: 4px; }
+.frontier-profile-muted { color: var(--locker-muted); }
+.frontier-profile-button {
+  min-width: 44px; min-height: 44px; max-width: 100%; padding: 9px 16px;
+  border: 2px solid var(--locker-plum); border-radius: 4px; background: var(--locker-white); color: var(--locker-plum);
+  font: 700 1rem/1.4 Inter, system-ui, sans-serif; cursor: pointer; touch-action: manipulation; transition: background-color 150ms ease-out;
+}
+.frontier-profile-button:hover:not(:disabled) { background: var(--locker-jade-light); }
+.frontier-profile-button:active:not(:disabled) { background: #cce4d6; }
+.frontier-profile-button:disabled { color: var(--locker-muted); background: #eae6ee; border-color: #8b7c95; cursor: not-allowed; }
+.frontier-profile-button--primary { background: var(--locker-jade); color: white; border-color: var(--locker-jade); }
+.frontier-profile-button--primary:hover:not(:disabled), .frontier-profile-button--primary:active:not(:disabled) { background: #174e3d; }
+.frontier-locker-shell { width: min(1120px, 100%); margin: 0 auto; padding: 28px 24px max(28px, env(safe-area-inset-bottom)); }
+.frontier-locker-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; margin-bottom: 28px; }
+.frontier-locker-layout { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); align-items: start; gap: 36px; }
+.frontier-locker-layout > *, .frontier-locker-item > *, .frontier-identity-trainer > * { min-width: 0; }
+.frontier-identity { padding: 20px; background: var(--locker-white); color: var(--locker-plum); font: 16px/1.5 Inter, system-ui, sans-serif; overflow-wrap: anywhere; border: 3px solid var(--locker-plum); border-radius: 8px; box-shadow: 4px 4px 0 #d4cadc; }
+.frontier-identity-trainer { display: flex; align-items: center; gap: 12px; margin: 16px 0 22px; }
+.frontier-identity-trainer h3 { font-size: 1.125rem; }
+.frontier-trainer-portrait, .frontier-trainer-fallback { flex: 0 0 60px; width: 60px; height: 72px; object-fit: contain; image-rendering: pixelated; }
+.frontier-trainer-fallback { display: grid; place-items: center; color: var(--locker-muted); }
+.frontier-identity figure { margin: 0 0 18px; }
+.frontier-portrait { display: grid; place-items: center; min-width: 0; height: 190px; padding: 12px; background: var(--locker-jade-light); border: 2px solid #839b8d; border-radius: 4px; }
+.frontier-portrait img { display: block; width: 100%; height: 100%; max-height: 162px; object-fit: contain; image-rendering: pixelated; }
+.frontier-portrait canvas { max-width: 100%; max-height: 160px; width: auto; height: auto; }
+.frontier-portrait--lantern { background: #f8e7b8; border: 4px solid #9b492d; box-shadow: inset 0 0 0 4px #e7b856; }
+.frontier-identity figcaption { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+.frontier-identity figcaption > span { color: var(--locker-muted); }
+.frontier-identity-badges { margin: 18px 0; }
+.frontier-identity-badges ul { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 8px 0; list-style: none; }
+.frontier-identity-badges li { padding: 5px 9px; background: var(--locker-jade-light); color: #174e3d; border: 1px solid #839b8d; border-radius: 4px; }
+.frontier-local-label { color: var(--locker-clay); font-weight: 750; }
+.frontier-locker-note { color: var(--locker-muted); padding-bottom: 20px; }
+.frontier-locker-collection > section { margin-bottom: 32px; }
+.frontier-locker-items { list-style: none; padding: 0; margin: 12px 0 0; }
+.frontier-locker-item, .frontier-locker-base { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0; border-top: 1px solid var(--locker-edge); }
+.frontier-locker-item > button, .frontier-locker-base > button { flex-shrink: 0; }
+.frontier-locker-item-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; }
+.frontier-locker-state { color: var(--locker-muted); }
+.frontier-locker-item.is-equipped .frontier-locker-state { color: var(--locker-jade); font-weight: 750; }
+.frontier-locker-feedback { min-height: 3em; color: var(--locker-jade); font-weight: 700; }
+.frontier-vs-shell { width: min(1000px, 100%); margin: auto; padding: 28px 24px max(28px, env(safe-area-inset-bottom)); }
+.frontier-vs-header { margin-bottom: 24px; }
+.frontier-vs-sides { display: grid; grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); gap: 20px; align-items: start; }
+.frontier-vs-sides > section { min-width: 0; animation: frontier-vs-arrive 220ms cubic-bezier(.22, 1, .36, 1); }
+.frontier-vs-separator { align-self: center; color: var(--locker-clay); text-align: center; font: 900 1.5rem/1 'Courier New', monospace; }
+.frontier-vs-model { padding: 18px 0; }
+.frontier-vs-model h2 { margin-bottom: 8px; }
+.frontier-vs-model dl { margin: 14px 0; }
+.frontier-vs-model dt { color: var(--locker-muted); margin-top: 10px; }
+.frontier-vs-model dd { margin: 2px 0 0; font-weight: 700; }
+.frontier-vs-mascot { margin: 0 0 14px; }
+.frontier-vs-mascot figcaption { margin-top: 10px; }
+.frontier-vs-footer { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--locker-edge); }
+.frontier-vs-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+@keyframes frontier-vs-arrive { from { transform: translateY(10px); } to { transform: translateY(0); } }
+@media (max-width: 720px) {
+  .frontier-locker-shell, .frontier-vs-shell { padding: 20px 16px max(24px, env(safe-area-inset-bottom)); }
+  .frontier-locker-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .frontier-locker-item { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .frontier-locker-base { align-items: flex-start; flex-wrap: wrap; }
+  .frontier-locker-item > button { align-self: flex-start; }
+  .frontier-vs-sides { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .frontier-vs-separator { padding: 8px 0; }
+  .frontier-vs-mascot .frontier-portrait { height: 150px; }
+  .frontier-vs-mascot img { max-height: 122px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .frontier-vs-sides > section { animation: none; }
+  .frontier-profile-button { transition: none; }
+}
