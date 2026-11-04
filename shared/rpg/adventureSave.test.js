@@ -173,7 +173,7 @@ test('new v3 wins, corrupt newer saves fall back visibly, and no originals are r
   assert.equal(saveAdventure(migrated, store), true);
   assert.equal(loadAdventure(store).starterId, 'kitewhisk');
   for (const key of LEGACY_SAVE_KEYS) assert.equal(store.data.get(key), entries[key]);
-  saveAdventure(createAdventure({ starterId: 'duplet' }), store);
+  saveAdventure(createAdventure({ starterId: 'duplet' }), store, { replace: true });
   assert.equal(loadAdventure(store).starterId, 'duplet');
 });
 

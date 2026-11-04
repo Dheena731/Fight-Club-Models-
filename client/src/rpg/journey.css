@@ -174,6 +174,10 @@
 .journey-enemy-platform { width: 250px; left: 62%; top: 49%; }.journey-ally-platform { width: 330px; right: 54%; bottom: 8%; }
 .journey-enemy-art { position: absolute; left: 65%; top: 7%; width: clamp(160px, 20vw, 260px); height: clamp(160px, 20vw, 260px); }
 .journey-ally-art { position: absolute; right: 57%; bottom: 4%; width: clamp(200px, 24vw, 310px); height: clamp(200px, 24vw, 310px); }
+.journey-ally-art.is-acting { animation: journey-strike 240ms ease-out; }
+.journey-enemy-art.is-hit { animation: journey-impact 240ms ease-out; }
+@keyframes journey-strike { 0%, 100% { transform: translate(0, 0); } 45% { transform: translate(16px, -8px); } }
+@keyframes journey-impact { 0%, 100% { transform: translateX(0); } 35% { transform: translateX(7px); opacity: .55; } 65% { transform: translateX(-4px); } }
 .journey-battle-party { position: absolute; bottom: 13px; left: 24px; display: flex; gap: 9px; font-size: 22px; color: #3a5c44; }
 .journey-battle-party .is-fainted { color: #947971; }.journey-battle-party .is-active { color: #fff4b4; text-shadow: 1px 1px #54633c; }
 .journey-battle-console { display: grid; grid-template-columns: .8fr 1.2fr; gap: 0; min-height: 250px; border-top: 4px solid var(--j-ink); background: var(--j-cloud); flex-shrink: 0; }
@@ -229,4 +233,4 @@
   .journey-title-brand h1 { font-size: 46px; }.journey-starter-pick > span:last-child { font-size: 10px; }.journey-dialog-heading h2 { font-size: 17px; }.journey-dialog-heading .journey-button { font-size: 11px !important; }
 }
 @media (max-height: 620px) and (min-width: 701px) { .journey-title-brand { top: 6%; }.journey-title-brand h1 { font-size: 55px; }.journey-title-menu { bottom: 10%; padding: 8px 12px; }.journey-menu-option { min-height: 44px; }.journey-menu-note { display: none; }.journey-battle-scene { min-height: 270px; } }
-@media (prefers-reduced-motion: reduce) { .journey-button, .journey-meter-track i { transition: none; }.journey-button:hover:not(:disabled) { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .journey-button, .journey-meter-track i { transition: none; }.journey-button:hover:not(:disabled) { transform: none; }.journey-ally-art.is-acting, .journey-enemy-art.is-hit { animation: none; } }

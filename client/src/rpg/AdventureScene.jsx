@@ -130,6 +130,7 @@ export default function AdventureScene({ state }) {
   const milestoneKey = JSON.stringify(state.flags);
 
   useEffect(() => {
+    setReady(false);
     let disposed = false; let initialized = false; let observer;
     const app = new Application();
     async function start() {

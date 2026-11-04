@@ -10,6 +10,6 @@ export function readAdventure(storage) {
   }
 }
 
-export function writeAdventure(state, storage) {
-  try { return saveAdventure(state, storage); } catch { return false; }
+export function writeAdventure(state, storage, options) {
+  try { return saveAdventure(state, storage, options); } catch { return false; }
 }

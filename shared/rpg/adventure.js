@@ -1,4 +1,4 @@
-import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, COMPANIONS, ENCOUNTERS, FLAG_IDS, ITEMS, LAMP_CHOICES, MAX_BATTLE_TURNS, MOVES, QUESTS, RELAY_SEQUENCE, STARTER_IDS } from './adventureContent.js';
+import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, COMPANIONS, ENCOUNTERS, FLAG_IDS, ITEMS, LAMP_CHOICES, MAP_REVISION, MAX_BATTLE_TURNS, MOVES, QUESTS, RELAY_SEQUENCE, STARTER_IDS } from './adventureContent.js';
 
 export const ADVENTURE_VERSION = 3;
 export const MODES = ['journey', 'practice', 'circuit'];
@@ -15,7 +15,7 @@ export function createCompanion(id, xp = 0) {
 export function createAdventure({ trainerName = 'Trainer', starterId = STARTER_IDS[0], mode = 'journey' } = {}) {
   if (!STARTER_IDS.includes(starterId) || !MODES.includes(mode)) throw new Error('Choose a valid starter and adventure mode.');
   const state = {
-    version: ADVENTURE_VERSION, chapterId: CHAPTER_ID, mode, trainerName: normalizeTrainerName(trainerName), starterId,
+    version: ADVENTURE_VERSION, mapRevision: MAP_REVISION, runId: globalThis.crypto?.randomUUID?.() || `run-${Date.now()}-${Math.random().toString(36).slice(2)}`, chapterId: CHAPTER_ID, mode, trainerName: normalizeTrainerName(trainerName), starterId,
     team: [createCompanion(starterId)], activeId: starterId,
     locationId: 'frontier', ...ADVENTURE_REGIONS.frontier.spawn, facing: 'down',
     flags: Object.fromEntries(FLAG_IDS.map(id => [id, false])),

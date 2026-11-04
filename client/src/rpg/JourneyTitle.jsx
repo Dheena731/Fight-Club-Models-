@@ -20,7 +20,7 @@ export default function JourneyTitle() {
 
   function begin() {
     const next = createAdventure({ trainerName: trainerName.trim() || 'Traveler', starterId, mode: 'journey' });
-    if (!saveAdventure(next)) {
+    if (!saveAdventure(next, undefined, { replace: true })) {
       setError('This browser could not save the adventure. Allow site storage, then try again. Your previous save has not been removed.');
       return;
     }
@@ -29,7 +29,7 @@ export default function JourneyTitle() {
   }
 
   return <main className="journey-title">
-    <img className="journey-title-panorama" src="/assets/frontier/title-panorama.png" alt="A trainer and three companions overlook a sunlit river town and distant observatory." fetchpriority="high" />
+    <img className="journey-title-panorama" src="/assets/frontier/title-panorama.png" alt="A trainer and three companions overlook a sunlit river town and distant observatory." />
     <div className="journey-title-shade" aria-hidden="true" />
     <header className="journey-title-brand"><span className="journey-brand-star" aria-hidden="true">✦</span><h1>AI <span>Frontier</span></h1><p>A companion adventure</p></header>
     <section className="journey-title-menu" aria-label="Game menu">

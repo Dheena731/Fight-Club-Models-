@@ -1,13 +1,40 @@
-import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, FLAG_IDS, ITEMS, MAX_BATTLE_TURNS, STARTER_IDS } from './adventureContent.js';
+import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, FLAG_IDS, ITEMS, MAP_REVISION, MAX_BATTLE_TURNS, STARTER_IDS } from './adventureContent.js';
 import { adventureResult, beginBattle, createAdventure, createCompanion, enemyIntent, isAdventureWalkable, MODES, normalizeTrainerName } from './adventure.js';
 import { fromSave as fromLegacySave, toSave as toLegacySave } from './worldState.js';
 
 export const ADVENTURE_SAVE_KEY = 'ai-frontier:adventure:v3';
+export const CIRCUIT_SAVE_KEY = 'ai-frontier:circuit:v1';
 export const LEGACY_SAVE_KEYS = ['ai-frontier:save:v2', 'ai-frontier:save:v1'];
 export const LEGACY_HERO_MAP = { owl: 'emberquill', fox: 'kitewhisk', serpent: 'duplet' };
 const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const integer = (value, min, max) => Number.isInteger(value) && value >= min && value <= max;
 const owns = (object, key) => Object.hasOwn(object, key);
+
+function oldRunId(value) {
+  const identity = `${value.trainerName}:${value.starterId}`;
+  let hash = 2166136261;
+  for (const char of identity) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619) >>> 0;
+  return `legacy-${hash.toString(36)}`;
+}
+
+function migrateV3Map(value) {
+  if (!record(value) || value.version !== 3) return value;
+  const next = { ...value, runId: value.runId ?? oldRunId(value) };
+  if (value.mapRevision !== undefined && value.mapRevision !== 1) return next;
+  next.mapRevision = MAP_REVISION;
+  const region = owns(ADVENTURE_REGIONS, value.locationId) && ADVENTURE_REGIONS[value.locationId];
+  if (!region) return next;
+  Object.assign(next, region.spawn);
+  if (value.mode === 'journey' && value.battle) {
+    const object = region.objects.find(entry => entry.encounterId === value.battle.encounterId);
+    if (object) {
+      const point = [[-1, 0], [1, 0], [0, 1], [0, -1]].map(([dx, dy]) => ({ x: object.x + dx, y: object.y + dy }))
+        .find(entry => isAdventureWalkable(next, entry.x, entry.y));
+      if (point) Object.assign(next, point);
+    }
+  }
+  return next;
+}
 
 function legacyHistory(value) {
   const old = fromLegacySave(value);
@@ -50,7 +77,9 @@ function validFlags(flags, mode) {
 }
 
 function readV3(value, nested = false) {
+  value = migrateV3Map(value);
   if (!record(value) || value.version !== 3 || value.chapterId !== CHAPTER_ID || !MODES.includes(value.mode)
+    || value.mapRevision !== MAP_REVISION || typeof value.runId !== 'string' || !/^[a-zA-Z0-9:-]{1,80}$/.test(value.runId)
     || !STARTER_IDS.includes(value.starterId) || typeof value.trainerName !== 'string' || normalizeTrainerName(value.trainerName) !== value.trainerName
     || !owns(ADVENTURE_REGIONS, value.locationId) || !['up', 'down', 'left', 'right'].includes(value.facing)
     || !validFlags(value.flags, value.mode) || !Array.isArray(value.team) || value.team.length < 1 || value.team.length > 2
@@ -71,7 +100,7 @@ function readV3(value, nested = false) {
     || typeof circuit.completed !== 'boolean' || circuit.completed !== (circuit.wins === 3)
     || circuit.wins < circuit.index || circuit.wins > circuit.index + 1) return null;
   const state = {
-    ...createAdventure({ trainerName: value.trainerName, starterId: value.starterId }), mode: value.mode,
+    ...createAdventure({ trainerName: value.trainerName, starterId: value.starterId }), mode: value.mode, runId: value.runId,
     team, activeId: value.activeId, locationId: value.locationId, x: value.x, y: value.y, facing: value.facing,
     flags: Object.fromEntries(FLAG_IDS.map(id => [id, value.flags[id]])), inventory: Object.fromEntries(ITEMS.map(item => [item.id, value.inventory[item.id]])),
     discoveries: [...new Set(value.discoveries)], circuit: { index: circuit.index, wins: circuit.wins, completed: circuit.completed, bestWins: circuit.bestWins },
@@ -133,7 +162,7 @@ export function fromAdventureSave(value) {
 
 function project(state, nested = false) {
   return {
-    version: 3, chapterId: CHAPTER_ID, mode: state.mode, trainerName: state.trainerName, starterId: state.starterId,
+    version: 3, mapRevision: MAP_REVISION, runId: state.runId, chapterId: CHAPTER_ID, mode: state.mode, trainerName: state.trainerName, starterId: state.starterId,
     team: state.team.map(member => ({ id: member.id, xp: member.xp, hp: member.hp, energy: member.energy })), activeId: state.activeId,
     locationId: state.locationId, x: state.x, y: state.y, facing: state.facing,
     flags: Object.fromEntries(FLAG_IDS.map(id => [id, state.flags[id]])), inventory: Object.fromEntries(ITEMS.map(item => [item.id, state.inventory[item.id]])), discoveries: state.discoveries.filter(id => owns(ADVENTURE_REGIONS, id)),
@@ -148,8 +177,9 @@ function project(state, nested = false) {
 export function toAdventureSave(state) {
   let snapshot;
   try { snapshot = project(state); } catch { throw new Error('This adventure cannot be saved: invalid state.'); }
-  if (!fromAdventureSave(snapshot)) throw new Error('This adventure cannot be saved: invalid state.');
-  return snapshot;
+  const validated = fromAdventureSave(snapshot);
+  if (!validated) throw new Error('This adventure cannot be saved: invalid state.');
+  return project(validated);
 }
 
 // State/null and true on success; callers display the explicit error on failure.
@@ -175,14 +205,42 @@ export function loadAdventure(storage) {
   return null;
 }
 
-export function saveAdventure(state, storage) {
+export function saveAdventure(state, storage, { replace = false } = {}) {
   const snapshot = toAdventureSave(state);
   try {
     storage ??= globalThis.localStorage;
     if (!storage || typeof storage.setItem !== 'function' || typeof storage.getItem !== 'function') throw new Error('unavailable');
+    const raw = storage.getItem(ADVENTURE_SAVE_KEY);
+    let existing;
+    try { existing = raw ? fromAdventureSave(JSON.parse(raw)) : null; } catch { /* Explicit replacement may recover a corrupt entry. */ }
+    if (!replace && existing && existing.runId !== snapshot.runId) {
+      const error = new Error('A different Journey was started in another tab. This older Journey was not saved over it. Return to the title and Continue the current Journey.');
+      error.code = 'STALE_JOURNEY';
+      throw error;
+    }
     const text = JSON.stringify(snapshot);
     storage.setItem(ADVENTURE_SAVE_KEY, text);
     if (storage.getItem(ADVENTURE_SAVE_KEY) !== text) throw new Error('verification failed');
     return true;
-  } catch { throw new Error('Adventure could not be saved. Storage may be full or unavailable; your older saves have not been removed.'); }
+  } catch (error) {
+    if (error.code === 'STALE_JOURNEY') throw error;
+    throw new Error('Adventure could not be saved. Storage may be full or unavailable; your older saves have not been removed.');
+  }
+}
+
+export function loadCircuitRecord(storage) {
+  try {
+    const value = JSON.parse((storage ?? globalThis.localStorage).getItem(CIRCUIT_SAVE_KEY) || 'null');
+    return record(value) && value.version === 1 && integer(value.bestWins, 0, 3) ? { version: 1, bestWins: value.bestWins } : { version: 1, bestWins: 0 };
+  } catch { return { version: 1, bestWins: 0 }; }
+}
+
+export function saveCircuitRecord(circuit, storage) {
+  if (!record(circuit) || !integer(circuit.bestWins, 0, 3)) return false;
+  try {
+    storage ??= globalThis.localStorage;
+    const bestWins = Math.max(loadCircuitRecord(storage).bestWins, circuit.bestWins);
+    storage.setItem(CIRCUIT_SAVE_KEY, JSON.stringify({ version: 1, bestWins }));
+    return loadCircuitRecord(storage).bestWins === bestWins;
+  } catch { return false; }
 }

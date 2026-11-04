@@ -3,6 +3,7 @@ import { useGameDispatch, useGameState } from '../game/GameContext';
 import { COMPANIONS, ADVENTURE_REGIONS, MOVES } from '../../../shared/rpg/adventureContent.js';
 import { createAdventure, adventureReducer, activeCompanion, nearbyInteractable, adventureObjective, questProgress, unlockedRewardIds } from '../../../shared/rpg/adventure.js';
 import { readAdventure, writeAdventure as saveAdventure } from '../lib/adventureStorage.js';
+import { loadCircuitRecord, saveCircuitRecord } from '../../../shared/rpg/adventureSave.js';
 import { createProfile, loadProfile, saveProfile, syncAdventureProfile, profileSnapshot, getCosmetic } from '../../../shared/rpg/profile.js';
 import AdventureScene from './AdventureScene';
 import CompanionArt from './CompanionArt';
@@ -40,14 +41,14 @@ function BattleScreen({ state, dispatch, profile, onExit }) {
       <div className="journey-battle-distant" aria-hidden="true" />
       <section className="journey-combatant-info is-enemy"><div><h1>{enemy.name}</h1><span>Wild signal</span></div><Meter value={enemy.hp} max={enemy.maxHp} label="Opponent HP" /></section>
       <div className="journey-enemy-platform" aria-hidden="true" />
-      <div className="journey-enemy-art"><CompanionArt id={enemyArtId} variant="front" /></div>
+      <div key={`enemy-${state.battle.turn}`} className={`journey-enemy-art ${state.battle.turn > 0 ? 'is-hit' : ''}`}><CompanionArt id={enemyArtId} variant="front" /></div>
       <div className="journey-ally-platform" aria-hidden="true" />
-      <div className="journey-ally-art"><CompanionArt key={companion.id} id={companion.id} variant="back" skinId={profile.loadout.skinId} /></div>
+      <div key={`ally-${companion.id}-${state.battle.turn}`} className={`journey-ally-art ${state.battle.turn > 0 ? 'is-acting' : ''}`}><CompanionArt id={companion.id} variant="back" skinId={profile.loadout.skinId} /></div>
       <section className="journey-combatant-info is-ally"><div><h2>{companion.name}</h2><span>Lv. {companion.level} · {companion.affinity}</span></div><Meter value={companion.hp} max={companion.maxHp} label="Companion HP" /><Meter value={companion.energy} max={companion.maxEnergy} label="Energy" energy /></section>
       <div className="journey-battle-party" aria-label="Your team">{state.team.map((member) => <span key={member.id} className={`${member.hp > 0 ? 'is-ready' : 'is-fainted'} ${member.id === state.activeId ? 'is-active' : ''}`} title={`${member.name}: ${member.hp}/${member.maxHp} HP`}>{member.id === state.activeId ? '◆' : '◇'}</span>)}</div>
     </div>
     <section className="journey-battle-console" aria-label="Battle commands">
-      <div className="journey-battle-narration"><p className="journey-intent"><strong>Next intent</strong> {intent || 'Watch the signal carefully.'}</p><p aria-live="polite" aria-atomic="true">{state.message || (Array.isArray(state.battle.log) ? state.battle.log.at(-1) : state.battle.log) || `What will ${companion.name} do?`}</p></div>
+      <div className="journey-battle-narration"><p className="journey-intent"><strong>Next intent</strong> {intent || 'Watch the signal carefully.'}</p><p aria-live="polite" aria-atomic="true">{(Array.isArray(state.battle.log) ? state.battle.log.slice(-2).join(' ') : state.battle.log) || state.message || `What will ${companion.name} do?`}</p></div>
       <div className="journey-command-area">
         <nav className="journey-command-tabs" aria-label="Command group">{[['fight', 'Fight'], ['team', 'Team'], ['pack', 'Pack'], ['retreat', 'Retreat']].map(([id, label]) => <button key={id} className={`journey-command-tab ${command === id ? 'is-selected' : ''}`} aria-pressed={command === id} onClick={() => setCommand(id)}>{label}</button>)}</nav>
         {command === 'fight' && <div className="journey-moves">{moves.map((move) => <button key={move.id} className="journey-move" disabled={companion.energy < move.cost || companion.hp <= 0} onClick={() => dispatch({ type: 'BATTLE_MOVE', moveId: move.id })}><strong>{move.name}</strong><span>{move.description}</span><small>{move.cost ? `${move.cost} energy` : 'Free · recover energy'}</small></button>)}</div>}
@@ -62,7 +63,10 @@ function BattleScreen({ state, dispatch, profile, onExit }) {
 export default function Adventure() {
   const game = useGameState(); const dispatchGame = useGameDispatch();
   const [loaded] = useState(() => readAdventure());
-  const [state, dispatch] = useReducer(adventureReducer, null, () => game.adventure || loaded.state || createAdventure({}));
+  const [state, dispatch] = useReducer(adventureReducer, null, () => {
+    const initial = game.adventure || loaded.state || createAdventure({});
+    return { ...initial, circuit: { ...initial.circuit, bestWins: Math.max(initial.circuit.bestWins, loadCircuitRecord().bestWins) } };
+  });
   const [panel, setPanel] = useState(null); const [profile, setProfile] = useState(() => loadProfile() || createProfile());
   const [saveError, setSaveError] = useState(loaded.error); const [savedAt, setSavedAt] = useState('');
   const [showArenaConsent, setShowArenaConsent] = useState(false);
@@ -74,7 +78,7 @@ export default function Adventure() {
     if (state.mode !== 'journey') return;
     const timer = setTimeout(() => {
       const okay = saveAdventure(state);
-      setSaveError(okay ? '' : 'Progress could not be saved. Keep this tab open and allow browser storage, then retry.');
+      setSaveError(okay ? '' : 'Progress could not be saved. Storage may be unavailable, or a different Journey was started in another tab. Your current saved Journey has not been replaced.');
       if (okay) setSavedAt('Saved on this device');
       setProfile((previous) => {
         const next = syncAdventureProfile(previous, { trainerName: state.trainerName, companionId: state.activeId, level: activeCompanion(state).level, worldsCleared: state.flags.questComplete ? 1 : 0, rewardIds: unlockedRewardIds(state) });
@@ -84,6 +88,11 @@ export default function Adventure() {
     }, 160);
     return () => clearTimeout(timer);
   }, [state]);
+  useEffect(() => {
+    if (state.mode === 'circuit' && (state.result || state.circuit.completed) && !saveCircuitRecord(state.circuit)) {
+      setSaveError('Your Circuit record could not be saved. Keep this tab open and allow browser storage before leaving.');
+    }
+  }, [state.mode, state.result, state.circuit]);
 
   useEffect(() => {
     if (state.transition === 'arena') setShowArenaConsent(true);
@@ -134,7 +143,7 @@ export default function Adventure() {
   const tasks = questProgress(state);
   const taskList = Array.isArray(tasks) ? tasks : Object.values(tasks || {});
 
-  if (state.battle && !state.result) return <><BattleScreen state={state} dispatch={dispatch} profile={profile} onExit={exit} />{saveError && <div className="journey-save-warning" role="alert">{saveError}</div>}</>;
+  if (state.battle && !state.result) return <><BattleScreen state={state} dispatch={dispatch} profile={profile} onExit={exit} />{saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div>}</>;
 
   return <main className="journey-game">
     <header className="journey-hud"><button className="journey-brand-button" onClick={() => setPanel('menu')} aria-label="Open game menu"><span aria-hidden="true">✦</span> AI FRONTIER</button>
@@ -151,7 +160,7 @@ export default function Adventure() {
       <div className="journey-objective"><span>Next on your journey</span><p>{adventureObjective(state)}</p>{state.message && <small aria-live="polite">{state.message}</small>}</div>
       <div className="journey-explore-controls" ref={controlsRef}><div className="journey-dpad" aria-label="Movement controls">{[[0, -1, 'up', '▲'], [-1, 0, 'left', '◀'], [0, 1, 'down', '▼'], [1, 0, 'right', '▶']].map(([dx, dy, direction, symbol]) => <button key={direction} className={direction} aria-label={`Move ${direction}`} onPointerDown={(event) => hold(event, dx, dy)} onPointerUp={stopHold} onPointerCancel={stopHold} onLostPointerCapture={stopHold} onClick={(event) => { if (event.detail === 0) move(dx, dy); }}>{symbol}</button>)}</div><button className="journey-button is-primary journey-interact" disabled={!nearby || Boolean(state.dialogue || state.result)} onClick={() => dispatch({ type: 'INTERACT' })}>Interact <kbd>E</kbd></button></div>
     </footer>
-    {saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={() => { if (saveAdventure(state) && saveProfile(profile)) setSaveError(''); }}>Retry save</button></div>}
+    {saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={() => { if (saveAdventure(state) && saveProfile(profile)) setSaveError(''); }}>Retry save</button><button onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div>}
 
     {state.dialogue && <GameDialog title={state.dialogue.speaker} onClose={() => dispatch({ type: 'DISMISS_DIALOGUE' })} className="journey-narrative-dialog"><p className="journey-narrative-text" aria-live="polite">{state.dialogue.text}</p><button className="journey-button is-primary" onClick={() => dispatch({ type: 'DISMISS_DIALOGUE' })}>Continue ▸</button></GameDialog>}
 

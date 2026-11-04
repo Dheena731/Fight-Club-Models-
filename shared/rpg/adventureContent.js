@@ -1,6 +1,7 @@
 import { REGIONS } from './world.js';
 
 export const CHAPTER_ID = 'lantern-signal';
+export const MAP_REVISION = 2;
 export const STARTER_IDS = ['emberquill', 'kitewhisk', 'duplet'];
 export const COMPANIONS = [
   { id: 'emberquill', name: 'Emberquill', affinity: 'Ember', role: 'Protector', color: '#d97757', description: 'A patient owl who wards the team against heavy signals.', baseHp: 36, maxEnergy: 5, moves: ['strike', 'ward', 'overcharge'] },
