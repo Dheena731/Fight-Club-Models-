@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef } from 'react';
-import { useGameDispatch } from '../game/GameContext';
+import { useGameDispatch } from '../game/gameHooks';
 import { ABILITIES, CHAPTER, HEROES, REGIONS, WORLD_SIZE } from '../../../shared/rpg/world.js';
 import { factionForHero, factionObjective, selectedChoice } from '../../../shared/rpg/factions.js';
 import { HISTORICAL_RECORDS } from '../../../shared/rpg/lore.js';

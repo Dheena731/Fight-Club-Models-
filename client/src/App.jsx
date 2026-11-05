@@ -1,18 +1,34 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { Component, lazy, Suspense, useEffect } from 'react';
 import { ThemeProvider } from './lib/theme';
-import { GameProvider, useGameState, PHASE } from './game/GameContext';
+import { GameProvider } from './game/GameContext';
+import { useGameState } from './game/gameHooks';
+import { PHASE } from './game/gameReducer';
 import { StageProvider } from './stage/StageContext';
-import { useStage } from './stage/StageContext';
+import { useStage } from './stage/stageHooks';
 import Boot from './screens/Boot';
 import Home from './screens/Home';
 import Vs from './screens/Vs';
 import Battle from './screens/Battle';
 import Result from './screens/Result';
+import { installGamepadControls } from './lib/gamepadControls';
 import './rpg/frontier.css';
 import './rpg/journey.css';
 
 const Title = lazy(() => import('./rpg/JourneyTitle'));
 const World = lazy(() => import('./rpg/Adventure'));
+
+class GameBoundary extends Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    if (this.state.failed) return <main className="journey-scene-loading" role="alert"><section>
+      <h1>The journey was interrupted</h1>
+      <p>Reload to retry. You can continue from your last successful save.</p>
+      <button className="journey-button" onClick={() => window.location.reload()}>Reload Cogimon</button>
+    </section></main>;
+    return this.props.children;
+  }
+}
 
 function ArenaReady({ phase }) {
   const { init, ready, error } = useStage();
@@ -38,11 +54,12 @@ function GameShell() {
 }
 
 export default function App() {
+  useEffect(() => installGamepadControls(), []);
   return (
     <ThemeProvider>
       <GameProvider>
         <StageProvider>
-          <GameShell />
+          <GameBoundary><GameShell /></GameBoundary>
         </StageProvider>
       </GameProvider>
     </ThemeProvider>

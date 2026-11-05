@@ -1,10 +1,7 @@
-import { createContext, useContext, useReducer, useMemo, useCallback, useRef } from 'react';
-import { gameReducer, initialState, PHASE, FIGHT_BEAT } from './gameReducer';
+import { useReducer, useMemo, useCallback, useRef } from 'react';
+import { gameReducer, initialState } from './gameReducer';
 import { clearKeys } from '../lib/keys';
-
-const GameStateCtx = createContext(null);
-const GameDispatchCtx = createContext(null);
-const ArenaCredentialsCtx = createContext(null);
+import { GameStateCtx, GameDispatchCtx, ArenaCredentialsCtx } from './gameHooks';
 
 export function GameProvider({ children }) {
   const [state, reduce] = useReducer(gameReducer, initialState);
@@ -42,23 +39,3 @@ export function GameProvider({ children }) {
     </GameDispatchCtx.Provider>
   );
 }
-
-export function useGameState() {
-  const ctx = useContext(GameStateCtx);
-  if (!ctx) throw new Error('useGameState outside GameProvider');
-  return ctx;
-}
-
-export function useGameDispatch() {
-  const ctx = useContext(GameDispatchCtx);
-  if (!ctx) throw new Error('useGameDispatch outside GameProvider');
-  return ctx;
-}
-
-export function useArenaCredentials() {
-  const ctx = useContext(ArenaCredentialsCtx);
-  if (!ctx) throw new Error('useArenaCredentials outside GameProvider');
-  return ctx;
-}
-
-export { PHASE, FIGHT_BEAT };

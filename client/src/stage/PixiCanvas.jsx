@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useStage } from './StageContext';
+import { useStage } from './stageHooks';
 
 /** Mounts the Pixi canvas into the letterbox (z0 stage layer). */
 export default function PixiCanvas() {

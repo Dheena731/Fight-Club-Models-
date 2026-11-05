@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useGameDispatch } from '../game/GameContext';
+import { useGameDispatch } from '../game/gameHooks';
 import { decodeReplayFromHash } from '../lib/replay';
 import { clearKeys } from '../lib/keys';
 

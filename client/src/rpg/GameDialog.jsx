@@ -9,6 +9,7 @@ export default function GameDialog({ title, onClose, children, notice, className
     return () => {
       dialog.close();
       if (previous?.isConnected) previous.focus();
+      if (!previous || previous === document.body || document.activeElement !== previous) document.querySelector('.journey-brand-button')?.focus();
     };
   }, []);
   return <dialog ref={ref} className={`journey-dialog ${className}`} aria-label={title} onCancel={(event) => { event.preventDefault(); onClose?.(); }}>

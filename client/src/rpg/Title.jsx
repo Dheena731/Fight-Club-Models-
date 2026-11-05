@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGameDispatch } from '../game/GameContext';
+import { useGameDispatch } from '../game/gameHooks';
 import PixelCreature from '../components/creatures/PixelCreature';
 import { getCreature } from '../components/creatures/pixelData';
 import { HEROES } from '../../../shared/rpg/world.js';

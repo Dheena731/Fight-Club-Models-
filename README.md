@@ -6,7 +6,7 @@ The GBA companion redesign is being implemented against the [complete progressio
 
 ## Playable modes
 
-- **Journey:** name your trainer, inspect three original starter companions, cross an authored town/forest/Archive, recruit Mossback, restore a relay and defeat the Archive Warden. Keyboard and touch movement are supported; versioned progress saves locally with legacy-save import.
+- **Journey:** name your trainer, inspect three original starter companions, cross an authored town/forest/Archive, recruit Mossback, restore a relay and defeat the Archive Warden. Keyboard, touch and browser-standard gamepad controls are supported; versioned progress saves locally with legacy-save import.
 - **Practice:** repeatable, deterministic creature combat without changing Journey XP or unlocks.
 - **Rival Circuit:** three local rival encounters with recovery and a separate local record. No provider key required.
 - **Locker:** equip earned Lantern cosmetics, a title and up to three badges; preview the arena entrance without making a model call. These rewards remain local/unverified.
@@ -15,6 +15,10 @@ The GBA companion redesign is being implemented against the [complete progressio
 The first chapter is a bounded playable slice, not a finished open-world game. A lore codex separates sourced AI history from invented game abilities. Multiplayer, more chapters, deeper RPG combat, and a fully reviewed BYOK challenge system remain planned. See the [roadmap](docs/ai-frontier/ROADMAP.md).
 
 PixiJS renders exploration and the arena; React owns readable HUD, dialogue, controls, and menus.
+
+Move with the arrow keys or WASD; hold Shift to run. E or Space interacts, J opens the Journal, T opens Team, I opens Pack, and Escape closes menus. On a standard gamepad, use the left stick or D-pad to move or choose, A to confirm/interact, B to return, X to run, and Start for the game menu. Touch controls remain visible. Physical-controller and phone validation remain release checks.
+
+Runtime artwork uses lossless WebP, with the original PNGs and provenance retained. The release-polish checkpoint and its validation limits are recorded in the [work log](docs/ai-frontier/WORK_LOG.md#2026-11-05--current-chapter-release-polish).
 
 Cogimon is the product brand. The repository name `Fight-Club-Models-`, `docs/ai-frontier` paths and legacy browser keys remain stable: `ai-frontier:adventure:v3`, `ai-frontier:circuit:v1`, `ai-frontier:profile:v1`, `ai-frontier:save:v2`, `ai-frontier:save:v1` and `aba:theme`. The rebrand preserves existing progress and preferences; obsolete `aba:provider-keys` entries still receive the documented credential cleanup.
 

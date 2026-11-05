@@ -10,7 +10,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          pixi: ['pixi.js'],
           ui: ['react', 'react-dom', 'framer-motion'],
         },
       },

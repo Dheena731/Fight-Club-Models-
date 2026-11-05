@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { LOGICAL_W, LOGICAL_H } from './constants';
-import { useStage } from './StageContext';
+import { useStage } from './stageHooks';
 
 /**
  * Letterboxed 960×540 wrapper. One CSS transform scales canvas + DOM overlay

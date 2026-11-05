@@ -1,12 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { readPreference, writePreference } from './preferences.js';
-
-const ThemeCtx = createContext({ theme: 'dark', toggle: () => {} });
-
-export function useTheme() {
-  return useContext(ThemeCtx);
-}
-export { ThemeCtx };
+import { ThemeCtx } from './themeHooks';
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => readPreference('aba:theme', 'dark') === 'light' ? 'light' : 'dark');

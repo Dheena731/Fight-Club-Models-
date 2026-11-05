@@ -14,7 +14,7 @@ import PixelCreature from '../components/creatures/PixelCreature';
 import ModelInventory from '../components/ModelInventory';
 import CoinSlot from '../components/CoinSlot';
 import ThemeToggle from '../components/ThemeToggle';
-import { useGameDispatch, useGameState } from '../game/GameContext';
+import { useGameDispatch, useGameState } from '../game/gameHooks';
 import * as sfx from '../lib/sfx';
 
 const MODES = [

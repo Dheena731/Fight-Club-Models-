@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { useGameDispatch, useGameState } from '../game/GameContext';
+import { useGameDispatch, useGameState } from '../game/gameHooks';
 import { COMPANIONS, ADVENTURE_REGIONS, ITEMS, MOVES } from '../../../shared/rpg/adventureContent.js';
 import { createAdventure, adventureReducer, activeCompanion, nearbyInteractable, adventureObjective, sideObjective, questProgress, unlockedRewardIds } from '../../../shared/rpg/adventure.js';
 import { readAdventure, retryGameSave, writeAdventure as saveAdventure } from '../lib/adventureStorage.js';
@@ -36,6 +36,8 @@ function IdentityPreview({ profile, onBack }) {
 }
 
 function BattleScreen({ state, dispatch, profile, onExit }) {
+  const headingRef = useRef(null);
+  useEffect(() => { headingRef.current?.focus(); }, []);
   const companion = activeCompanion(state);
   const [command, setCommand] = useState('fight');
   const enemy = state.battle.enemy;
@@ -46,7 +48,7 @@ function BattleScreen({ state, dispatch, profile, onExit }) {
     <header className="journey-battle-topline"><span>{state.mode === 'journey' ? 'THE LANTERN SIGNAL' : state.mode === 'practice' ? 'PRACTICE · NO STORY REWARDS' : 'RIVAL CIRCUIT'}</span><span>Turn {state.battle.turn + 1} · Offline tactics</span></header>
     <div className={`journey-battle-scene is-${state.locationId}`}>
       <div className="journey-battle-distant" aria-hidden="true" />
-      <section className="journey-combatant-info is-enemy"><div><h1>{enemy.name}</h1><span>{state.mode === 'circuit' ? 'Rival team' : 'Wild signal'}</span></div><Meter value={enemy.hp} max={enemy.maxHp} label="Opponent HP" /></section>
+      <section className="journey-combatant-info is-enemy"><div><h1 ref={headingRef} tabIndex={-1}>{enemy.name}</h1><span>{state.mode === 'circuit' ? 'Rival team' : 'Wild signal'}</span></div><Meter value={enemy.hp} max={enemy.maxHp} label="Opponent HP" /></section>
       <div className="journey-enemy-platform" aria-hidden="true" />
       <div key={`enemy-${state.battle.turn}`} className={`journey-enemy-art ${state.battle.turn > 0 ? 'is-hit' : ''}`}><CompanionArt id={enemyArtId} variant="front" /></div>
       <div className="journey-ally-platform" aria-hidden="true" />
@@ -150,6 +152,7 @@ export default function Adventure() {
   }, [clearInputs]);
   useEffect(() => {
     const onKey = (event) => {
+      if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
       if (dialogueRef.current && ['KeyE', 'Space'].includes(event.code) && !event.target.closest?.('input,textarea,select,[contenteditable="true"]')) {
         event.preventDefault();
         if (!event.repeat) dispatch({ type: 'DISMISS_DIALOGUE' });
@@ -214,7 +217,7 @@ export default function Adventure() {
 
   if (state.battle && !state.result) return <><BattleScreen state={state} dispatch={dispatch} profile={profile} onExit={exit} />{saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={retrySave}>Retry save</button><button onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div>}</>;
 
-  return <main className="journey-game">
+  return <main className="journey-game" data-gamepad-context={`${state.locationId}:${state.mode}:${paused}`}>
     <header className="journey-hud"><button className="journey-brand-button" onClick={() => setPanel('menu')} aria-label="Open Cogimon menu"><img src="/cogimon-icon.svg" width="24" height="24" alt="" /> COGIMON</button>
       <div className="journey-location"><strong>{region.name}</strong><span>{state.mode === 'journey' ? 'The Lantern Signal' : state.mode === 'practice' ? 'Practice · separate progress' : 'Rival Circuit · separate progress'}</span></div>
       <nav aria-label="Adventure menu"><button onClick={() => setPanel('team')}>Team</button><button onClick={() => setPanel('journal')}>Journal</button><button onClick={() => setPanel('locker')}>Locker</button><button aria-label="More game options" onClick={() => setPanel('menu')}>☰</button></nav>

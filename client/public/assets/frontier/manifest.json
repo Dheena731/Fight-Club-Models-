@@ -1,77 +1,107 @@
 {
-  "version": 1,
+  "version": 2,
   "date": "2026-11-04",
   "generator": "built-in image_gen",
-  "notes": "Original runtime artwork. Field atlas frames use rounded source boundaries because the generated dimensions are not evenly divisible by four. Starter atlas has independently drawn front/back poses. Field walk cycle uses movement interpolation with four facing poses, not a finished multi-frame walk sheet. Portraits retain the reviewed concept art. Palette/frame animation cleanup and compressed delivery remain release gates.",
+  "notes": "Original artwork with lossless runtime derivatives. Field atlas frames use rounded source boundaries because the generated dimensions are not evenly divisible by four. Starter atlas has independently drawn front/back poses. Field walk cycle uses movement interpolation with four facing poses, not a finished multi-frame walk sheet. Portraits retain the reviewed concept art. Palette/frame animation cleanup remains a release gate.",
   "assets": [
     {
-      "file": "title-panorama.png",
+      "file": "title-panorama.webp",
       "role": "title background, no baked UI",
       "width": 1672,
       "height": 941,
-      "bytes": 2518042,
-      "sha256": "803df7e74d5ca7f67d91aa573c3f98fd8ea6334854af5298d63fa3109bcf7cc2",
-      "transparent": false
+      "bytes": 2176772,
+      "sha256": "9c61cea4b8693885a83de45f763d19ffcb14841b426e87690e6abe534a84e1e4",
+      "transparent": false,
+      "original": {
+        "file": "title-panorama.png",
+        "bytes": 2518042,
+        "sha256": "803df7e74d5ca7f67d91aa573c3f98fd8ea6334854af5298d63fa3109bcf7cc2"
+      },
+      "rgbaSha256": "d33b125ff14202657f8b41fadbaef0f6c914fbbea3b0905fcdc585bdf2fcd5e4"
     },
     {
-      "file": "starter-battle-atlas.png",
+      "file": "starter-battle-atlas.webp",
       "role": "three starters: front row then back row",
       "width": 1536,
       "height": 1024,
-      "bytes": 2179549,
-      "sha256": "caf85724b3d083a6e9e42cf01e957946c5591a1cd23e643a882e7d1a6c8f48c8",
+      "bytes": 1674536,
+      "sha256": "25f7ac9c6e47ebae5c8fc863a7b229e35e4bd1c11abfff97d034490823e05ba7",
       "transparent": true,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "original": {
+        "file": "starter-battle-atlas.png",
+        "bytes": 2179549,
+        "sha256": "caf85724b3d083a6e9e42cf01e957946c5591a1cd23e643a882e7d1a6c8f48c8"
+      },
+      "rgbaSha256": "d30dfc3ceffeb874b5f148c129182a38f07b19bed5487405e7d01a03d3bc900c"
     },
     {
-      "file": "field-atlas.png",
+      "file": "field-atlas.webp",
       "role": "trainer, Emberquill, Kitewhisk, Duplet; south, west, east, north",
       "width": 1246,
       "height": 1263,
-      "bytes": 1419163,
-      "sha256": "f1b7f21a9580f278680fce8e329188ea655ab985d45c6118b2764ad4656dab82",
+      "bytes": 1111024,
+      "sha256": "017e53b935a5677a1b22dd52a78a71bc49d7f146dc8c0db7c085f9ecc76e18dc",
       "transparent": true,
       "columns": 4,
       "rows": 4,
       "anchor": [
         0.5,
         0.88
-      ]
+      ],
+      "original": {
+        "file": "field-atlas.png",
+        "bytes": 1419163,
+        "sha256": "f1b7f21a9580f278680fce8e329188ea655ab985d45c6118b2764ad4656dab82"
+      },
+      "rgbaSha256": "4b4c0952a4c1985c4c15b7e1705dfc2ffcc53d04b1c36f93c968437368f27597"
     },
     {
-      "file": "environment-atlas.png",
+      "file": "environment-atlas.webp",
       "role": "cottage, guild, Archive / tree, lantern, gate",
       "width": 1536,
       "height": 1024,
-      "bytes": 2149682,
-      "sha256": "447160b6b24d22487df8cbee8b14a7a4c965bf08fc3d0ad777d187b0042113b4",
+      "bytes": 1575342,
+      "sha256": "2ff8aaef94953673f0c25b55da88cae97a35802c1be2ec979313ed661b8a6fe0",
       "transparent": true,
       "columns": 3,
       "rows": 2,
       "anchor": [
         0.5,
         1
-      ]
+      ],
+      "original": {
+        "file": "environment-atlas.png",
+        "bytes": 2149682,
+        "sha256": "447160b6b24d22487df8cbee8b14a7a4c965bf08fc3d0ad777d187b0042113b4"
+      },
+      "rgbaSha256": "9e9f1b55ffa8ef846bc640f9bba01ec430473d8d5159a810646cdc8b2f7a6e03"
     },
     {
-      "file": "enemy-atlas.png",
+      "file": "enemy-atlas.webp",
       "role": "Static Wisp and Archive Warden",
       "width": 1774,
       "height": 887,
-      "bytes": 735108,
-      "sha256": "4b710696d27164119ec61d82d6f7710b01bdce492ab418c7a2b9d4c554d9643c",
+      "bytes": 528746,
+      "sha256": "80db59278bbb57982466555b5e7914bb6cf8582a7660ffbe9b5d15dc0f0a1ff8",
       "transparent": true,
       "columns": 2,
-      "rows": 1
+      "rows": 1,
+      "original": {
+        "file": "enemy-atlas.png",
+        "bytes": 735108,
+        "sha256": "4b710696d27164119ec61d82d6f7710b01bdce492ab418c7a2b9d4c554d9643c"
+      },
+      "rgbaSha256": "f10d6e1c0784a923a44c1f827a98cd12e3f21fd32f84176801b06cdd8f01a114"
     },
     {
-      "file": "npc-atlas.png",
+      "file": "npc-atlas.webp",
       "role": "Mara, Ivo, Neri; front-facing overworld characters",
       "width": 2172,
       "height": 724,
-      "bytes": 768753,
-      "sha256": "ef2d74292bc0d8f1b73d29f22f26cf87d044ed989ea2b875602ae46ece706303",
+      "bytes": 581726,
+      "sha256": "5a71d8d695f7e6eaf69befb3589a0fc6c3e337879f7dbf64498604c91a35be9c",
       "transparent": true,
       "columns": 3,
       "rows": 1,
@@ -79,59 +109,182 @@
         0.5,
         0.91
       ],
-      "cornerAlpha": 1
+      "cornerAlpha": 1,
+      "original": {
+        "file": "npc-atlas.png",
+        "bytes": 768753,
+        "sha256": "ef2d74292bc0d8f1b73d29f22f26cf87d044ed989ea2b875602ae46ece706303"
+      },
+      "rgbaSha256": "efa7b7dbfab710a15c504cb642ec83f9a7e607cc47e06dee85bd66edf33a889e"
     }
   ],
   "portraits": [
     {
       "id": "emberquill",
-      "file": "portraits/emberquill.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/emberquill-avatar.png"
+      "file": "portraits/emberquill.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/emberquill-avatar.png",
+      "original": {
+        "file": "portraits/emberquill.png",
+        "bytes": 1251284,
+        "sha256": "548dffb8c06baad3530188180499294ae27febc8cc4d830b8dedb006e3e5aa8c"
+      },
+      "width": 1305,
+      "height": 1206,
+      "bytes": 968926,
+      "sha256": "e7f06e41b883d93306e4c5a799e0aa09f788cd81a6d8a85b57e224f4c4770414",
+      "rgbaSha256": "344a2ad4254f36ea5ce33d70e67ebb92d5dabd05049d830451c48bf2af76ff9c",
+      "transparent": true
     },
     {
       "id": "kitewhisk",
-      "file": "portraits/kitewhisk.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/kitewhisk-avatar.png"
+      "file": "portraits/kitewhisk.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/kitewhisk-avatar.png",
+      "original": {
+        "file": "portraits/kitewhisk.png",
+        "bytes": 965189,
+        "sha256": "e4a7f3ce1007bca81337340585908309fa6929d7a2975c67d0a6a1c3679da946"
+      },
+      "width": 1312,
+      "height": 1199,
+      "bytes": 701054,
+      "sha256": "dc4cbc859f3c627bfe5a803c174edb0373e537c25930bfac59c0e1fc54229fa0",
+      "rgbaSha256": "76965e65c6de2b36e06e2a6b4f21bb65d4f33fa0a3e0896d97881bf87f54e61d",
+      "transparent": true
     },
     {
       "id": "duplet",
-      "file": "portraits/duplet.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/duplet-avatar.png"
+      "file": "portraits/duplet.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/duplet-avatar.png",
+      "original": {
+        "file": "portraits/duplet.png",
+        "bytes": 833886,
+        "sha256": "018c9800b13328b3ca15554143c1180ec53c79b2ff8a0f3612e70b74352b22a8"
+      },
+      "width": 1312,
+      "height": 1199,
+      "bytes": 624066,
+      "sha256": "273461e0ad0117762ceae79a253a0dd3e78ac53d1573a127635eb2b4dfefda06",
+      "rgbaSha256": "23da59e72a45c0d6645f3bb91c65ed8224355832e9e257943875f8b0fdfb5540",
+      "transparent": true
     },
     {
       "id": "crosswake",
-      "file": "portraits/crosswake.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/crosswake-avatar.png"
+      "file": "portraits/crosswake.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/crosswake-avatar.png",
+      "original": {
+        "file": "portraits/crosswake.png",
+        "bytes": 1490605,
+        "sha256": "5cedcc4533d9c2d2721f1a0a61a861ff5d59b67c49931b063ed431209e207957"
+      },
+      "width": 1305,
+      "height": 1205,
+      "bytes": 1152144,
+      "sha256": "4759fc547fdd6fb018c347991e084bf614e160cee28ac42067d3b9852d155de3",
+      "rgbaSha256": "1ba93fdebdd4f7433f8a900a6e33cf0d70162e3aed9c64c3d0cc87e38007b87d",
+      "transparent": true
     },
     {
       "id": "zipcat",
-      "file": "portraits/zipcat.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/zipcat-avatar.png"
+      "file": "portraits/zipcat.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/zipcat-avatar.png",
+      "original": {
+        "file": "portraits/zipcat.png",
+        "bytes": 1185362,
+        "sha256": "e5d4857bdf8f3a5b4add587e7bd28492acc0e08f1fd3f133baa8e47fc6f4dfbd"
+      },
+      "width": 1345,
+      "height": 1169,
+      "bytes": 905770,
+      "sha256": "0fa58c5b3ffd1f9c40820054205aafab30aeb27792a138861b100c10b9c402b9",
+      "rgbaSha256": "8861026097e4e74f5bd9cca6ab054df216d6c17a0aef7d221218a4cebc53fe1c",
+      "transparent": true
     },
     {
       "id": "rampart",
-      "file": "portraits/rampart.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/rampart-avatar.png"
+      "file": "portraits/rampart.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/rampart-avatar.png",
+      "original": {
+        "file": "portraits/rampart.png",
+        "bytes": 1496144,
+        "sha256": "ec7cf740d97aa3fa7505f3a62bb5b080339ac336efaa3f604abf22737c188c68"
+      },
+      "width": 1338,
+      "height": 1176,
+      "bytes": 1080968,
+      "sha256": "b844e28c13ab6e92f76158de4588e874a8ff472f003f87f8b7c79dbf2563b993",
+      "rgbaSha256": "220e816692e0fd21169e1aa73d2d78b39de4a47607e55df6b40b742d486a4348",
+      "transparent": true
     },
     {
       "id": "latticewing",
-      "file": "portraits/latticewing.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/latticewing-avatar.png"
+      "file": "portraits/latticewing.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/latticewing-avatar.png",
+      "original": {
+        "file": "portraits/latticewing.png",
+        "bytes": 1276782,
+        "sha256": "c672758eef3d3d32ed39b90df6a1cf77145b1bc6f84a5dabb8631c3b8f0df07b"
+      },
+      "width": 1305,
+      "height": 1205,
+      "bytes": 987370,
+      "sha256": "6123fccdb9b9bd43ca3e98449fed136ce9413240d9b497ae61d45bebe6c044a7",
+      "rgbaSha256": "172e47aa3255229295e4229f21a4007d9f73a816b5f57fb805298539d959f6c8",
+      "transparent": true
     },
     {
       "id": "mossback",
-      "file": "portraits/mossback.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/mossback-avatar.png"
+      "file": "portraits/mossback.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/mossback-avatar.png",
+      "original": {
+        "file": "portraits/mossback.png",
+        "bytes": 1245109,
+        "sha256": "8506fb4b88ab9c273cee4c6ef26cb82a6dd76d2be82ad33274f533db268b3cb4"
+      },
+      "width": 1181,
+      "height": 1331,
+      "bytes": 908748,
+      "sha256": "8626efbc51dc5c0068ea03ecdf3fa6200da54a39b2fc056e468baacb00723099",
+      "rgbaSha256": "564fa892f9e1d323bbb897898fcf0d85d599e4651030d0c8fd8462996220d0f7",
+      "transparent": true
     },
     {
       "id": "patchbyte",
-      "file": "portraits/patchbyte.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/patchbyte-avatar.png"
+      "file": "portraits/patchbyte.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/patchbyte-avatar.png",
+      "original": {
+        "file": "portraits/patchbyte.png",
+        "bytes": 1246605,
+        "sha256": "714107c411051a2a94d3b893bc8beb4a225d411b9b9660d16a1ceddec9bc7a88"
+      },
+      "width": 1222,
+      "height": 1287,
+      "bytes": 920514,
+      "sha256": "45fdcd5881fe8f6be51a783797c68c9af8b85014fa46277370b17a74b6003177",
+      "rgbaSha256": "079c5263068bbbc0ab0566ab6de8a522c910d9de247f7707c981091f3a5f1ad7",
+      "transparent": true
     },
     {
       "id": "trainer",
-      "file": "portraits/trainer.png",
-      "source": "docs/ai-frontier/redesign-v3/assets/trainer-avatar.png"
+      "file": "portraits/trainer.webp",
+      "source": "docs/ai-frontier/redesign-v3/assets/trainer-avatar.png",
+      "original": {
+        "file": "portraits/trainer.png",
+        "bytes": 1506176,
+        "sha256": "7abb29884ea3dbd9b40543bf1beb21a6ffc977e932cd1c5e4bd9f4f126223261"
+      },
+      "width": 1024,
+      "height": 1536,
+      "bytes": 1012554,
+      "sha256": "6dc002ebb65db9c741925227eaad643b61c03fefa24e9654a88adaf95ed32877",
+      "rgbaSha256": "17727c4be351ea9fa0a9aa1c2e0ac805d6ce08370065f57f402fd8d142f8e740",
+      "transparent": true
     }
-  ]
+  ],
+  "delivery": {
+    "format": "lossless WebP",
+    "encoder": "Pillow 10.2.0 / libwebp, lossless=True, exact=True, method=6",
+    "sourceBytes": 22267439,
+    "runtimeBytes": 16910260,
+    "verification": "Every runtime file was decoded and compared byte-for-byte as RGBA and alpha against the original PNG at unchanged dimensions. rgbaSha256 records the shared decoded RGBA bytes. Original PNG files are retained for provenance."
+  }
 }

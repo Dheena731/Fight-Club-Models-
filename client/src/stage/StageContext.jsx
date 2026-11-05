@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -11,9 +9,9 @@ import { Application, Container, Sprite, Text, TextStyle } from 'pixi.js';
 import { LOGICAL_W, LOGICAL_H, FLOOR_Y, FIGHTER_A_X, FIGHTER_B_X, SPRITE_SCALE } from './constants';
 import { bakeAllTextures } from './bakeTextures';
 import { FIGHTER_CREATURE, PROVIDER_CREATURE } from '../components/creatures/pixelData';
-import { useGameState, PHASE } from '../game/GameContext';
-
-const StageCtx = createContext(null);
+import { useGameState } from '../game/gameHooks';
+import { PHASE } from '../game/gameReducer';
+import { StageCtx } from './stageHooks';
 
 const CRIT_LINES = ['SAVAGE!', 'BRUTAL!', 'ROASTED!', 'FLAWLESS!'];
 const CRIT_DAMAGE = 22;
@@ -332,10 +330,4 @@ export function StageProvider({ children }) {
   }), [ready, error, anchors, layout, init, attachCanvas, setFighters, setSpriteState, spawnDamage, clearFx]);
 
   return <StageCtx.Provider value={value}>{children}</StageCtx.Provider>;
-}
-
-export function useStage() {
-  const ctx = useContext(StageCtx);
-  if (!ctx) throw new Error('useStage outside StageProvider');
-  return ctx;
 }

@@ -12,11 +12,11 @@ let assetsPromise;
 
 function loadArt() {
   if (!assetsPromise) assetsPromise = Promise.all([
-    Assets.load('/assets/frontier/field-atlas.png'),
-    Assets.load('/assets/frontier/environment-atlas.png'),
-    Assets.load('/assets/frontier/portraits/mossback.png'),
-    Assets.load('/assets/frontier/npc-atlas.png'),
-    Assets.load('/assets/frontier/enemy-atlas.png'),
+    Assets.load('/assets/frontier/field-atlas.webp'),
+    Assets.load('/assets/frontier/environment-atlas.webp'),
+    Assets.load('/assets/frontier/portraits/mossback.webp'),
+    Assets.load('/assets/frontier/npc-atlas.webp'),
+    Assets.load('/assets/frontier/enemy-atlas.webp'),
   ]).catch((error) => { assetsPromise = null; throw error; });
   return assetsPromise;
 }
@@ -319,7 +319,7 @@ export default function AdventureScene({ state, motion = {} }) {
     if (motion.paused || document.hidden || !focusedRef.current) appRef.current?.ticker.stop(); else appRef.current?.ticker.start();
   }, [motion.paused, ready]);
 
-  return <div className="journey-world-canvas" ref={hostRef} role="img" aria-label={`${ADVENTURE_REGIONS[state.locationId].name}. Trainer at column ${state.x}, row ${state.y}. Use movement controls and interact with nearby landmarks.`}>
-    {!ready && <div className="journey-scene-loading" role="status">{error || 'Unfolding the map…'}{error && <button className="journey-button" onClick={() => { setReady(false); setAttempt((value) => value + 1); }}>Retry artwork</button>}</div>}
+  return <div className="journey-world-canvas" ref={hostRef} role="group" aria-label={`${ADVENTURE_REGIONS[state.locationId].name}. Trainer at column ${state.x}, row ${state.y}. Use movement controls and interact with nearby landmarks.`}>
+    {!ready && <div className="journey-scene-loading" role={error ? 'alert' : 'status'}>{error ? 'The map artwork could not be loaded. Check your connection, then retry.' : 'Unfolding the map…'}{error && <><button className="journey-button" onClick={() => { setReady(false); setAttempt((value) => value + 1); }}>Retry artwork</button><button className="journey-button" onClick={() => window.location.reload()}>Reload Cogimon</button></>}</div>}
   </div>;
 }

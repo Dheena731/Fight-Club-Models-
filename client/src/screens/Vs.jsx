@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useGameState, useGameDispatch } from '../game/GameContext';
+import { useGameState, useGameDispatch } from '../game/gameHooks';
 import { FIGHTERS } from '../../../shared/fighters.js';
 import { PROFILE_VERSION, PROFILE_COMPANIONS, createProfile, loadProfile, profileSnapshot } from '../../../shared/rpg/profile.js';
 import { FIGHTER_CREATURE, PROVIDER_CREATURE } from '../components/creatures/pixelData';

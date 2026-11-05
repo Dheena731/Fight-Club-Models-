@@ -8,7 +8,7 @@ import { downloadShareCard } from '../lib/shareCard';
 import CompactRound from '../components/arena/CompactRound';
 import FighterSprite from '../components/FighterSprite';
 import ThemeToggle from '../components/ThemeToggle';
-import { useGameState, useGameDispatch } from '../game/GameContext';
+import { useGameState, useGameDispatch } from '../game/gameHooks';
 
 function SharePanel({ result }) {
   const [copied, setCopied] = useState(false);

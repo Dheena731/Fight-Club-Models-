@@ -6,7 +6,7 @@ import './locker.css';
 
 export function CompanionPortrait({ companionId, skinId = null }) {
   const companion = PROFILE_COMPANIONS.find((entry) => entry.id === companionId) ?? PROFILE_COMPANIONS[0];
-  const src = `/assets/frontier/portraits/${companion.id}.png`;
+  const src = `/assets/frontier/portraits/${companion.id}.webp`;
   const [failedSrc, setFailedSrc] = useState(null);
   const lantern = skinId === 'skin-lantern' && getCosmetic(skinId).companionIds.includes(companion.id);
   return (
@@ -23,7 +23,7 @@ export function CompanionPortrait({ companionId, skinId = null }) {
 function TrainerPortrait() {
   const [failed, setFailed] = useState(false);
   return failed ? <span className="frontier-trainer-fallback">Trainer</span> : (
-    <img className="frontier-trainer-portrait" src="/assets/frontier/portraits/trainer.png"
+    <img className="frontier-trainer-portrait" src="/assets/frontier/portraits/trainer.webp"
       alt="Human field trainer in a travel outfit with a backpack." onError={() => setFailed(true)} />
   );
 }
