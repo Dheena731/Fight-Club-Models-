@@ -2,15 +2,16 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useGameDispatch, useGameState } from '../game/gameHooks';
 import { COMPANIONS, ADVENTURE_REGIONS, ITEMS, MOVES } from '../../../shared/rpg/adventureContent.js';
 import { createAdventure, adventureReducer, activeCompanion, nearbyInteractable, adventureObjective, sideObjective, questProgress, unlockedRewardIds } from '../../../shared/rpg/adventure.js';
-import { readAdventure, retryGameSave, writeAdventure as saveAdventure } from '../lib/adventureStorage.js';
+import { journeyStorageIdentity, readAdventure, retryGameSave, writeGameProfile, writeAdventure as saveAdventure } from '../lib/adventureStorage.js';
 import { createMovementController, MOVEMENT_KEYS } from '../lib/adventureMovement.js';
 import { loadCircuitRecord, saveCircuitRecord } from '../../../shared/rpg/adventureSave.js';
-import { createProfile, loadProfile, saveProfile, syncAdventureProfile, profileSnapshot, getCosmetic } from '../../../shared/rpg/profile.js';
+import { createProfile, loadProfile, syncAdventureProfile, profileSnapshot, getCosmetic } from '../../../shared/rpg/profile.js';
 import AdventureScene from './AdventureScene';
 import CompanionArt from './CompanionArt';
 import GameDialog from './GameDialog';
 import Locker from './Locker';
 import FieldMap from './FieldMap';
+import SaveDataPanel from './SaveDataPanel';
 import * as sfx from '../lib/sfx';
 
 const MOVE_LIST = Array.isArray(MOVES) ? MOVES : Object.values(MOVES);
@@ -77,6 +78,9 @@ export default function Adventure() {
     return { ...initial, circuit: { ...initial.circuit, bestWins: Math.max(initial.circuit.bestWins, loadCircuitRecord().bestWins) } };
   });
   const [panel, setPanel] = useState(null); const [profile, setProfile] = useState(() => loadProfile() || createProfile());
+  const [initialProfileIdentity] = useState(() => journeyStorageIdentity());
+  const profileJourney = state.mode === 'journey' ? state : state.returnJourney;
+  const profileIdentity = profileJourney ? `journey:${profileJourney.runId}` : initialProfileIdentity;
   const [saveError, setSaveError] = useState(loaded.error); const [savedAt, setSavedAt] = useState('');
   const [showArenaConsent, setShowArenaConsent] = useState(false);
   const [muted, setMuted] = useState(sfx.isMuted);
@@ -106,10 +110,11 @@ export default function Adventure() {
     const timer = setTimeout(() => {
       const okay = saveAdventure(state);
       setSaveError(okay ? '' : 'Progress could not be saved. Storage may be unavailable, or a different Journey was started in another tab. Your current saved Journey has not been replaced.');
-      if (okay) setSavedAt('Saved on this device');
+      if (!okay) return; // A stale tab must not replace a restored Locker either.
+      setSavedAt('Saved on this device');
       setProfile((previous) => {
         const next = syncAdventureProfile(previous, { trainerName: state.trainerName, companionId: state.activeId, level: activeCompanion(state).level, worldsCleared: state.flags.questComplete ? 1 : 0, rewardIds: unlockedRewardIds(state) });
-        if (!saveProfile(next)) setSaveError('The adventure is saved, but your Locker could not be saved. Allow browser storage and retry.');
+        if (!writeGameProfile(next, `journey:${state.runId}`)) setSaveError('Your Locker could not be saved. Allow browser storage, or return to title if another tab restored a Journey.');
         return next;
       });
     }, 160);
@@ -192,8 +197,12 @@ export default function Adventure() {
     dispatchGame({ type: 'RETURN_TITLE' });
   }
   function changeProfile(next) {
+    if (!writeGameProfile(next, profileIdentity)) {
+      setSaveError('Your Locker could not be saved. Storage may be unavailable, or another tab restored a Journey. Return to title to load the current saves.');
+      return false;
+    }
     setProfile(next);
-    if (!saveProfile(next)) setSaveError('Your equipment could not be saved. Please allow browser storage and retry.');
+    return true;
   }
   function move(dx, dy) { if (!pausedRef.current) dispatch({ type: 'MOVE', dx, dy }); }
   function hold(event, dx, dy) {
@@ -210,7 +219,7 @@ export default function Adventure() {
     if (state.mode === 'journey' && !saveAdventure(state)) { setSaveError('Could not save your Journey before changing modes. Please retry.'); return; }
     setPanel(null); dispatch({ type });
   }
-  function retrySave() { if (retryGameSave(state, profile)) setSaveError(''); }
+  function retrySave() { if (retryGameSave(state, profile, undefined, profileIdentity)) setSaveError(''); }
   const saveNotice = saveError && <div className="journey-save-inline" role="alert"><p>{saveError}</p><div className="journey-inline-actions"><button className="journey-button" onClick={retrySave}>Retry save</button><button className="journey-button" onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div></div>;
   const tasks = questProgress(state);
   const taskList = Array.isArray(tasks) ? tasks : Object.values(tasks || {});
@@ -247,7 +256,21 @@ export default function Adventure() {
     {panel === 'map' && <GameDialog notice={saveNotice} title="Your field map" onClose={() => setPanel(null)}><FieldMap state={state} /></GameDialog>}
     {panel === 'locker' && <GameDialog notice={saveNotice} title="The companion Locker" onClose={() => setPanel(null)} className="journey-locker-dialog"><Locker profile={profile} onChange={changeProfile} onClose={() => setPanel(null)} /><button className="journey-button" onClick={() => setPanel('preview')}>Preview arena entrance</button></GameDialog>}
     {panel === 'preview' && <GameDialog notice={saveNotice} title="Your arena entrance" onClose={() => setPanel('locker')} className="journey-preview-dialog"><IdentityPreview profile={profile} onBack={() => setPanel('locker')} /></GameDialog>}
-    {panel === 'menu' && <GameDialog notice={saveNotice} title="A moment on the road" onClose={() => setPanel(null)}>{state.circuit.bestWins > 0 && <p className="journey-muted">Rival Circuit record: {state.circuit.bestWins}/3 rivals cleared.</p>}<div className="journey-system-menu"><button className="journey-button" aria-pressed={!muted} onClick={() => setMuted(sfx.toggleMute())}>Sound effects: {muted ? 'Off' : 'On'}</button><button className="journey-button" onClick={() => setPanel('map')}>Field map</button><button className="journey-button" onClick={() => setPanel('pack')}>Open pack</button><button className="journey-button" onClick={() => startMode('START_PRACTICE')}>Practice battle</button><button className="journey-button" onClick={() => startMode('START_CIRCUIT')}>Rival Circuit</button><button className="journey-button" onClick={() => { setPanel(null); setShowArenaConsent(true); }}>Visit Live Arena</button><button className="journey-button is-primary" onClick={exit}>{state.mode === 'journey' ? 'Save & return to title' : 'Return to title'}</button></div><p className="journey-muted">Arrows / WASD: move · Hold Shift or toggle Run: run · E: interact · J: Journal · T: Team · I: Pack. System reduced-motion settings are respected.</p></GameDialog>}
+    {panel === 'save-data' && <GameDialog notice={saveNotice} title="Save Data" onClose={() => setPanel('menu')}><SaveDataPanel adventure={state} profile={profile} /></GameDialog>}
+    {panel === 'menu' && <GameDialog notice={saveNotice} title="A moment on the road" onClose={() => setPanel(null)}>
+      {state.circuit.bestWins > 0 && <p className="journey-muted">Rival Circuit record: {state.circuit.bestWins}/3 rivals cleared.</p>}
+      <div className="journey-system-menu">
+        <button className="journey-button" aria-pressed={!muted} onClick={() => setMuted(sfx.toggleMute())}>Sound effects: {muted ? 'Off' : 'On'}</button>
+        <button className="journey-button" onClick={() => setPanel('map')}>Field map</button>
+        <button className="journey-button" onClick={() => setPanel('pack')}>Open pack</button>
+        <button className="journey-button" onClick={() => setPanel('save-data')}>Save Data · backup</button>
+        <button className="journey-button" onClick={() => startMode('START_PRACTICE')}>Practice battle</button>
+        <button className="journey-button" onClick={() => startMode('START_CIRCUIT')}>Rival Circuit</button>
+        <button className="journey-button" onClick={() => { setPanel(null); setShowArenaConsent(true); }}>Visit Live Arena</button>
+        <button className="journey-button is-primary" onClick={exit}>{state.mode === 'journey' ? 'Save & return to title' : 'Return to title'}</button>
+      </div>
+      <p className="journey-muted">Arrows / WASD: move · Hold Shift or toggle Run: run · E: interact · J: Journal · T: Team · I: Pack. System reduced-motion settings are respected.</p>
+    </GameDialog>}
     {showArenaConsent && <GameDialog notice={saveNotice} title="Beyond the practice ring" onClose={() => { setShowArenaConsent(false); dispatch({ type: 'CLEAR_TRANSITION' }); }}><p>The Live Arena runs actual AI models using your provider credentials. Creature levels and cosmetics do not improve a model&apos;s score.</p><p>No model call happens on entry. You will choose models, connect credentials, review the call budget and explicitly start the match inside.</p><p className="journey-muted">This is a one-browser model show, not online human matchmaking. Local badges remain unverified.</p><div className="journey-inline-actions"><button className="journey-button is-primary" onClick={() => { const next = adventureReducer(state, { type: 'CLEAR_TRANSITION' }); if (state.mode === 'journey' && !saveAdventure(next)) { setSaveError('Could not save before entering the arena. Please retry.'); return; } dispatchGame({ type: 'ENTER_ARENA', adventure: next, identity: profileSnapshot(profile) }); }}>Enter model arena</button><button className="journey-button" onClick={() => { setShowArenaConsent(false); dispatch({ type: 'CLEAR_TRANSITION' }); }}>Stay on the frontier</button></div></GameDialog>}
   </main>;
 }

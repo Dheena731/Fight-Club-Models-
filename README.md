@@ -22,6 +22,14 @@ Runtime artwork uses lossless WebP, with the original PNGs and provenance retain
 
 Cogimon is the product brand. The repository name `Fight-Club-Models-`, `docs/ai-frontier` paths and legacy browser keys remain stable: `ai-frontier:adventure:v3`, `ai-frontier:circuit:v1`, `ai-frontier:profile:v1`, `ai-frontier:save:v2`, `ai-frontier:save:v1` and `aba:theme`. The rebrand preserves existing progress and preferences; obsolete `aba:provider-keys` entries still receive the documented credential cleanup.
 
+## Save backup & restore
+
+Open **Field Guide → Save Data** at the title screen to download or restore `cogimon-journey.json`. The in-game menu also offers a backup of your current Journey, including the protected Journey when playing Practice or Circuit.
+
+Backups include Journey progress, local Locker cosmetics/loadout and the best Circuit record. Provider keys, model conversations and browser settings are excluded. File selection only previews; replacement requires confirmation. A better existing Circuit record is kept. Close other Cogimon tabs before restoring; stale Journey autosaves are rejected.
+
+This is a local, editable backup, not cloud sync or proof of verified achievements. Keep a backup before replacing saves. See the [save-data plan and recovery boundaries](docs/ai-frontier/SAVE_DATA_PLAN.md).
+
 ## Stack
 
 - Client: React, Vite, Tailwind, Framer Motion, PixiJS 8

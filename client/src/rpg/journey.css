@@ -45,6 +45,16 @@
 .journey-dialog p { max-width: 65ch; }
 .journey-dialog input { display: block; background: #fffef6; color: var(--j-ink); border: 2px solid #6e7364; padding: 11px 12px; width: 100%; min-height: 48px; font: inherit; margin-top: 6px; }
 .journey-dialog label { font-weight: 700; }
+.journey-backup-picker { margin-top: 28px; }
+.journey-save-data input[type="file"] { font-size: 14px; max-width: 100%; }
+.journey-save-data input::file-selector-button { min-height: 44px; margin-right: 12px; padding: 8px 12px; background: var(--j-panel); color: var(--j-ink); border: 2px solid #6e7364; font: inherit; font-weight: 700; cursor: pointer; }
+.journey-backup-preview { display: grid; grid-template-columns: minmax(75px, 130px) minmax(0, 1fr); align-items: center; gap: 18px; }
+.journey-backup-preview > .journey-art { height: 160px; }
+.journey-backup-preview h3 { margin: 0 0 14px; overflow-wrap: anywhere; }
+.journey-backup-preview dl { margin: 0; }
+.journey-backup-preview dt { color: var(--j-muted); font-size: 13px; }
+.journey-backup-preview dd { margin: 0 0 10px; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .journey-backup-preview { grid-template-columns: 65px minmax(0, 1fr); gap: 12px; }.journey-backup-preview > .journey-art { height: 110px; }.journey-backup-preview h3 { font-size: 18px; }.journey-backup-preview dd { font-size: 14px; } }
 .journey-trainer-setup { display: grid; grid-template-columns: 170px 1fr; align-items: center; gap: 28px; }
 .journey-trainer-setup > .journey-art { height: 320px; }
 .journey-art { display: inline-block; position: relative; width: 100%; height: 100%; vertical-align: middle; }

@@ -69,7 +69,10 @@ export default function Locker({ profile, onChange, onClose }) {
 
   function change(item, unequip = false) {
     const next = equipCosmetic(current, item.id, { unequip });
-    onChange?.(next);
+    if (onChange?.(next) === false) {
+      setMessage('Equipment unchanged. Check the save warning before trying again.');
+      return;
+    }
     setMessage(unequip ? `${item.name} removed. You still own it.` : `${item.name} ${item.type === 'badge' ? 'pinned' : 'equipped'}.`);
   }
 
