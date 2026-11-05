@@ -84,7 +84,7 @@ function drawRegion(region, state, textures) {
 
   const label = new Text({
     text: region.name.toUpperCase(),
-    style: new TextStyle({ fontFamily: 'monospace', fontWeight: 'bold', fontSize: 12, fill: region.palette.glow }),
+    style: new TextStyle({ fontFamily: 'Pixelify Sans, monospace', fontWeight: 'bold', fontSize: 12, fill: region.palette.glow }),
   });
   label.x = 14;
   label.y = 10;
@@ -118,6 +118,7 @@ export default function WorldScene({ state }) {
         const size = window.matchMedia('(max-width: 600px)').matches ? PORTRAIT : DESKTOP;
         await app.init({ width: size.width, height: size.height, antialias: false, background: '#091722',
           resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
+        await document.fonts.load('16px "Pixelify Sans"').catch(() => {});
         if (disposed) { app.destroy(true, { children: true }); return; }
         appRef.current = app;
         texturesRef.current = bakeAllTextures();

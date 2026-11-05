@@ -12,6 +12,7 @@ function roundWinner(round) {
 }
 
 export async function renderShareCard(result) {
+  await document.fonts.load('700 72px "Pixelify Sans"').catch(() => {});
   const { fighters, rounds = [], finalHp, winnerId, ko, mode } = result;
   const a = fighters.a;
   const b = fighters.b;
@@ -45,7 +46,7 @@ export async function renderShareCard(result) {
   ctx.fillStyle = colorB;
   ctx.fillRect(W / 2, 0, W / 2, 10);
 
-  const display = (px) => `bold ${px}px "Bebas Neue", Impact, sans-serif`;
+  const display = (px) => `bold ${px}px "Pixelify Sans", monospace`;
   ctx.textBaseline = 'alphabetic';
 
   // header

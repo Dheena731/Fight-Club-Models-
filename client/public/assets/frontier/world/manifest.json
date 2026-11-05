@@ -1,0 +1,93 @@
+{
+  "generator": "built-in image_gen",
+  "created": "2026-11-05",
+  "assets": [
+    {
+      "path": "watermill.png",
+      "prompt": "Use case: stylized-concept. Asset type: standalone transparent PNG overworld sprite for an original warm Game Boy Advance style roleplaying game. Primary request: a detailed charming cream-stone watermill with terracotta tiled roof and large wooden waterwheel attached on its right, teal door, tiny flower window boxes, stone foundation, moss, small stacked sacks and weathered timber details. Camera: 3/4 overhead RPG perspective, frontal south-facing facade with visible roof, orthographic, isolated object. Carefully authored crisp pixel art with deep plum outlines, jade foliage, warm ochre highlights, sunlight from upper left and contact shadow lower right. The mill should occupy the center 85 percent with generous transparent padding and no clipped parts. Ground footprint compact. Transparent background, genuinely transparent alpha around building; no scenery, ground plane, river, square backdrop, text, people, watermark, border, glow, blur or gradient. Match detailed classic handheld RPG environmental sprite with discernible pixels at 160px rendered width.",
+      "transparent": true,
+      "sha256": "fb03e88e6b0f47e3b329108331e047ae5839361f495ee38c58a5a24d0d531d63",
+      "width": 1312,
+      "height": 1199,
+      "mode": "RGBA",
+      "bitDepth": 8,
+      "runtime": {
+        "path": "watermill.webp",
+        "bytes": 1583520,
+        "sha256": "bbe947e17a202e9d034683e1a9a491da7e50a616f2553b2fa0fe494f763ce611",
+        "rgbaSha256": "fe1e46db2025c76d2054e2da9fcb7ebf5f05225fa19937390f4050de0a1cfcd7"
+      }
+    },
+    {
+      "path": "observatory.png",
+      "prompt": "Use case: stylized-concept. Asset type: standalone transparent PNG overworld sprite for an original warm Game Boy Advance style RPG. Primary request: a beautiful small hilltop astronomical observatory, cream limestone round building with terracotta trim, weathered bronze and pale jade domed roof, a tilted brass telescope emerging from open dome, teal double door, three front steps, flowers and ivy creeping around foundation. Camera: 3/4 overhead RPG perspective, frontal south-facing facade with roof visible, orthographic isolated object. Detailed crisp pixel art with deep plum outlines, warm ochre highlights, sunlight upper left and compact shadow lower right. Center entire object within central 85 percent, transparent padding all around; no clipping. Genuinely transparent alpha background. No scenery, ground plane, text, people, watermark, border, blur, glow or gradient. Consistent environmental sprite with discernible pixels when rendered 160 pixels wide.",
+      "transparent": true,
+      "sha256": "3259ac29cd389d2959f3b45c8e54f6f49d8475512fbd7051086a08416451d7dd",
+      "width": 1269,
+      "height": 1240,
+      "mode": "RGBA",
+      "bitDepth": 8,
+      "runtime": {
+        "path": "observatory.webp",
+        "bytes": 1196840,
+        "sha256": "d938dac452e629f8dc89dc4fb5e0f664b55b5e9d58e1958b3825b44bb5b19b58",
+        "rgbaSha256": "1ca7f728f559bfcb911e3deaed238d9fcfdd36d9e09f04a85542b01e081fbc29"
+      }
+    },
+    {
+      "path": "stone-bridge.png",
+      "prompt": "Use case: stylized-concept. Asset type: standalone transparent PNG overworld sprite for an original warm Game Boy Advance style RPG. Primary request: a short wide mossy cream-stone arched bridge viewed from 3/4 overhead with the crossing running horizontally left to right. Broad flat cobblestone walking deck, low stone parapets above and below, two visible shallow arch openings in lower front face, worn individual cream stone blocks, lichen and ivy, pale ochre light on top and cool plum shadows under arches. Entire isolated bridge occupies central 85 percent with generous transparent padding. Crisp richly detailed classic handheld pixel art, orthographic with sunlight upper left. Genuinely transparent alpha background including beneath arches. No water, riverbank, ground plane, scenery, people, text, watermark, border, glow, blur or gradient. Bridge should retain an easily readable flat traversable top when rendered 150 pixels wide.",
+      "transparent": true,
+      "sha256": "954cfec527816bd9adbda461185c80ce79f8776e32b64b3db31cf066c52cf092",
+      "width": 1774,
+      "height": 887,
+      "mode": "RGBA",
+      "bitDepth": 8,
+      "runtime": {
+        "path": "stone-bridge.webp",
+        "bytes": 1419404,
+        "sha256": "1f59577930cf9c6b4105d79177e4ebe4abc50aed663e2e5c6c90b6f20e3036e3",
+        "rgbaSha256": "b867b38b0c0787502afbf1d974c106706a2407c962b2ee920eeb5f732d6a77f1"
+      }
+    },
+    {
+      "path": "broadleaf-tree.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent PNG overworld sprite for original warm Game Boy Advance RPG. A single richly detailed old broadleaf tree, dense asymmetrical layered rounded jade and spring-green canopy with sunlit yellow-green leaf clusters, dark teal shaded canopy underneath, gnarled brown trunk and visible roots, a few small grass tufts around base. Crisp classic handheld pixel art, dark plum outlines, deliberate clustered pixels, 3/4 top-down orthographic RPG perspective, sunlight upper left. Entire tree centered within 85 percent of image, transparent padding all sides with no clipping. Genuinely transparent alpha background, no square backdrop, terrain plane, text, people, watermark, gradient, glow or blur. Designed to look finely detailed at 75 pixels tall.",
+      "transparent": true,
+      "sha256": "0761338a47fa9afd427d5f89be3f33e1a3eff813992a893c91d675157e1b6982",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "bitDepth": 8,
+      "runtime": {
+        "path": "broadleaf-tree.webp",
+        "bytes": 862192,
+        "sha256": "78c7454c6ac265bca7bfb34ece50eed4cb375b4a0560e4e35e2ab0808fc4cc99",
+        "rgbaSha256": "e8999e226b4ef81586a39e7f88a40b375a879a8b3d3951971721628ac29608f5"
+      }
+    },
+    {
+      "path": "cottage.png",
+      "prompt": "Use case: stylized-concept. Asset type: isolated transparent PNG overworld environmental sprite for an original warm Game Boy Advance RPG. Primary request: a charming modest village cottage with cream limestone walls, broad terracotta tiled roof, teal wooden door, tiny teal shutters, flower boxes full of pink and cream flowers beneath two windows, chimney and ivy at one corner, two small front stone steps. Camera: 3/4 top-down orthographic RPG perspective, frontal south-facing facade and visible roof. Crisp richly detailed pixel art, deliberate clustered pixels, deep plum outlines, warm ochre highlights, sunlight from upper left, cool subtle contact shadow lower right. Entire cottage centered in central 85 percent with transparent padding, no clipped parts. Genuinely transparent alpha background. No environment, ground plane, square backdrop, signage, text, people, watermark, glow, blur or gradient. Designed as a finely detailed 145 pixel wide sprite.",
+      "transparent": true,
+      "sha256": "b900d20c7da9fead603dd1b6fc6c0e9541b046745446857e725cb176d1840ce4",
+      "width": 1312,
+      "height": 1199,
+      "mode": "RGBA",
+      "bitDepth": 8,
+      "runtime": {
+        "path": "cottage.webp",
+        "bytes": 1432696,
+        "sha256": "9d90a7d9b985aefa0e082d06ccfefea781a47d1b44d25516514eaf6a1097c834",
+        "rgbaSha256": "28116b77a2c8c1a9900f61a50b55db3318f305d1891927aa842a9374ee8ac5f0"
+      }
+    }
+  ],
+  "delivery": {
+    "format": "lossless WebP",
+    "encoder": "Pillow 13.0.0 / libwebp, lossless=True, exact=True, method=6",
+    "sourceBytes": 8406708,
+    "runtimeBytes": 6494652,
+    "verification": "Unchanged dimensions and byte-for-byte decoded RGBA comparison, including alpha. Original PNGs and generation prompts retained."
+  }
+}

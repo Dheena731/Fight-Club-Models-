@@ -1,0 +1,141 @@
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('/fonts/PixelifySans-Variable.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+:root {
+  --font-pixel-body: 'Pixelify Sans', 'Segoe UI Symbol', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+  --font-pixel-display: var(--font-pixel-body);
+}
+
+/* One text voice includes help, native dialogs and form controls, not just headings. */
+body, #root, #root * {
+  font-family: var(--font-pixel-body);
+}
+
+/* The HUD's incumbent font shorthand is important; change only its family. */
+#root .journey-brand-button {
+  font-family: var(--font-pixel-display) !important;
+}
+
+/* Provider fields have an inline monospace family. */
+#root input[id^='key-'] {
+  font-family: var(--font-pixel-body) !important;
+}
+
+#root :is(.font-display, .pixel-button, .frontier-hud-brand, .frontier-panel h2) {
+  font-family: var(--font-pixel-display);
+  letter-spacing: .04em;
+}
+
+#root :is(.journey-title, .journey-game, .journey-battle-screen, .journey-dialog, .frontier-profile-ui, .frontier-identity, .frontier-app) {
+  line-height: 1.5;
+  font-synthesis: none;
+}
+
+#root :is(h1, h2, h3, button, input, select, textarea) {
+  font-synthesis: none;
+}
+
+#root :is(button, input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  border-radius: 0;
+}
+
+#root :is(button, select, input:not([type='checkbox']):not([type='radio'])) {
+  min-height: 44px;
+}
+
+#root :is(.journey-dialog, .journey-title-menu, .journey-dialogue-box, .journey-combatant-info, .frontier-panel, .frontier-identity, .frontier-portrait, .frontier-identity-badges li, [role='dialog']) {
+  border-radius: 0;
+}
+
+#root :is(.rounded-xl, .rounded-2xl, .rounded-t-2xl) {
+  border-radius: 0;
+}
+
+#root :is(input, textarea) {
+  caret-color: currentColor;
+}
+
+#root a {
+  text-underline-offset: 3px;
+}
+
+#root :is(.journey-title, .journey-game, .journey-dialog, .journey-battle-screen, .frontier-profile-ui) ::selection {
+  color: #2b2438;
+  background: #e6b64b;
+}
+
+#root :is(.journey-title-brand h1, .journey-starter-details h3) {
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+#root .journey-title-brand h1 {
+  font-size: clamp(44px, 7vw, 88px);
+  line-height: 1.1;
+}
+
+#root :is(.journey-title-brand p, .journey-title-caption span:first-child, .journey-area-label span, .journey-result-outcome) {
+  letter-spacing: .04em;
+}
+
+#root :is(.journey-menu-option small, .journey-menu-note, .journey-title-footnote, .journey-muted, .frontier-muted) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#root :is(.journey-title-caption, .journey-location > span, .journey-area-label span, .journey-companion-status strong small, .journey-meter > span:first-child, .journey-save-status, .journey-objective > span, .journey-objective small, .journey-team-member h3 small, .journey-route-map p, .journey-map-landmarks, .journey-map-landmarks span, .journey-map-connections, .journey-map-legend, .journey-pinned-badges span, .journey-versus-pair small, .journey-battle-topline, .journey-combatant-info > div > span, .journey-intent strong, .journey-move small, .journey-battle-team .journey-button span, .journey-destination > p, .journey-world-map button span, .journey-destination > button, .journey-starter-pick > span:last-child, .journey-button kbd, .journey-nearby kbd) {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#root :is(.journey-move span, .journey-intent, .journey-team-member p, .journey-pack-items article p, .journey-journal-quests p, .journey-map-projects article p, .journey-map-tracking p, .journey-map-projects small) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#root :is(.journey-dialogue-box p, .journey-narrative-text, .journey-battle-narration > p:last-child) {
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+#root :is(.journey-error, [role='alert'], [role='status']) {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#root :is(.text-xs, .text-\[11px\], .text-\[12px\]) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#root :is(.text-\[9px\], .text-\[10px\]) {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  #root .journey-title-brand h1 { font-size: 48px; }
+  #root .journey-title-brand p { font-size: 12px; padding-inline: 10px; }
+  #root .journey-title-menu { bottom: 8%; }
+  #root .journey-menu-option > span:last-child { font-size: 20px; }
+  #root .journey-title-caption { font-size: 12px; }
+  #root .journey-dialog-heading h2 { font-size: 20px; }
+  #root .journey-starter-details h3 { font-size: 28px; overflow-wrap: anywhere; }
+  #root :is(.journey-dialogue-box p, .journey-narrative-text, .journey-battle-narration > p:last-child) { font-size: 16px; }
+  #root :is(.journey-hud nav button, .journey-objective > span, .journey-objective small) { font-size: 12px; }
+  #root .journey-nearby { white-space: normal; width: max-content; }
+  #root .journey-move { min-height: 90px; }
+}
+
+@media (max-width: 360px) {
+  #root .journey-title-brand h1 { font-size: 40px; }
+  #root .journey-title-footnote { font-size: 13px; }
+  #root .journey-dialog-heading { flex-wrap: wrap; }
+  #root .journey-hud nav button { padding-inline: 6px; }
+  #root .journey-world-map > button { font-size: 11px; }
+}

@@ -1,0 +1,91 @@
+{
+  "generator": "built-in image_gen",
+  "created": "2026-11-05",
+  "assets": [
+    {
+      "id": "buildings",
+      "columns": 3,
+      "rows": 2,
+      "sprites": [
+        "inn",
+        "smithy",
+        "shop",
+        "townhouse",
+        "greenhouse",
+        "barn"
+      ],
+      "prompt": "Production game asset sheet for Cogimon, an original richly detailed warm Game Boy Advance pixel-art RPG. Transparent background. A perfectly regular 3-column by 2-row sprite atlas with exactly SIX DISTINCT complete buildings, one centered per equal rectangular cell, large generous clear padding between cells, all objects isolated with alpha. Orthographic 3/4 overhead south-facing RPG view. Upper row left: large two-story rustic inn with teal tiled roof, cream plaster and dark timber, small hanging blank wooden bed-shaped sign, porch, chimney and flower boxes. Upper row middle: broad working blacksmith forge with charcoal slate roof, open arched forge glowing warm amber, stone chimney and timber side lean-to stacked with logs. Upper row right: cozy pale-blue general store with red striped cloth awning, green shutters, attached produce display and sacks. Lower row left: tall narrow whimsical yellow townhouse with steep blue mansard roof and dormer windows, tiny balcony, teal door and climbing roses. Lower row middle: cottage of red brick with asymmetric ochre thatched roof, round window, green door, tiny attached greenhouse of glass and timber. Lower row right: large red-painted farm barn with cream timber beams, hayloft opening, green roof, open double doors and cartwheel at side. Carefully authored crisp pixel art, individual roof tiles, weathered stone, window panes, carved wooden trim, flowers and moss, beautiful rich material detailing, coherent scale and lighting from upper left, restrained plum outlines. All buildings very visibly different in silhouette and color, same game art style, slightly exaggerated readable shapes. Keep each entire building inside its equal atlas cell with 12 percent clear margins. NO text, lettering, numbers, watermarks, cell borders, labels, scenery, landscape or background. Transparent alpha around all six buildings. Finished high quality in-game sprite assets, not a mockup.",
+      "source": "buildings.png",
+      "runtime": "buildings.webp",
+      "width": 1536,
+      "height": 1024,
+      "sourceBytes": 2821683,
+      "runtimeBytes": 2059904,
+      "sourceSha256": "278a3d4bd68a306a0530b22385769b6a6d0fde35872d10f87e52b29b641c477d",
+      "runtimeSha256": "15f90c62e9fda125709763cbcb97cc787548d2ccfcf08c6bd8b1900d05f12024",
+      "rgbaSha256": "b5a6ecec2ec7e2f9d99603e4482294e8764fc06dc94c5027f046e545bafe7187"
+    },
+    {
+      "id": "interiors",
+      "columns": 4,
+      "rows": 3,
+      "sprites": [
+        "bed",
+        "table",
+        "chair",
+        "shelf",
+        "stove",
+        "kitchen",
+        "counter",
+        "wardrobe",
+        "chest",
+        "rug",
+        "loom",
+        "workbench"
+      ],
+      "prompt": "Production interior furniture sprite atlas for Cogimon original warm highly detailed GBA pixel-art RPG. EXACT regular grid FOUR columns THREE rows, twelve equal cells on fully transparent background. Exactly ONE complete isolated furnishing centered per cell with generous clear margins no overlap. Same orthographic 3/4 overhead south-facing RPG camera and warm light upper left, crisp detailed pixel art, readable at small game scale, warm wood/jade/ochre/terracotta/plum. Row1 left to right: cozy single wooden bed with cream pillow and teal patchwork quilt, headboard at top; rustic square wooden dining table with two mugs and loaf of bread; a single simple wooden chair; tall wooden bookshelf full of colorful bound books and a small plant. Row2 left to right: stone hearth fireplace with warm glowing fire and kettle; rustic kitchen counter with sink, cutting board, herbs and copper pans; long wooden general-store service counter with a tiny brass register and jars; tall carved wooden wardrobe with teal doors and folded linens. Row3 left to right: oak keepsake chest with brass latch; flat rectangular woven red/cream patterned floor rug viewed overhead; traditional wooden weaving loom with a blue patterned cloth in progress; carpenter/blacksmith workbench with small vise and scattered tools. Every furnishing recognizable, all different, richly weathered natural materials. Keep each isolated furniture piece completely inside its equal cell. No labels, lettering, numbers, text, logos, watermark, grid lines, room walls, floor planes, backgrounds or scenery. Fully transparent alpha around all12 sprites, no colored backdrop. Finished game art asset sheet, not a moodboard.",
+      "source": "interiors.png",
+      "runtime": "interiors.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceBytes": 2402354,
+      "runtimeBytes": 1674070,
+      "sourceSha256": "7d5dd8472e1644b87257552d3b2215f01a38f18374e59adcf265a9068f83f452",
+      "runtimeSha256": "3984b479f49041a7804bcf32ec13e6b32f365db0159f60b36c7d9c466cb2517e",
+      "rgbaSha256": "4205b652ebb6aa9baea492be320c6df440eaad9561c4747423883cc1b1ad4f67"
+    },
+    {
+      "id": "outdoors",
+      "columns": 4,
+      "rows": 3,
+      "sprites": [
+        "fountain",
+        "well",
+        "cart",
+        "stall",
+        "crop",
+        "beehive",
+        "logs",
+        "clothesline",
+        "boat",
+        "pot",
+        "barrel",
+        "lamppost"
+      ],
+      "prompt": "Production game sprite atlas for Cogimon original warm richly detailed GBA pixel-art RPG. EXACT regular grid FOUR columns THREE rows, twelve equal cells on fully transparent background. Exactly ONE complete isolated environmental object centered inside each cell with generous clear margin, no object crosses cell borders. Same orthographic 3/4 overhead south-facing camera and sunlight upper left, crisp pixel art, warm ochre/terracotta/jade/plum outlines, varied textured materials. Row1 left to right: circular carved stone town fountain with sparkling blue water and small central pedestal; roofed stone village well with wooden crank and hanging bucket; wooden two-wheel merchant handcart loaded with sacks and pumpkins; timber open-air produce market stall with red and cream striped cloth canopy, vegetables in crates. Row2 left to right: rectangular vegetable growing bed with neat carrot/cabbage rows in dark soil; small wooden beehive with copper cap on short legs; pile of split firewood in a covered timber rack; clothesline on two wooden posts with blue shirt and cream linen hanging. Row3 left to right: short wooden fishing rowboat with oars and coil of rope; cluster of terracotta pots filled with colorful flowers and green leaves; pair of oak barrels with metal hoops; tall elegant brass village lantern on stone base with warm glass. Very clear recognizable silhouettes, lovingly detailed game props, varying sizes fitted centered into SAME-sized cells, all12 fully isolated no shared ground. No labels, lettering, text, logos, watermark, grid lines, frames, backdrops or scenery. Transparent alpha around every sprite, not a colored background. This is an export-ready game sprite sheet, not a concept collage.",
+      "source": "outdoors.png",
+      "runtime": "outdoors.webp",
+      "width": 1448,
+      "height": 1086,
+      "sourceBytes": 2423972,
+      "runtimeBytes": 1718496,
+      "sourceSha256": "b2252a2559fc6b586b16e09d754a6855e3de3062d4425ecc4340c85fad3fdb8b",
+      "runtimeSha256": "cb943c10eab2cdd39c20a01dd97ed4cf639d0e102b49ff6408c8c6607471eddc",
+      "rgbaSha256": "e180dc533b831eb024cce4b27c5a7e0da8c5572dc46c96a6109ea904ae541038"
+    }
+  ],
+  "delivery": {
+    "format": "lossless WebP",
+    "verification": "Decoded RGBA bytes and dimensions identical to original source PNG. Source artwork and full generation prompts retained."
+  }
+}

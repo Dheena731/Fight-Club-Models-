@@ -1,6 +1,7 @@
-import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, FLAG_IDS, ITEMS, MAP_REVISION, MAX_BATTLE_TURNS, STARTER_IDS, SUNWARD_FLAG_IDS } from './adventureContent.js';
+import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, EXPLORATION_FLAG_IDS, FLAG_IDS, ITEMS, MAP_REVISION, MAX_BATTLE_TURNS, STARTER_IDS, SUNWARD_FLAG_IDS } from './adventureContent.js';
 import { adventureResult, beginBattle, createAdventure, createCompanion, enemyIntent, isAdventureWalkable, MODES, normalizeTrainerName } from './adventure.js';
 import { fromSave as fromLegacySave, toSave as toLegacySave } from './worldState.js';
+import { TOWN_FLAG_IDS, TOWN_QUESTS } from './inhabitedContent.js';
 
 export const ADVENTURE_SAVE_KEY = 'ai-frontier:adventure:v3';
 export const CIRCUIT_SAVE_KEY = 'ai-frontier:circuit:v1';
@@ -43,6 +44,16 @@ function migrateSunwardFields(value) {
   return { ...value, flags: { ...value.flags, ...Object.fromEntries(SUNWARD_FLAG_IDS.map(id => [id, false])) }, inventory: { ...value.inventory, 'keeper-lens': 0 } };
 }
 
+function migrateExplorationFields(value) {
+  if (!record(value) || !record(value.flags) || EXPLORATION_FLAG_IDS.some(id => owns(value.flags, id))) return value;
+  return { ...value, flags: { ...value.flags, ...Object.fromEntries(EXPLORATION_FLAG_IDS.map(id => [id, false])) } };
+}
+
+function migrateTownFields(value) {
+  if (!record(value) || !record(value.flags) || TOWN_FLAG_IDS.some(id => owns(value.flags, id))) return value;
+  return { ...value, flags: { ...value.flags, ...Object.fromEntries(TOWN_FLAG_IDS.map(id => [id, false])) } };
+}
+
 function legacyHistory(value) {
   const old = fromLegacySave(value);
   return old ? { ...toLegacySave(old), version: value.version } : null;
@@ -75,21 +86,20 @@ function migrate(value) {
 function validFlags(flags, mode) {
   if (!record(flags) || !FLAG_IDS.every(id => typeof flags[id] === 'boolean')) return false;
   if (mode !== 'journey') return FLAG_IDS.every(id => !flags[id]);
+  if (TOWN_QUESTS.some(quest => quest.stages.some((stage, index) => flags[stage.flag] && quest.stages.slice(0, index).some(previous => !flags[previous.flag])))) return false;
   return (!flags.shardFound || flags.questStarted)
     && (!flags.wispDefeated || flags.shardFound)
     && (!flags.recruited || flags.wispDefeated)
     && (!flags.relayRestored || flags.noteRead && flags.wispDefeated)
     && (!flags.bossDefeated || flags.relayRestored)
     && (!flags.questComplete || flags.bossDefeated)
-    && (!flags.lensQuestStarted || flags.wispDefeated)
     && (!flags.windClueRead || flags.lensQuestStarted)
     && (!flags.lensRecovered || flags.windClueRead)
-    && (!flags.lensReturned || flags.lensRecovered)
-    && (!flags.overlookFound || flags.wispDefeated);
+    && (!flags.lensReturned || flags.lensRecovered);
 }
 
 function readV3(value, nested = false) {
-  value = migrateSunwardFields(migrateV3Map(value));
+  value = migrateTownFields(migrateExplorationFields(migrateSunwardFields(migrateV3Map(value))));
   if (!record(value) || value.version !== 3 || value.chapterId !== CHAPTER_ID || !MODES.includes(value.mode)
     || value.mapRevision !== MAP_REVISION || typeof value.runId !== 'string' || !/^[a-zA-Z0-9:-]{1,80}$/.test(value.runId)
     || !STARTER_IDS.includes(value.starterId) || typeof value.trainerName !== 'string' || normalizeTrainerName(value.trainerName) !== value.trainerName
@@ -107,8 +117,8 @@ function readV3(value, nested = false) {
   }
   if (!team.some(member => member.id === value.activeId && member.hp > 0)) return null;
   if (!Array.isArray(value.discoveries) || value.discoveries.length > Object.keys(ADVENTURE_REGIONS).length || !value.discoveries.includes(value.locationId) || value.discoveries.some(id => !owns(ADVENTURE_REGIONS, id))) return null;
-  if (value.inventory['keeper-lens'] !== Number(value.flags.lensRecovered && !value.flags.lensReturned)
-    || value.discoveries.includes('sunward') && !value.flags.wispDefeated) return null;
+  if (value.discoveries.some(id => ADVENTURE_REGIONS[id].parentRegion && !value.discoveries.includes(ADVENTURE_REGIONS[id].parentRegion))) return null;
+  if (value.inventory['keeper-lens'] !== Number(value.flags.lensRecovered && !value.flags.lensReturned)) return null;
   const circuit = value.circuit;
   if (!record(circuit) || !integer(circuit.index, 0, 2) || !integer(circuit.wins, 0, 3) || !integer(circuit.bestWins, circuit.wins, 3)
     || typeof circuit.completed !== 'boolean' || circuit.completed !== (circuit.wins === 3)

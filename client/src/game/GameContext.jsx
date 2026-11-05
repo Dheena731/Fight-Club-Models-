@@ -18,10 +18,10 @@ export function GameProvider({ children }) {
       } });
       return;
     }
-    if (['ENTER_WORLD', 'RETURN_WORLD', 'RETURN_TITLE'].includes(action.type)) {
+    if (['ENTER_WORLD', 'RETURN_WORLD', 'RETURN_TITLE', 'ENTER_PVP'].includes(action.type)) {
       credentialsRef.current = { a: '', b: '' };
       clearKeys();
-      if (window.location.hash.startsWith('#r=')) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      if (window.location.hash.startsWith('#r=') || (action.type !== 'ENTER_PVP' && window.location.hash.toLowerCase().startsWith('#duel='))) window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
     reduce(action);
   }, []);

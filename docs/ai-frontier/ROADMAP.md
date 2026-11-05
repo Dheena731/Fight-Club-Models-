@@ -52,9 +52,11 @@ Preserve the current entertainment arena while improving its real request path. 
 
 ## Phase 5 — Small multiplayer slice
 
-Design player identity, session expiry, room authorization, and persistence before adding sockets. Start with two players in one shared hub and server-validated movement/presence; then one cooperative quest interaction. Only afterward add synchronized combat or competitive AI challenges. Each participant authorizes their own billable calls; no shared key, prompt, or private result crosses player boundaries. Rate-limit intents and verify rewards server-side. Avoid a public leaderboard until anti-cheat and scoring audit pass.
+The current approved slice is **Trainer duels**: two human trainers join an invite room and lock simultaneous creature moves. Server-controlled equal stats keep editable Journey progress out of competitive outcomes. Seat passes authorize commands; the server validates turns, expiry, forfeits and mutual rematches. Rooms are transient in one server process. No provider call, ranked reward or public achievement is attached to a duel. See [PvP rules and limits](PVP.md).
 
-**Gate:** two independent browser sessions join a room, see each other, complete a supported co-op action, reconnect safely, and cannot forge position, rewards, match outcome, or another player's provider call. Add concurrency and disconnect tests. No MMO-scale claim.
+Shared hubs, server-validated movement/presence, cooperative quests and persistent verified profiles remain future work. Any later competitive AI challenge must require each participant's own billable-call consent; no shared key, prompt, or private result may cross player boundaries. Avoid a public leaderboard until anti-cheat and scoring audit pass.
+
+**Duel gate:** two independent browser sessions create/join, exchange hidden choices, finish, mutually rematch, refresh/reconnect and leave safely. Unauthorized, stale and duplicate commands must fail. A local browser pass does not establish internet deployment, persistent profiles, player enjoyment or MMO scale. The shared-hub/co-op gate remains separate.
 
 ## Phase 6 — Release readiness
 

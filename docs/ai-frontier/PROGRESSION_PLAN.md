@@ -184,6 +184,24 @@ No open-world multiplayer, ranked ladder, real-AI-per-creature-turn, monetisatio
 
 ## Structured exploration extension · 2026-11-05
 
-The story direction is a structured main chapter with optional routes, secrets and side quests. [World and story](WORLD_AND_STORY.md) records the implemented Lantern Signal beats, character stakes, the new Sunward Pass route and honest proposals for the next acts. Sunward opens after the Static Wisp: its northern clue/recovery/return quest grants supplies once, while its southern memorial road leads to a persistent overlook discovery. It rejoins the existing chapter without changing main XP, cosmetics or completion gates. The field map and optional objective make the detour findable.
+The story direction is a structured main chapter with optional routes, secrets and side quests. [World and story](WORLD_AND_STORY.md) records the implemented Lantern Signal beats, character stakes, Sunward Pass and honest proposals for the next acts. Sunward is now open before the Static Wisp: its northern clue/recovery/return quest grants supplies once and restores the Beacon Lift, while its southern memorial road leads to a persistent overlook discovery. It rejoins the existing chapter without changing main XP, cosmetics or completion gates. The field map and optional objective make the detour findable.
 
 The extension preserves revision-2 coordinates through a passable trailhead and narrowly migrates only the new optional fields. Automated checks cover each starter’s side route, reward idempotency, region reachability and old/nested/active-battle saves. This is added chapter content, not completion of P6’s distinct second-world or observed-player validation gate.
+
+## Connected outer world and authored traversal · 2026-11-05
+
+The first chapter has seven outdoor regions. Amber Riverlands (56 × 40), Hearthbloom Orchard (48 × 36) and Starfall Highlands (52 × 40) connect Frontier Crossing to Sunward Pass through two river bridges, a watermill, cottage terraces, gardens, ruins and an observatory. Inspectable mailboxes, benches, waystones and field tins support nine persistent discoveries without altering main XP, supplies or cosmetic rewards. Caches remain concealed on the field map until found. Six regions form an open loop before chapter combat; the Wisp gate protects only the Archive.
+
+Jumping, climbing and one-way ledges use authored directed links with safe canonical landings. The riverbank jump, orchard terrace holds and highland cliff shortcuts have walking alternatives. Terrain controls water/bridge collision, while decorative detail remains nonblocking. Revision-2 coordinates, run identity, save keys and old battle/mode snapshots are preserved; only wholly absent discovery-field groups receive migration defaults. Automated coverage includes the full loop, all discoveries, traversal guards, terrain collision, old gateway positions and save/resume during traversal. See [world and story](WORLD_AND_STORY.md) for content and future-act boundaries. Integrated browser, audio and hardware checks remain separate release evidence.
+
+## Valley atmosphere and exploration leads · 2026-11-05
+
+Integrated upstream portable-save protection (`723010f`) with the local seven-region expansion. The next base now includes continuous terrain variation, layered slate cliffs, varied trees, bounded biome ambience, lossless world-art delivery and contextual Keeper’s Trail leads using the existing nine discovery flags. Final offline validation is 171 tests plus clean lint/build; 14 desktop/emulated-mobile browser checks pass. This is a visual/content-guidance increment, not completion of later story acts, multiplayer, observed-player validation or physical-device profiling. See WORK_LOG.md for exact evidence and the uncommitted-work boundary.
+
+## Inhabited places and exploration agency · 2026-11-05
+
+Frontier now has six neighborhoods, fifteen building exteriors and eight enterable town interiors. The mill and observatory add two more furnished interiors. Three errands connect residents and places. Physical street props, interior furniture, wood footsteps and recovery services give these places practical behavior.
+
+The valley ring is freely walkable in either direction before starting the Lantern Signal, with a new Moss–Orchard footpath. Restoring the mill ferry and Sela’s beacon lift permanently adds two-way shortcuts; either project can come first. The region graph and chosen-destination bearings expose these choices without teleporting. Mobile exploration uses the wider camera view and a compact console; secondary objectives remain in the Journal.
+
+This establishes non-linear exploration and persistent route consequences in one bounded valley. It does not finish a large-scale open-world game: more distinct encounters, companion moments, later story acts and reactive resident behavior remain content work. Simulated schedules, a seamless continent and open-world multiplayer are not supplied by these changes. Integration evidence and remaining hardware/player checks are recorded in WORK_LOG.md.

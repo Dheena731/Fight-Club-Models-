@@ -104,6 +104,30 @@ Continued `codex/gba-redesign-plan` at `12fa7ea` after fetching and pulling with
 
 This is a playable chapter extension, not a completed large open world. Physical-device performance, bespoke multi-frame character sheets, observed player sessions, later chapters and online multiplayer remain future work. Changes have not been committed or pushed.
 
+## 2026-11-05 — Discoverable valley and traversal expansion
+
+The cover panorama now informs playable places: Amber Riverlands (56×40), Hearthbloom Orchard (48×36), and Starfall Highlands (52×40). Together they add 6,048 map tiles to the existing four regions. The seven-region road loop links the crossing, river, orchard, observatory, Sunward ridge and grove. New road connectors are visual changes only; existing solid footprints, saved coordinates, map revision, run IDs and story rewards remain intact.
+
+### Implemented behavior
+
+- Two river crossings, a watermill, waterfall, cottages, orchard terraces, ruins and a domed observatory. Five original transparent PNG landmarks/trees have recorded prompts, dimensions and hashes in `client/public/assets/frontier/world/manifest.json`.
+- Small stones have highlights, weathering and ground shadows. Mailboxes, benches, waystones, crates, stumps, flowers, reeds, banks and masonry have distinct details. Stable coordinate-based variation keeps the world consistent on reload; ambient populations and scenery culling are bounded.
+- Nine persistent field discoveries include letters, a hidden garden, caches and views. Inspecting a mailbox reads an authored letter; discoveries enter the Journal. Secret coordinates remain hidden on the field map until found. Main-story objectives remain separate.
+- Seven directed traversal links support jumping the creek, climbing orchard/highland holds and dropping from a one-way ledge. Space and a touch control use canonical authored endpoints. Movement stays locked until player and companion land. Hidden/blurred or paused scenes freeze the animation; reduced motion completes it directly. Mid-traversal saves resume safely at the destination.
+- Surface-specific footsteps, interaction/discovery/travel cues, takeoff/landing sounds and quiet wind/river/bird ambience reuse WebAudio. Audio remains opt-in through the existing preference. Muting, pausing, blur and unmount clean up ambience; blocked walking is silent. Mud and sand affect walking/running cadence.
+- View controls offer bounded 1×/2×/3× framing without rebuilding the world. The wider view fits large landmarks; the closer view exposes small details. Keyboard movement returns focus to the playfield after HUD use so Space retains its traversal action.
+
+### Verification
+
+- Integrated working tree: **144/144 tests**, zero-error/zero-warning lint, and production build passed. This includes concurrent release-polish changes. Their independent staged release candidate is a separate checkpoint; this expansion remains uncommitted.
+- Shared tests cover all seven regions, nine discovery/save milestones, deep-water/bridge precedence, canonical traversal guards and valid landings, one-way return routes, old/nested/battle save migration and repeated interactions. An exhaustive grid/material parity check prevents renderer and collision/audio terrain from diverging. Asset tests verify all five new PNG dimensions, RGBA format and source hashes.
+- Isolated Chrome at `127.0.0.1:15173`: jump/climb/drop landings and input lock, blur/resume mid-crossing, HUD-to-game keyboard focus, water collision, mailbox persistence/Journal, map/zoom controls, mobile touch traversal and reduced motion passed. All inspected controls meet 44×44px at 390×844; 320×740 and 1280×800 were also checked.
+- Native WebAudio instrumentation observed accepted footsteps and ambience, no blocked-step cue, and zero active sources after blur/mute. The inspected large scene yielded approximately 60 animation frames/second over a 1.3-second local desktop sample. This is not physical-device performance or speaker/headphone calibration.
+- Completed browser pass: no page errors, failed requests or Arena/model API calls. Reproduction and screenshots: `.cache/overworld-smoke.mjs`, `.cache/qa/overworld/report.json`; command output: `.cache/overworld-final-check.txt`.
+- A parallel release preview under `client/.cache` exposed lint scanning generated bundles. The source lint config now excludes that cache alongside `dist`; source checks remain enabled. The other active chat was notified with user authorization, and its staged release changes were preserved.
+
+The new PNGs add approximately 8.5MB and still need delivery/physical-device profiling. Later story acts, unrestricted physics, human playtests, broader accessibility validation and multiplayer remain outside this completed expansion. No new runtime dependency or live Arena generation was used.
+
 ## 2026-11-05 — Current chapter release polish
 
 ### Delivered
@@ -145,3 +169,53 @@ Physical phone/controller checks, screen-reader testing, target-device frame/mem
 - The independent finish review found one stale manual Locker-write issue; five new storage regressions and a shared identity guard address it. Its final **ship** verdict pass scored both that safety issue and directly related false-success feedback **resolved**, with no fix-induced regression in the four final captures. That verdict covers the two scored fixes, not a whole-product audit. A separate static documenter confirmed the addition inherits the incumbent GBA system, with no global design-file changes. Only our new brief's incorrect “amber buttons” wording was corrected to match the existing jade actions; pre-existing arena-focused DESIGN.md sections were preserved.
 
 No provider credentials were entered or paid AI calls made. Backups remain editable, local and unverified. Cloud sync, verified profiles, human matchmaking, physical-device checks and measured performance remain separate work.
+
+## 2026-11-05 — Latest save integration and valley atmosphere
+
+### Starting point and delivery
+
+- Fast-forwarded `codex/gba-redesign-plan` from `6a21df1` to upstream `723010f` (portable saves and restored-Locker protection). Preserved the local seven-region expansion through autostash `3355fe3`, resolving the two Adventure import/menu conflicts by keeping both save controls and traversal. The recovery stash remains; no changes were pushed this turn.
+- Astra-led rendering pass adds continuous meadow color fields, shallow-water contours, varied tree silhouettes/tints, horizontal slate strata, low-opacity cloud shadows and bounded biome motes. Terrain/collision, object footprints, traversal endpoints and save schemas remain unchanged. Motion uses the existing pause/focus lifecycle and reduced-motion handling.
+- Keeper’s Trail clues now guide optional exploration within Riverlands, Orchard and Highlands before combat. Leads advance through the existing nine discovery flags; the completed trail is acknowledged without new rewards, save fields or secret coordinates. Existing Sunward lens objectives remain intact elsewhere.
+- Five world images now load lossless WebP derivatives: **8,406,708 → 6,494,652 bytes**, a **22.74%** runtime-transfer reduction. Every derivative was decoded and compared byte-for-byte as RGBA at unchanged dimensions. Original PNGs/prompts remain in the manifest; retaining both formats increases the public asset directory, so this is not a deployment-size reduction.
+- PRODUCT.md now describes the seven-region authored valley and the bounded first-chapter scope accurately.
+
+### Verification
+
+- Final `npm run check`: **171/171 tests**, clean lint and successful production build; largest JS chunk 372.23KB. `git diff --check` passes.
+- Added regression coverage for deterministic landscape-field continuity, advancing optional clues/mode isolation, and portable backups preserving all valley memories and canonical traversal landings across Journey/Practice/Circuit. Runtime image headers/dimensions/alpha/hashes are checked against the manifest.
+- `.cache/world-atmosphere-smoke.mjs`: **14 browser checks** pass, including traversal input locking/landing, blur pause/resume, real WebAudio cleanup, blocked-water steps, persistent mailbox discoveries, changing/completed trail clues, Save Data access, all seven map tabs, 44px controls at 390px, and static reduced-motion rendering at 320px. No page errors, failed requests or Arena/model API calls. A short desktop rAF sample was approximately 60fps; this does not establish phone performance.
+- Captures and report: `.cache/qa/world-atmosphere/`; final full check log: `.cache/world-atmosphere-final-check.log`. Static Impeccable scan of Adventure/AdventureScene returned no findings. Independent visual review requested a cliff correction and accurate product scope; both were scored resolved (`ship` at that fix-list scope). Documentation review preserves the incumbent design system; older arena-heavy DESIGN.md/absent sidecar are pre-existing drift, not repaired here.
+
+### Next implementation starting point and limits
+
+The connected valley, traversal, save compatibility and optional discovery leads are the current base. The next content gap is distinct authored encounters/companion moments along these routes, then a second story act with its own mechanic; those are not implemented by this visual pass. Human playtesting and physical phone/controller/speaker checks remain outstanding. All expansion work remains local/uncommitted. Three unrelated root-level `ChatGPT Image` files were left untouched.
+
+## 2026-11-05–06 — Inhabited places and open exploration
+
+The user rejected the sparse world and then challenged the open-world claim. This increment adds places to enter and meaningful freedom/consequences within the existing valley; it does not claim a finished continent or later story acts.
+
+- Frontier Crossing expands to 64 × 48 tiles across six neighborhoods, with fifteen distinct building exteriors, market stalls, working yards and canal gardens. Eight enterable town rooms plus the mill and observatory provide ten furnished interiors. Three errands use nine ordered persistent flags; rewards are bounded and once-only. Recovery services restore the party without replenishing supplies.
+- Three generated sprite atlases supply building, furnishing and outdoor detail. Source PNGs, lossless runtime WebPs, prompts and integrity hashes remain in `client/public/assets/frontier/settlement/manifest.json`. No runtime dependency was added. Fifty-three substantial street props have collision; all residents and doors remain reachable.
+- Removed the global Wisp requirement from Sunward and its save validation while retaining the lens clue/recovery/return chain and Archive gate. A fresh Journey can walk the six-region outdoor ring in both directions without starting the story. A reciprocal Moss–Orchard footpath adds another route.
+- Existing mill and lens completion flags now reopen actual two-way Canal Ferry and Beacon Lift gateways. Either project can be completed first; rewards cannot be farmed, and save/reload and nested Journey snapshots retain the restored routes. Locked prompts name the required repair; open prompts and physical markers indicate restored transport.
+- The field map presents the valley route graph, current project leads and selectable destinations. Navigation skips closed gateways and gives the next gateway bearing without moving the player. Secret locations remain concealed until discovered; the current lens pickup becomes trackable only after its clue. Pins are session preferences, while project progress persists.
+- Mobile exploration starts at zoom 1 with a compact destination/control console; story and errand details remain in the Journal. At 320 × 844 the final market, cottage and tracked-route views devote **495.8px (58.75%)** to the world. Controls meet 44 × 44px; four SVG arrows replace D-pad text glyphs.
+
+### Verification and integration boundaries
+
+- Inhabited-world validation passed **179 tests**, lint and build. Open-world logic/navigation then passed **189 tests**, lint and build. After the other chat integrated invite-duel and pixel-text work and corrected its caught-error lint issue, the final combined `npm run check` passed **210/210 tests**, lint and production build. Evidence: `.cache/openworld-integrated-check.log`; earlier incremental checks remain in `.cache/openworld-final-check.log`, `.cache/openworld-final-lint.log` and `.cache/openworld-final-build.log`. `git diff --check` passes.
+- All **5,560** historical valid tile coordinates remain walkable. Reachability covers every current resident, doorway and transport endpoint. New tests walk the ring both ways, complete the two projects in either order, enforce locks/rewards/save invariants and track every current project stage, including the lens pickup.
+- `.cache/inhabited-smoke.mjs` passed real room entry/exit for all ten interiors, inn save/reload, clinic recovery and all three town errands. Its inn-exit false failure was a fixed-delay race; the harness now waits for the expected persisted region rather than assuming 220ms is sufficient.
+- `.cache/openworld-smoke.mjs` passed keyboard travel around the ring, the reciprocal footpath, pre-Wisp Sunward, retained Archive lock, real project stages, both transport directions, reload and destination selection/clearing. Final responsive checks measure dialog overflow and every map-node boundary, not just document width. A clipped mobile diagram was found visually and fixed by removing its intrinsic aspect-ratio width.
+- The fourteen-check traversal/audio regression passes after integration: jump/climb/ledge motion and input locks, canonical saves, blur/focus lifecycle, deep-water collision, discovery persistence, WebAudio cleanup, touch and reduced motion. Final browser reports contain no page errors, failed requests or provider calls. Reports/captures are in `.cache/qa/inhabited/`, `.cache/qa/openworld/` and `.cache/qa/world-atmosphere/`. A short desktop frame sample is not phone performance evidence.
+- Fresh Impeccable review requested compact mobile framing, explicit transport-state feedback and SVG D-pad icons. Its final **ship** verdict scores those fixes and the provenance clarification resolved; that verdict covers the scored fix list, not a whole-game audit. The ordinary-extension exemption in `reference/new-work.md` §3 applies: these are features inside the existing Adventure and FieldMap, so no concept tournament or retrospective seed is required. Static detection found only the older Inter declaration overridden by the concurrently supplied global Pixelify stylesheet. The read-only documenter preserved the other chat’s design records and reported pre-existing sidecar/token-pointer drift without repairing it.
+- Coordinated with the authorized parallel chat on isolated invite-duel integration and global pixel typography. Added only its agreed title/Journey menu entries in owned files; Journey saves before leaving and refuses entry if persistence fails. The other chat owns duel behavior and deployment validation. PRODUCT.md distinguishes those optional local unranked rooms from world exploration and model calls.
+
+All world work remains local and uncommitted; no push was made. Physical phones, controllers/speakers, observed playtesting, reactive NPC schedules, more authored encounters and later story acts remain unchecked or unimplemented as applicable. Existing recovery stash `3355fe3` and unrelated root images remain untouched.
+
+## 2026-11-06 — Integrated GitHub checkpoint
+
+The user authorized publishing the completed world, pixel-presentation and invite-duel work together on `codex/gba-redesign-plan`. A fresh pre-commit `npm run check` passes **210 tests**, lint and the production build; evidence remains local in `.cache/github-push-check.log`. The three unrelated root images and local QA files are excluded from the commit.
+
+The coordinated PvP lane supplies the server-controlled engine, in-memory room store/router, two-seat client, invite handling, refresh recovery and Journey/title return paths. Its browser verification covered hidden simultaneous choices, four-round knockout, mutual rematch, seat retention after reload, the real two-minute idle draw, forfeit, offline exit and Journey position/HP preservation. Pixel typography and scrolling were checked in the duel guide, Save Data, Locker, Practice and model Arena at 320/390px, with controls at least 44px and no provider calls. These are local browser checks, not public deployment or physical-device evidence. Rooms remain single-process memory and reset when the server restarts; balance and observed-player validation remain open.

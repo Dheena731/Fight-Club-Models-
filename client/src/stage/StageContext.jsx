@@ -63,6 +63,7 @@ export function StageProvider({ children }) {
         autoDensity: true,
         resolution: Math.min(window.devicePixelRatio || 1, 2),
       });
+      await document.fonts.load('16px "Pixelify Sans"').catch(() => {});
 
       texturesRef.current = bakeAllTextures();
 
@@ -205,7 +206,7 @@ export function StageProvider({ children }) {
   useEffect(() => {
     const ticker = appRef.current?.ticker;
     if (!ticker) return;
-    if ([PHASE.BOOT, PHASE.TITLE, PHASE.WORLD].includes(phase) || document.hidden) ticker.stop();
+    if ([PHASE.BOOT, PHASE.TITLE, PHASE.WORLD, PHASE.PVP].includes(phase) || document.hidden) ticker.stop();
     else ticker.start();
   }, [phase, ready]);
 
@@ -268,7 +269,7 @@ export function StageProvider({ children }) {
     const id = dmgIdRef.current++;
     const crit = value >= CRIT_DAMAGE;
     const style = new TextStyle({
-      fontFamily: 'Bebas Neue, Impact, sans-serif',
+      fontFamily: 'Pixelify Sans, monospace',
       fontSize: crit ? 40 : 32,
       fill: crit ? '#FACC15' : '#EF4444',
       stroke: { color: '#0a0a0f', width: 3 },
@@ -290,7 +291,7 @@ export function StageProvider({ children }) {
       const callout = new Text({
         text: CRIT_LINES[id % CRIT_LINES.length],
         style: new TextStyle({
-          fontFamily: 'Bebas Neue, Impact, sans-serif',
+          fontFamily: 'Pixelify Sans, monospace',
           fontSize: 13,
           fill: '#FACC15',
           letterSpacing: 3,

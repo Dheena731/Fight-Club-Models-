@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createMovementController, RUN_STEP_MS, WALK_STEP_MS } from './adventureMovement.js';
+import { createMovementController, RUN_STEP_MS, WALK_STEP_MS, stepDuration } from './adventureMovement.js';
 
 test('held input follows the clock and ignores OS key repeat', () => {
   const input = createMovementController();
@@ -56,4 +56,20 @@ test('cancel clears all keyboard and pointer inputs and resets cadence', () => {
   assert.deepEqual(input.tick(10001), [0, -1]);
   assert.equal(input.tick(10001 + RUN_STEP_MS), null);
   assert.deepEqual(input.tick(10001 + WALK_STEP_MS), [0, -1]);
+});
+
+test('departure terrain controls cadence and run changes retain that surface', () => {
+  for (const surface of ['grass', 'dirt', 'stone', 'water', 'bridge']) assert.equal(stepDuration(false, surface), WALK_STEP_MS);
+  assert.equal(stepDuration(false, 'mud'), WALK_STEP_MS * 1.55);
+  assert.equal(stepDuration(true, 'sand'), RUN_STEP_MS * 1.2);
+  const input = createMovementController();
+  input.press('KeyD', [1, 0]);
+  assert.deepEqual(input.tick(0, 'mud'), [1, 0]);
+  assert.equal(input.tick(200, 'grass'), null);
+  input.setRunning(true);
+  const next = stepDuration(true, 'mud');
+  assert.equal(input.tick(next - 1, 'sand'), null);
+  assert.deepEqual(input.tick(next, 'sand'), [1, 0]);
+  assert.equal(input.tick(next + stepDuration(true, 'sand') - 1, 'grass'), null);
+  assert.deepEqual(input.tick(next + stepDuration(true, 'sand'), 'grass'), [1, 0]);
 });

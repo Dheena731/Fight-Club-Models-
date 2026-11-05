@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { adventureReducer, createAdventure } from './adventure.js';
-import { ADVENTURE_REGIONS } from './adventureContent.js';
+import { ADVENTURE_REGIONS, EXPLORATION_FLAG_IDS } from './adventureContent.js';
 import { ADVENTURE_SAVE_KEY, CIRCUIT_SAVE_KEY, LEGACY_SAVE_KEYS, loadAdventure, saveAdventure, toAdventureSave } from './adventureSave.js';
 import { PROFILE_SAVE_KEY, createProfile, loadProfile, saveProfile } from './profile.js';
 import { createGame, toSave } from './worldState.js';
@@ -11,6 +11,31 @@ function storage(entries = {}) {
   const data = new Map(Object.entries(entries));
   return { data, getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value), removeItem: key => data.delete(key) };
 }
+
+test('portable backups retain valley memories and restore in-flight traversal at its canonical landing', () => {
+  for (const regionId of ['riverlands', 'orchard', 'highlands']) {
+    const link = ADVENTURE_REGIONS[regionId].traversals[0];
+    const initial = createAdventure();
+    const field = { ...initial, locationId: regionId, ...link.from, facing: link.facing,
+      discoveries: ['frontier', 'riverlands', 'orchard', 'highlands'],
+      flags: { ...initial.flags, ...Object.fromEntries(EXPLORATION_FLAG_IDS.map(flag => [flag, true])) } };
+    const crossing = adventureReducer(field, { type: 'TRAVERSE', id: link.id });
+    assert.ok(crossing.traversal);
+    for (const mode of ['journey', 'practice', 'circuit']) {
+      const journey = mode === 'journey' ? crossing : adventureReducer(crossing, { type: 'END_TRAVERSAL', id: link.id });
+      const state = mode === 'journey' ? journey : adventureReducer(journey, { type: mode === 'practice' ? 'START_PRACTICE' : 'START_CIRCUIT' });
+      const text = JSON.stringify(createSaveBackup(storage(), { journey: state, scope: 'journey' }));
+      const destination = storage();
+      const restored = restoreSaveBackup(prepareSaveRestore(text, destination), destination);
+      assert.equal(restored.locationId, regionId);
+      assert.equal(restored.x, link.to.x); assert.equal(restored.y, link.to.y);
+      assert.equal(restored.traversal, null);
+      assert.deepEqual(restored.flags, field.flags);
+      assert.deepEqual(restored.discoveries, field.discoveries);
+      assert.notEqual(restored.runId, field.runId);
+    }
+  }
+});
 function source() {
   const store = storage();
   const state = createAdventure({ trainerName: 'Mira', starterId: 'kitewhisk' });

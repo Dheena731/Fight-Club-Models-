@@ -1,7 +1,7 @@
 import { Component, lazy, Suspense, useEffect } from 'react';
 import { ThemeProvider } from './lib/theme';
 import { GameProvider } from './game/GameContext';
-import { useGameState } from './game/gameHooks';
+import { useGameDispatch, useGameState } from './game/gameHooks';
 import { PHASE } from './game/gameReducer';
 import { StageProvider } from './stage/StageContext';
 import { useStage } from './stage/stageHooks';
@@ -13,9 +13,11 @@ import Result from './screens/Result';
 import { installGamepadControls } from './lib/gamepadControls';
 import './rpg/frontier.css';
 import './rpg/journey.css';
+import './pixel-ui.css';
 
 const Title = lazy(() => import('./rpg/JourneyTitle'));
 const World = lazy(() => import('./rpg/Adventure'));
+const PvpHall = lazy(() => import('./rpg/pvp/PvpHall'));
 
 class GameBoundary extends Component {
   state = { failed: false };
@@ -40,13 +42,15 @@ function ArenaReady({ phase }) {
 }
 
 function GameShell() {
-  const { phase } = useGameState();
+  const { phase, adventure, pvpReturn } = useGameState();
+  const dispatch = useGameDispatch();
 
   return (
     <Suspense fallback={<div className="journey-scene-loading" role="status">Opening the frontier…</div>}><div className="h-svh overflow-hidden">
       {phase === PHASE.BOOT && <Boot />}
       {phase === PHASE.TITLE && <Title />}
       {phase === PHASE.WORLD && <World />}
+      {phase === PHASE.PVP && <PvpHall trainerName={adventure?.trainerName} onExit={() => dispatch({ type: pvpReturn ? 'RETURN_WORLD' : 'RETURN_TITLE' })} />}
       {[PHASE.SELECT, PHASE.VS, PHASE.FIGHT].includes(phase) && <ArenaReady phase={phase} />}
       {phase === PHASE.RESULT && <Result />}
     </div></Suspense>

@@ -1,4 +1,5 @@
-import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, COMPANIONS, ENCOUNTERS, FLAG_IDS, ITEMS, LAMP_CHOICES, MAP_REVISION, MAX_BATTLE_TURNS, MOVES, QUESTS, RELAY_SEQUENCE, STARTER_IDS } from './adventureContent.js';
+import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, COMPANIONS, ENCOUNTERS, EXPLORATION_FLAG_IDS, FLAG_IDS, ITEMS, LAMP_CHOICES, MAP_REVISION, MAX_BATTLE_TURNS, MOVES, QUESTS, RELAY_SEQUENCE, STARTER_IDS, WORLD_PROJECTS, terrainAt } from './adventureContent.js';
+import { TOWN_QUESTS } from './inhabitedContent.js';
 
 export const ADVENTURE_VERSION = 3;
 export const MODES = ['journey', 'practice', 'circuit'];
@@ -21,8 +22,8 @@ export function createAdventure({ trainerName = 'Trainer', starterId = STARTER_I
     flags: Object.fromEntries(FLAG_IDS.map(id => [id, false])),
     inventory: { potion: 3, ether: 2, 'signal-shard': 0, 'clear-circuit': 0, 'lantern-emblem': 0, 'keeper-lens': 0 },
     discoveries: ['frontier'], battle: null, result: null, dialogue: null,
-    puzzle: null, transition: null, circuit: { index: 0, wins: 0, completed: false, bestWins: 0 },
-    returnJourney: null, legacy: null, message: 'Meet Mara by the lantern. No model calls are used in this adventure.',
+    puzzle: null, transition: null, traversal: null, circuit: { index: 0, wins: 0, completed: false, bestWins: 0 },
+    returnJourney: null, legacy: null, message: 'The valley roads are open. Mara’s lantern quest can wait.',
   };
   return mode === 'journey' ? state : beginBattle(state, mode === 'practice' ? 'practice-wisp' : CIRCUIT_IDS[0]);
 }
@@ -55,8 +56,58 @@ export function adventureObjective(state) {
 }
 export const lanternStatus = state => state.flags.questComplete ? 'restored' : state.flags.bossDefeated ? 'lit' : 'dark';
 export const journalEntries = state => questProgress(state).map(quest => ({ id: quest.id, text: quest.objective, complete: quest.complete }));
+export const exitLocked = (state, object) => object.type === 'exit' && Boolean(object.to === 'archive' && !state.flags.wispDefeated || object.requiresFlag && !state.flags[object.requiresFlag]);
+export const worldProjectProgress = state => state.mode !== 'journey' ? [] : WORLD_PROJECTS.map(project => {
+  const next = project.stages.find(stage => !state.flags[stage.flag]);
+  return { ...project, complete: state.flags[project.flag], started: project.stages.some(stage => state.flags[stage.flag]),
+    regionId: next?.regionId, objectId: next?.objectId, objective: next?.objective || project.benefit };
+});
+export function townQuestProgress(state) {
+  if (state.mode !== 'journey') return [];
+  return TOWN_QUESTS.map(quest => ({
+    id: quest.id, name: quest.name,
+    started: quest.stages.some(stage => state.flags[stage.flag]),
+    complete: state.flags[quest.stages.at(-1).flag],
+    objective: quest.stages.find(stage => !state.flags[stage.flag])?.objective || 'Completed. Your neighbors remember your help.',
+  }));
+}
+export function townObjective(state) {
+  const quests = townQuestProgress(state);
+  const active = quests.find(quest => quest.started && !quest.complete);
+  if (active) return `Optional · ${active.name}: ${active.objective}`;
+  const region = ADVENTURE_REGIONS[state.locationId];
+  if (state.locationId !== 'frontier' && region?.parentRegion !== 'frontier') return null;
+  const next = quests.find(quest => !quest.complete);
+  return next ? `Around town: ${next.objective}` : quests.length ? 'You helped the kitchen, mill and garden. Visit your neighbors or follow the valley roads.' : null;
+}
 export function sideObjective(state) {
-  if (state.mode !== 'journey' || !state.flags.wispDefeated) return null;
+  if (state.mode !== 'journey') return null;
+  const trails = {
+    riverlands: [
+      ['millWheelSeen', 'Follow the southern bridge to the watermill. Read the promise on its millstone.'],
+      ['waterfallFound', 'Follow the western riverbank north. A bench overlooks the source of the Amber River.'],
+      ['riverCacheFound', 'Look among the reeds west of the narrow stream. A surveyor left something for the next walker.'],
+    ],
+    orchard: [
+      ['orchardLetterRead', 'Read the blue cottage mailbox on the lower cottage lane. News travels along this road.'],
+      ['gardenFound', 'Follow the irrigation channels into the lower gardens. Look for a place to sit among the flowers.'],
+      ['orchardCacheFound', 'Explore beyond the upper cottage lane. Someone has been collecting leaves and stars.'],
+    ],
+    highlands: [
+      ['ruinsRead', 'Take the western switchback toward the old ruins. The first keepers left their promise in stone.'],
+      ['observatoryFound', 'Follow the upper road to the observatory. Look through the telescope beside its eastern wall.'],
+      ['highlandCacheFound', 'Walk beyond the telescope toward the far crag. The astronomer kept a record of these journeys.'],
+    ],
+  };
+  const trail = trails[state.locationId];
+  if (trail) {
+    const next = trail.find(([flag]) => !state.flags[flag]);
+    if (next) return `Optional · Keeper’s Trail: ${next[1]}`;
+    const found = EXPLORATION_FLAG_IDS.filter(flag => state.flags[flag]).length;
+    return found === EXPLORATION_FLAG_IDS.length
+      ? 'Keeper’s Trail complete: nine memories connect the river, orchard and stars. They are yours to revisit in the Journal.'
+      : `This part of the Keeper’s Trail is recorded (${found}/${EXPLORATION_FLAG_IDS.length} memories). Follow the road to another valley region.`;
+  }
   if (state.flags.lensReturned) return state.flags.overlookFound ? null : 'Optional: follow the southern memorial road to Lantern Overlook in Sunward Pass.';
   if (state.flags.lensRecovered) return 'Optional: return the Keeper’s Lens to Sela at the western trailhead in Sunward Pass.';
   if (state.flags.windClueRead) return 'Optional: follow the northern ridge east to the old lookout and recover Sela’s lens.';
@@ -72,8 +123,13 @@ export const regionObjects = state => (ADVENTURE_REGIONS[state.locationId]?.obje
 export function isAdventureWalkable(state, x, y) {
   const region = ADVENTURE_REGIONS[state.locationId];
   if (!region || !Number.isInteger(x) || !Number.isInteger(y) || x < 1 || y < 1 || x >= region.width - 1 || y >= region.height - 1) return false;
+  if (terrainAt(state.locationId, x, y) === 'water') return false;
   if (region.solid.some(rect => x >= rect.x && y >= rect.y && x < rect.x + rect.w && y < rect.y + rect.h)) return false;
   return !region.objects.some(object => visibleObject(state, object) && object.x === x && object.y === y && object.type !== 'pickup' && !object.passable);
+}
+export function availableTraversal(state) {
+  if (state.mode !== 'journey' || state.battle || state.result || state.dialogue || state.puzzle || state.transition || state.traversal) return null;
+  return (ADVENTURE_REGIONS[state.locationId]?.traversals || []).find(link => link.from.x === state.x && link.from.y === state.y && link.facing === state.facing && isAdventureWalkable(state, link.to.x, link.to.y)) || null;
 }
 export function nearbyInteractable(state) {
   const facing = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[state.facing] || [0, 1];
@@ -150,8 +206,18 @@ function interact(state) {
   if (!object) return state;
   if (object.type === 'exit') {
     if (object.to === 'archive' && !state.flags.wispDefeated) return talk(state, object.name, 'Clear the Static Wisp in Moss Circuit before entering the Archive.');
-    if (object.to === 'sunward' && !state.flags.wispDefeated) return talk(state, object.name, 'Static is sweeping the ridge. Quiet the Wisp first; then the eastern pass is safe to explore.');
+    if (exitLocked(state, object)) return talk(state, object.name, object.lockedText);
     return { ...state, locationId: object.to, ...object.entry, discoveries: [...new Set([...state.discoveries, object.to])], message: `Entered ${ADVENTURE_REGIONS[object.to].name}.` };
+  }
+  if (object.service === 'heal') return talk(recover(state), object.name, object.text || 'Rest here. Your whole team has recovered its HP and energy.');
+  if (object.task) {
+    const task = object.task;
+    if (state.flags[task.flag]) return talk(state, object.name, task.completedText || task.text);
+    if (task.requires.some(flag => !state.flags[flag])) return talk(state, object.name, task.blockedText);
+    const next = grantFlag(state, task.flag);
+    const inventory = { ...next.inventory };
+    for (const item of ['potion', 'ether']) if (task.reward?.[item]) inventory[item] = Math.min(99, inventory[item] + task.reward[item]);
+    return talk({ ...next, inventory }, object.name, task.text);
   }
   switch (object.id) {
     case 'guide': {
@@ -177,12 +243,12 @@ function interact(state) {
       return talk(state, object.name, state.flags.recruited ? 'Mossback is traveling with you. The Archive lies south of town. For an optional detour, follow this road east: Sela keeps watch over Sunward Pass.' : 'A gathering signal leaves an opening. Ward against its following surge. After the Wisp, come back to meet Mossback.');
     }
     case 'routekeeper': {
-      if (!state.flags.lensQuestStarted) return talk(grantFlag(state, 'lensQuestStarted'), object.name, 'I kept the ridge beacon lit while Mara watched the town. The last surge tore its lens away. The Wind Marker on the northern ridge records where it fell. Bring it back and I can watch the road again. You can help now, or return another day.');
+      if (!state.flags.lensQuestStarted) return talk(grantFlag(state, 'lensQuestStarted'), object.name, 'The beacon guides the lift operator between Market Street and the ridge. I kept it lit while Mara watched the town. The last surge tore its lens away. The Wind Marker on the northern ridge records where it fell. Bring it back and I can watch the road again. You can help now, or return another day.');
       if (state.flags.lensRecovered && !state.flags.lensReturned) {
         const next = grantFlag(state, 'lensReturned');
-        return talk({ ...next, inventory: { ...next.inventory, 'keeper-lens': 0, potion: Math.min(99, next.inventory.potion + 2), ether: Math.min(99, next.inventory.ether + 1) } }, object.name, 'The lens is home. Take two Field Tonics and a Signal Tea for the road. My beacon will guide travelers again. The southern memorial road leads to an overlook, if you want to see what we are keeping safe.');
+        return talk({ ...next, inventory: { ...next.inventory, 'keeper-lens': 0, potion: Math.min(99, next.inventory.potion + 2), ether: Math.min(99, next.inventory.ether + 1) } }, object.name, 'The lens is home. Take two Field Tonics and a Signal Tea for the road. The beacon lift is running again! Its upper platform is beside Lantern Overlook; the lower platform is at the east end of Market Street. The southern memorial road leads to an overlook, if you want to see what we are keeping safe.');
       }
-      return talk(state, object.name, state.flags.lensReturned ? 'The ridge has its keeper again. Thank you. The southern road remembers the keepers before us; Mara is waiting back in the crossing.' : sideObjective(state));
+      return talk(state, object.name, state.flags.lensReturned ? 'The ridge has its keeper again. The Beacon Lift connects the overlook to Market Street. Thank you. The southern road remembers the keepers before us; Mara is waiting back in the crossing.' : sideObjective(state));
     }
     case 'ridge-sign': return talk(state, object.name, 'North: Wind Marker and the old lookout. East, then south: Keepers’ Memorial and Lantern Overlook. West: Sela and Moss Circuit. Both roads meet at the eastern ridge.');
     case 'wind-marker':
@@ -207,15 +273,22 @@ function interact(state) {
     case 'arena': return { ...state, transition: 'arena', message: 'Live Arena is separate from Journey. Provider calls require explicit consent.' };
     case 'practice-board': return startMode(state, 'practice');
     case 'circuit-board': return startMode(state, 'circuit');
-    case 'signpost': return talk(state, object.name, 'East: Moss Circuit. South: Forgotten Archive. Keeper’s Rest: beside the town square.');
+    case 'signpost': return talk(state, object.name, 'Market Street continues east beyond the Moss Circuit gateway: inn, clinic and provisions. South through the open streets: Hearth Row homes, Makers’ Yard and the canal. Southeast: Amber Riverlands. Keeper’s Rest is beside the old square. Stand beside an open doorstep and Interact to enter.');
     case 'lantern': return talk(state, object.name, state.flags.questComplete ? 'Amber light reaches every roof. The crossing is restored.' : 'The relay lantern is waiting for its signal.');
-    default: return state;
+    default: return typeof object.text === 'string' ? talk(object.discoveryFlag ? grantFlag(state, object.discoveryFlag) : state, object.name, object.text) : state;
   }
 }
 
 export function adventureReducer(state, action) {
   if (!action || typeof action.type !== 'string') return state;
+  if (state.traversal && action.type !== 'END_TRAVERSAL') return state;
   switch (action.type) {
+    case 'TRAVERSE': {
+      const link = availableTraversal(state);
+      if (!link || action.id !== undefined && action.id !== link.id) return state;
+      return { ...state, ...link.to, traversal: { id: link.id, kind: link.kind, from: { ...link.from }, to: { ...link.to } }, message: link.label || '' };
+    }
+    case 'END_TRAVERSAL': return state.traversal && action.id === state.traversal.id ? { ...state, traversal: null } : state;
     case 'DISMISS_DIALOGUE': return state.dialogue ? { ...state, dialogue: null } : state;
     case 'CLEAR_TRANSITION': return state.transition ? { ...state, transition: null } : state;
     case 'EXIT_MODE': {

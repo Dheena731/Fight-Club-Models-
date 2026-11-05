@@ -1,0 +1,164 @@
+.pvp-hall {
+  --pvp-ink: var(--pixel-ink, #2b2438);
+  --pvp-cloud: var(--pixel-cloud, #f4f6ed);
+  --pvp-jade: var(--pixel-jade, #35654f);
+  --pvp-gold: var(--pixel-gold, #e6b64b);
+  color: var(--pvp-ink);
+  background: #35654f;
+  min-height: 100svh;
+  height: 100svh;
+  overflow-y: auto;
+  padding: clamp(12px, 3vw, 36px);
+  font: 400 18px/1.45 var(--font-pixel-body, 'Courier New', monospace);
+  color-scheme: light;
+  accent-color: var(--pvp-jade);
+  caret-color: var(--pvp-jade);
+  scrollbar-color: #797967 var(--pvp-cloud);
+}
+.pvp-hall *, .pvp-hall *::before, .pvp-hall *::after { box-sizing: border-box; }
+.pvp-hall ::selection { background: var(--pvp-gold); color: var(--pvp-ink); }
+.pvp-hall :focus-visible { outline: 3px solid #0b6173; outline-offset: 4px; }
+.pvp-hall button, .pvp-hall input { font: inherit; color: inherit; border-radius: 0; }
+.pvp-hall button { min-height: 46px; border: 2px solid var(--pvp-ink); background: #e1e8d3; padding: 9px 15px; cursor: pointer; touch-action: manipulation; font-weight: 600; line-height: 1.25; }
+.pvp-hall button:hover:not(:disabled) { background: #f1dfad; }
+.pvp-hall button:disabled { opacity: .6; cursor: not-allowed; }
+.pvp-hall button.pvp-primary { background: var(--pvp-jade); color: #fffbe9; }
+.pvp-hall button.pvp-primary:hover:not(:disabled) { background: #254b39; }
+.pvp-hall button.pvp-danger { background: #8b342e; color: #fffbe9; }
+.pvp-hall button.pvp-danger:hover:not(:disabled) { background: #6e2926; }
+.pvp-hall h1, .pvp-hall h2, .pvp-hall h3 { font-family: var(--font-pixel-display, 'Courier New', monospace); line-height: 1.1; text-wrap: balance; }
+.pvp-hall h1 { font-size: clamp(30px, 4vw, 44px); margin: 0; }
+.pvp-hall h2 { font-size: 28px; margin: 0 0 15px; }
+.pvp-hall p { margin: 0 0 12px; max-width: 70ch; }
+.pvp-hall input { display: block; min-height: 48px; width: 100%; padding: 9px 12px; border: 2px solid #6e7364; background: #fffef6; margin-top: 5px; min-width: 0; }
+.pvp-hall input::placeholder { color: #635e59; opacity: 1; }
+.pvp-hall label { display: block; font-weight: 600; }
+.pvp-frame { max-width: 1080px; margin: 0 auto; border: 3px solid var(--pvp-ink); background: var(--pvp-cloud); }
+.pvp-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 24px 28px; border-bottom: 3px solid var(--pvp-ink); }
+.pvp-header p { font-size: 16px; margin: 7px 0 0; }
+.pvp-header button { flex-shrink: 0; }
+.pvp-entry { display: grid; grid-template-columns: 1.25fr 1fr; }
+.pvp-register { padding: 32px 28px; }
+.pvp-name { max-width: 360px; margin: 22px 0; }
+.pvp-hall fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+.pvp-hall legend { padding: 0; margin-bottom: 9px; }
+.pvp-starter-picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.pvp-starter-picks button { padding: 8px 3px; min-width: 0; font-size: 15px; }
+.pvp-starter-picks button[aria-pressed="true"] { background: #efda9d; border: 3px solid #71501e; padding: 7px 2px; }
+.pvp-starter-picks button > span:last-child { display: block; }
+.pvp-hall .journey-art { display: block; position: relative; width: 100%; height: 100%; }
+.pvp-hall .journey-art img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+.pvp-hall .journey-battle-sprite { display: block; width: 100%; height: 100%; background-repeat: no-repeat; image-rendering: pixelated; }
+.pvp-starter-picks .journey-art { height: 92px; }
+.pvp-join { border-top: 2px solid #b2baa5; margin-top: 24px; padding-top: 22px; display: flex; align-items: flex-end; gap: 10px; }
+.pvp-join label { flex: 1; min-width: 0; }
+.pvp-join button { flex-shrink: 0; min-height: 48px; }
+.pvp-join input { text-transform: uppercase; }
+.pvp-welcome { background: #d8e4c7; padding: 32px 28px; display: flex; align-items: flex-start; flex-direction: column; justify-content: center; }
+.pvp-welcome > .journey-art { height: 270px; max-width: 320px; align-self: center; margin-bottom: 18px; }
+.pvp-welcome p:last-child { margin-top: 12px; font-size: 16px; color: #3f5140; }
+.pvp-error, .pvp-notice { margin: 18px 28px !important; padding: 14px 16px; border: 2px solid #934a29; background: #fff0c8; color: #6f331f; }
+.pvp-error p { margin-bottom: 0; }
+.pvp-error button { margin-top: 12px; }
+.pvp-notice { color: #2c4e3c; border-color: #53745a; background: #e4edda; }
+.pvp-room-strip { padding: 18px 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px 22px; border-bottom: 2px solid #a2af94; background: #e4ebd8; }
+.pvp-room-strip label { width: 190px; font-size: 15px; }
+.pvp-room-strip input { font-size: 24px; line-height: 1; letter-spacing: .04em; padding: 8px; text-align: center; }
+.pvp-room-strip p { font-size: 14px; margin: 0 0 0 auto; }
+.pvp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pvp-turn-status { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; background: #fff0c8; border-bottom: 2px solid #b7a16d; }
+.pvp-turn-status p { margin: 0; font-size: 20px; font-weight: 600; }
+.pvp-clock { font-size: 24px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pvp-waiting { display: grid; grid-template-columns: 240px minmax(0, 1fr); align-items: center; gap: 28px; padding: 36px 28px; }
+.pvp-waiting > .journey-art { height: 230px; }
+.pvp-waiting p { color: #494f42; }
+.pvp-battlefield { display: grid; grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr); background: #d4e3bf; padding: 24px 40px 0; border-bottom: 8px solid #7e9a62; align-items: center; }
+.pvp-fighter { min-width: 0; max-width: 320px; justify-self: center; width: 100%; }
+.pvp-fighter-name strong { display: block; overflow-wrap: anywhere; font-size: 20px; }
+.pvp-fighter-name > span { display: block; font-size: 16px; color: #3f5140; }
+.pvp-hp { margin-top: 12px; }
+.pvp-hp > span { display: flex; align-items: center; justify-content: space-between; font-size: 16px; }
+.pvp-hp meter { display: block; appearance: none; width: 100%; height: 15px; border: 2px solid var(--pvp-ink); background: #b9c6a7; border-radius: 0; overflow: hidden; }
+.pvp-hp meter::-webkit-meter-bar { border: 0; background: #b9c6a7; border-radius: 0; }
+.pvp-hp meter::-webkit-meter-optimum-value { background: var(--pvp-jade); }
+.pvp-hp meter::-moz-meter-bar { background: var(--pvp-jade); }
+.pvp-energy { margin-top: 7px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px; font-size: 15px; }
+.pvp-energy > div { display: flex; gap: 4px; }
+.pvp-energy i { display: block; width: 13px; height: 13px; background: #b9c6a7; border: 1px solid #625c3c; }
+.pvp-energy i.is-filled { background: #e6b64b; }
+.pvp-fighter > .journey-art { height: 240px; width: min(100%, 280px); margin: 5px auto 0; }
+.pvp-ready { background: #edf2df; padding: 7px 10px; text-align: center; font-size: 15px; margin: 0 -6px !important; }
+.pvp-versus { text-align: center; font-size: 28px; color: #3c5a40; }
+.pvp-command-panel, .pvp-result { padding: 26px 28px; }
+.pvp-command-panel h2 { font-size: 24px; }
+.pvp-moves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pvp-moves button { text-align: left; padding: 14px; min-width: 0; }
+.pvp-moves strong { display: block; font-size: 21px; }
+.pvp-moves span, .pvp-moves small { display: block; margin-top: 6px; font-size: 15px; font-weight: 400; }
+.pvp-moves .is-chosen { background: #efda9d; border-color: #71501e; opacity: 1; }
+.pvp-command-panel > p { margin: 15px 0 0; font-size: 16px; }
+.pvp-history, .pvp-guide { border-top: 2px solid #a2af94; padding: 0 28px; }
+.pvp-hall summary { cursor: pointer; min-height: 52px; padding: 13px 0; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.pvp-guide > div { padding: 8px 0 18px; }
+.pvp-guide dl { margin: 20px 0; }
+.pvp-guide dt { font-weight: 700; }
+.pvp-guide dd { margin: 2px 0 16px; max-width: 65ch; }
+.pvp-history ol { max-height: 300px; overflow: auto; margin: 0 0 20px; padding: 0; list-style: none; }
+.pvp-history li { padding: 12px 0; border-bottom: 1px solid #b2baa5; }
+.pvp-history li span { display: block; overflow-wrap: anywhere; }
+.pvp-footer { padding: 15px 28px; font-size: 14px; background: #e4ebd8; border-top: 2px solid #a2af94; }
+.pvp-leave-dialog { min-height: 0; height: auto; padding: 26px; width: min(560px, calc(100vw - 32px)); max-height: calc(100svh - 32px); overflow: auto; background: var(--pvp-cloud); border: 3px solid var(--pvp-ink); margin: auto; }
+.pvp-leave-dialog::backdrop { background: #172c29b8; }
+.pvp-leave-dialog .pvp-actions { margin-top: 22px; }
+@media (max-width: 760px) {
+  .pvp-hall { padding: 14px; }
+  .pvp-header, .pvp-register, .pvp-welcome { padding: 22px 20px; }
+  .pvp-entry { grid-template-columns: 1fr; }
+  .pvp-welcome { display: none; }
+  .pvp-room-strip, .pvp-turn-status { padding: 16px 20px; }
+  .pvp-room-strip p { margin-left: 0; }
+  .pvp-waiting { padding: 24px 20px; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; }
+  .pvp-waiting > .journey-art { height: 180px; }
+  .pvp-battlefield { padding: 22px 20px 0; grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); gap: 8px; }
+  .pvp-fighter > .journey-art { height: 180px; }
+  .pvp-versus { font-size: 22px; }
+  .pvp-command-panel, .pvp-result { padding: 24px 20px; }
+  .pvp-moves { grid-template-columns: 1fr; }
+  .pvp-moves button { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+  .pvp-moves strong { grid-row: 1 / span 2; align-self: center; }
+  .pvp-moves span, .pvp-moves small { margin-top: 0; }
+  .pvp-history, .pvp-guide { padding: 0 20px; }
+  .pvp-footer { padding: 15px 20px; }
+}
+@media (max-width: 420px) {
+  .pvp-hall { padding: 9px; font-size: 17px; }
+  .pvp-header { padding: 18px 14px; gap: 12px; align-items: flex-start; }
+  .pvp-header p { font-size: 14px; }
+  .pvp-header button { padding: 9px 10px; font-size: 16px; }
+  .pvp-register, .pvp-command-panel, .pvp-result { padding: 24px 14px; }
+  .pvp-starter-picks { gap: 5px; }
+  .pvp-starter-picks button { font-size: 14px; }
+  .pvp-starter-picks .journey-art { height: 72px; }
+  .pvp-join { flex-direction: column; align-items: stretch; }
+  .pvp-room-strip, .pvp-turn-status { padding: 14px; }
+  .pvp-room-strip { gap: 12px; }
+  .pvp-turn-status p { font-size: 18px; }
+  .pvp-clock { font-size: 21px; }
+  .pvp-waiting { grid-template-columns: 1fr; padding: 24px 14px; }
+  .pvp-waiting > .journey-art { height: 150px; max-width: 180px; margin: auto; }
+  .pvp-battlefield { padding: 18px 12px 0; gap: 7px; grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr); }
+  .pvp-fighter-name strong { font-size: 17px; }
+  .pvp-fighter-name > span, .pvp-hp > span { font-size: 14px; }
+  .pvp-energy { font-size: 14px; }
+  .pvp-energy > div { gap: 3px; }
+  .pvp-energy i { width: 11px; height: 11px; }
+  .pvp-fighter > .journey-art { height: 145px; }
+  .pvp-ready { font-size: 14px; padding: 7px 2px; }
+  .pvp-versus { font-size: 17px; }
+  .pvp-moves button { grid-template-columns: 1fr; gap: 5px; }
+  .pvp-moves strong { grid-row: auto; }
+  .pvp-error, .pvp-notice { margin: 14px !important; }
+  .pvp-history, .pvp-guide { padding: 0 14px; }
+  .pvp-footer { padding: 15px 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .pvp-hall *, .pvp-hall *::before, .pvp-hall *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }

@@ -4,12 +4,14 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import battleRouter from './routes/battle.js';
 import modelRouter from './routes/model.js';
+import pvpRouter from './routes/pvp.js';
 import { corsOptions } from './lib/cors.js';
 
 const app = express();
 const PORT = process.env.API_PORT || process.env.PORT || 8787;
 
 app.use(cors(corsOptions));
+app.use('/api/pvp', pvpRouter);
 app.use(express.json());
 
 // Cost / abuse guardrail: cap battles per IP.

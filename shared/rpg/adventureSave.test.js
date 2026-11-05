@@ -237,7 +237,7 @@ test('corruption sweep never throws or resurrects missing team members', () => {
     const candidate = { ...saved, [key]: bad };
     assert.doesNotThrow(() => fromAdventureSave(candidate));
   }
-  assert.equal(FLAG_IDS.length, 13);
+  assert.equal(FLAG_IDS.length, 31);
   assert.equal(STARTER_IDS.length, 3);
-  assert.equal(Object.keys(ADVENTURE_REGIONS).length, 4);
+  assert.equal(Object.keys(ADVENTURE_REGIONS).length, 17);
 });

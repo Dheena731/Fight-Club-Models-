@@ -48,13 +48,8 @@ function stripSunwardFields(snapshot) {
   return snapshot;
 }
 
-test('the optional trail opens after the Wisp and does not change the main objective', () => {
+test('the optional trail opens before the Wisp and does not change the main objective', () => {
   let state = visit(createAdventure(), 'grove-gate');
-  assert.equal(sideObjective(state), null);
-  state = visit(state, 'sunward-gate');
-  assert.equal(state.locationId, 'grove');
-  assert.match(state.dialogue.text, /Quiet the Wisp/);
-  state = clearWisp();
   const objective = adventureObjective(state);
   state = visit(state, 'sunward-gate');
   assert.equal(state.locationId, 'sunward');
@@ -132,7 +127,6 @@ test('Sunward save defaults never repair partial/corrupt new or old required fie
     value => { delete value.inventory['keeper-lens']; },
     value => { value.flags.lensReturned = true; },
     value => { value.inventory['keeper-lens'] = 1; },
-    value => { value.flags.overlookFound = true; },
   ]) {
     const candidate = structuredClone(original); mutate(candidate);
     assert.equal(fromAdventureSave(candidate), null);

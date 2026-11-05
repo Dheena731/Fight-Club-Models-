@@ -9,12 +9,15 @@ The GBA companion redesign is being implemented against the [complete progressio
 - **Journey:** name your trainer, inspect three original starter companions, cross an authored town/forest/Archive, recruit Mossback, restore a relay and defeat the Archive Warden. Keyboard, touch and browser-standard gamepad controls are supported; versioned progress saves locally with legacy-save import.
 - **Practice:** repeatable, deterministic creature combat without changing Journey XP or unlocks.
 - **Rival Circuit:** three local rival encounters with recovery and a separate local record. No provider key required.
+- **Trainer duels:** two human trainers create/join an invite room and choose simultaneous creature moves. All starters use equal server-controlled stats; Journey rewards stay separate. The local server must be running. [Duel rules and hosting limits](docs/ai-frontier/PVP.md).
 - **Locker:** equip earned Lantern cosmetics, a title and up to three badges; preview the arena entrance without making a model call. These rewards remain local/unverified.
 - **Live model arena:** enter from Frontier Crossing to play Roast, Prompt-Injection, or Impersonation matches using your own provider credentials. This is separate from RPG combat and may incur provider charges.
 
-The first chapter is a bounded playable slice, not a finished open-world game. A lore codex separates sourced AI history from invented game abilities. Multiplayer, more chapters, deeper RPG combat, and a fully reviewed BYOK challenge system remain planned. See the [roadmap](docs/ai-frontier/ROADMAP.md).
+The first chapter is a bounded playable slice, not a finished open-world game. A lore codex separates sourced AI history from invented game abilities. Shared-world multiplayer, ranked play, more chapters, deeper RPG combat, and a fully reviewed BYOK challenge system remain planned. See the [roadmap](docs/ai-frontier/ROADMAP.md).
 
 PixiJS renders exploration and the arena; React owns readable HUD, dialogue, controls, and menus.
+
+The pixel presentation covers the whole game, including instructions, settings, save dialogs and provider setup. Pixelify Sans is bundled locally; the game does not require a font service.
 
 Move with the arrow keys or WASD; hold Shift to run. E or Space interacts, J opens the Journal, T opens Team, I opens Pack, and Escape closes menus. On a standard gamepad, use the left stick or D-pad to move or choose, A to confirm/interact, B to return, X to run, and Start for the game menu. Touch controls remain visible. Physical-controller and phone validation remain release checks.
 

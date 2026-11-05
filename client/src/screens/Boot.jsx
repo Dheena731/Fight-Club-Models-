@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useGameDispatch } from '../game/gameHooks';
 import { decodeReplayFromHash } from '../lib/replay';
 import { clearKeys } from '../lib/keys';
+import { readDuelInvite } from '../lib/duelInvite';
 
 /**
  * BOOT — short power-on. Pixi initializes only on entering a playable scene.
@@ -29,6 +30,8 @@ export default function Boot() {
       const t = setTimeout(() => {
         if (replayRef.current) {
           dispatch({ type: 'SHOW_REPLAY', result: replayRef.current });
+        } else if (readDuelInvite(window.location.hash)) {
+          dispatch({ type: 'ENTER_PVP' });
         } else {
           dispatch({ type: 'BOOT_DONE' });
         }

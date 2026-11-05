@@ -2,6 +2,7 @@ export const PHASE = {
   BOOT: 'BOOT',
   TITLE: 'TITLE',
   WORLD: 'WORLD',
+  PVP: 'PVP',
   SELECT: 'SELECT',
   VS: 'VS',
   FIGHT: 'FIGHT',
@@ -23,6 +24,7 @@ export const initialState = {
   fightBeat: FIGHT_BEAT.IDLE,
   bootError: null,
   arenaReturn: false,
+  pvpReturn: false,
   adventure: null,
   arenaIdentity: null,
 };
@@ -34,10 +36,13 @@ export function gameReducer(state, action) {
 
     case 'ENTER_WORLD':
     case 'RETURN_WORLD':
-      return { ...state, phase: PHASE.WORLD, adventure: action.adventure || state.adventure, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false };
+      return { ...state, phase: PHASE.WORLD, adventure: action.adventure || state.adventure, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false, pvpReturn: false };
 
     case 'RETURN_TITLE':
-      return { ...state, phase: PHASE.TITLE, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false };
+      return { ...state, phase: PHASE.TITLE, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false, pvpReturn: false };
+
+    case 'ENTER_PVP':
+      return { ...state, phase: PHASE.PVP, adventure: action.adventure || state.adventure, pvpReturn: Boolean(action.adventure), result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: false };
 
     case 'ENTER_ARENA':
       return { ...state, phase: PHASE.SELECT, adventure: action.adventure || state.adventure, arenaIdentity: action.identity || null, result: null, loadout: null, fightBeat: FIGHT_BEAT.IDLE, arenaReturn: true };
