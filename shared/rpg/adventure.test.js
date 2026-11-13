@@ -1,3 +1,4 @@
+import { STORY_CHAPTERS } from './storyContent.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ADVENTURE_REGIONS, CIRCUIT_IDS, COMPANIONS, ENCOUNTERS, getCompanion, getEncounter, getMove, ITEMS, MAX_BATTLE_TURNS, STARTER_IDS } from './adventureContent.js';
@@ -89,7 +90,7 @@ function finishChapter(starterId, recruit) {
   const rewards = unlockedRewardIds(state);
   assert.equal(new Set(rewards).size, 5);
   assert.equal(questProgress(state).every(quest => quest.complete), true);
-  assert.match(adventureObjective(state), /complete/);
+  assert.equal(adventureObjective(state), STORY_CHAPTERS[0].steps[0].objective, 'the next chapter supplies the objective after homecoming');
   const finalXp = state.team[0].xp;
   state = act(fromAdventureSave(toAdventureSave(state)), 'CONTINUE_RESULT');
   state = dismiss(interactAt(state, 'guide'));

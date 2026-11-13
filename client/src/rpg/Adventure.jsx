@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useGameDispatch, useGameState } from '../game/gameHooks';
-import { COMPANIONS, ADVENTURE_REGIONS, ITEMS, MOVES, EXPLORATION_FLAG_IDS, terrainAt } from '../../../shared/rpg/adventureContent.js';
-import { createAdventure, adventureReducer, activeCompanion, availableTraversal, nearbyInteractable, adventureObjective, sideObjective, townObjective, townQuestProgress, questProgress, unlockedRewardIds, exitLocked } from '../../../shared/rpg/adventure.js';
+import { COMPANIONS, ADVENTURE_REGIONS, ITEMS, MOVES, EXPLORATION_FLAG_IDS, ENCOUNTERS, terrainAt } from '../../../shared/rpg/adventureContent.js';
+import { createAdventure, adventureReducer, activeCompanion, availableTraversal, nearbyInteractable, adventureObjective, valleyProgress, sideObjective, townObjective, townQuestProgress, unlockedRewardIds, exitLocked } from '../../../shared/rpg/adventure.js';
 import { journeyStorageIdentity, readAdventure, retryGameSave, writeGameProfile, writeAdventure as saveAdventure } from '../lib/adventureStorage.js';
 import { createMovementController, MOVEMENT_KEYS } from '../lib/adventureMovement.js';
 import { loadCircuitRecord, saveCircuitRecord } from '../../../shared/rpg/adventureSave.js';
@@ -14,6 +14,13 @@ import FieldMap from './FieldMap';
 import { adventureRoute } from '../../../shared/rpg/adventureNavigation.js';
 import SaveDataPanel from './SaveDataPanel';
 import * as sfx from '../lib/sfx';
+import ValleyAlmanac from './ValleyAlmanac';
+import StoryJournal, { PersonalQuests } from './StoryJournal';
+import { currentStory } from '../../../shared/rpg/story.js';
+import { STORY_PUZZLES } from '../../../shared/rpg/storyContent.js';
+import './story.css';
+import './almanac.css';
+import { VALLEY_PUZZLES } from '../../../shared/rpg/valleyContent.js';
 
 const MOVE_LIST = Array.isArray(MOVES) ? MOVES : Object.values(MOVES);
 
@@ -44,15 +51,15 @@ function BattleScreen({ state, dispatch, profile, onExit }) {
   const [command, setCommand] = useState('fight');
   const enemy = state.battle.enemy;
   const intent = typeof enemy.intent === 'object' ? enemy.intent.description || enemy.intent.name : enemy.intent;
-  const enemyArtId = enemy.artId || ({ 'rival-scout': 'zipcat', 'rival-scholar': 'latticewing', 'rival-keeper': 'rampart' }[enemy.id]) || enemy.id;
+  const enemyArtId = ENCOUNTERS[state.battle.encounterId]?.artId || enemy.artId || ({ 'rival-scout': 'zipcat', 'rival-scholar': 'latticewing', 'rival-keeper': 'rampart' }[enemy.id]) || enemy.id;
   const moves = companion.moves.map((entry) => typeof entry === 'string' ? MOVE_LIST.find((move) => move.id === entry) : entry).filter(Boolean);
   return <main className="journey-battle-screen">
-    <header className="journey-battle-topline"><span>{state.mode === 'journey' ? 'THE LANTERN SIGNAL' : state.mode === 'practice' ? 'PRACTICE · NO STORY REWARDS' : 'RIVAL CIRCUIT'}</span><span>Turn {state.battle.turn + 1} · Offline tactics</span></header>
+    <header className="journey-battle-topline"><span>{state.mode === 'journey' ? ADVENTURE_REGIONS[state.locationId].name : state.mode === 'practice' ? 'PRACTICE · NO STORY REWARDS' : 'RIVAL CIRCUIT'}</span><span>Turn {state.battle.turn + 1} · Offline tactics</span></header>
     <div className={`journey-battle-scene is-${state.locationId}`}>
       <div className="journey-battle-distant" aria-hidden="true" />
-      <section className="journey-combatant-info is-enemy"><div><h1 ref={headingRef} tabIndex={-1}>{enemy.name}</h1><span>{state.mode === 'circuit' ? 'Rival team' : 'Wild signal'}</span></div><Meter value={enemy.hp} max={enemy.maxHp} label="Opponent HP" /></section>
+      <section className="journey-combatant-info is-enemy"><div><h1 ref={headingRef} tabIndex={-1}>{enemy.name}</h1><span>{state.mode === 'circuit' ? 'Rival team' : ENCOUNTERS[state.battle.encounterId]?.story ? 'Story guardian' : ENCOUNTERS[state.battle.encounterId]?.valley ? 'Valley guardian' : 'Wild signal'}</span></div><Meter value={enemy.hp} max={enemy.maxHp} label="Opponent HP" /></section>
       <div className="journey-enemy-platform" aria-hidden="true" />
-      <div key={`enemy-${state.battle.turn}`} className={`journey-enemy-art ${state.battle.turn > 0 ? 'is-hit' : ''}`}><CompanionArt id={enemyArtId} variant="front" /></div>
+      <div key={`enemy-${state.battle.turn}`} className={`journey-enemy-art ${state.battle.turn > 0 ? 'is-hit' : ''}`}><CompanionArt id={enemyArtId} variant="front" alt={enemy.name} /></div>
       <div className="journey-ally-platform" aria-hidden="true" />
       <div key={`ally-${companion.id}-${state.battle.turn}`} className={`journey-ally-art ${state.battle.turn > 0 ? 'is-acting' : ''}`}><CompanionArt id={companion.id} variant="back" skinId={profile.loadout.skinId} /></div>
       <section className="journey-combatant-info is-ally"><div><h2>{companion.name}</h2><span>Lv. {companion.level} · {companion.affinity}</span></div><Meter value={companion.hp} max={companion.maxHp} label="Companion HP" /><Meter value={companion.energy} max={companion.maxEnergy} label="Energy" energy /></section>
@@ -78,6 +85,7 @@ export default function Adventure() {
     const initial = game.adventure || loaded.state || createAdventure({});
     return { ...initial, circuit: { ...initial.circuit, bestWins: Math.max(initial.circuit.bestWins, loadCircuitRecord().bestWins) } };
   });
+  const [journalView, setJournalView] = useState('story');
   const [panel, setPanel] = useState(null); const [profile, setProfile] = useState(() => loadProfile() || createProfile());
   const [initialProfileIdentity] = useState(() => journeyStorageIdentity());
   const profileJourney = state.mode === 'journey' ? state : state.returnJourney;
@@ -101,8 +109,18 @@ export default function Adventure() {
   const [fieldAudioActive, setFieldAudioActive] = useState(() => !document.hidden && document.hasFocus());
   const dialogueRef = useRef(state.dialogue); dialogueRef.current = state.dialogue;
   const companion = activeCompanion(state); const nearby = nearbyInteractable(state); const region = ADVENTURE_REGIONS[state.locationId];
-  const optionalObjective = townObjective(state) || sideObjective(state);
+  const localFieldwork = valleyProgress(state).find(project => project.regionId === (region.parentRegion || region.id) && !project.complete);
+  const optionalObjective = localFieldwork ? `Almanac · ${localFieldwork.objective}` : townObjective(state) || sideObjective(state);
   const townTasks = townQuestProgress(state);
+  const storyChapter = currentStory(state);
+  const storyTitle = state.flags.questComplete ? storyChapter?.name || 'Stories of the valley' : 'The Lantern Signal';
+  const valleyPuzzle = state.puzzle?.kind === 'valley' ? VALLEY_PUZZLES[state.puzzle.id] : null;
+  const storyPuzzle = state.puzzle?.kind === 'story' ? STORY_PUZZLES[state.puzzle.id] : null;
+  const fieldPuzzle = storyPuzzle || valleyPuzzle;
+  function trackFromJournal(destination) {
+    setTrackedDestination({ ...destination, runId: state.runId });
+    setPanel(null);
+  }
   const district = region.districts?.find(area => state.x >= area.x && state.y >= area.y && state.x < area.x + area.w && state.y < area.y + area.h);
   const traversal = availableTraversal(state);
   const traversalLabel = { jump: 'Jump', climb: 'Climb', ledge: 'Drop' }[traversal?.kind || state.traversal?.kind] || 'Traverse';
@@ -144,7 +162,7 @@ export default function Adventure() {
     if (state.transition === 'arena') setShowArenaConsent(true);
   }, [state.transition]);
   useEffect(() => {
-    if (['won', 'restored'].includes(state.result?.outcome)) sfx.bell();
+    if (['won', 'restored', 'festival', 'river-restored', 'stars-restored'].includes(state.result?.outcome)) sfx.bell();
   }, [state.result]);
 
   useEffect(() => {
@@ -204,7 +222,7 @@ export default function Adventure() {
   useEffect(() => {
     const onKey = (event) => {
       if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
-      if (dialogueRef.current && ['KeyE', 'Space'].includes(event.code) && !event.target.closest?.('input,textarea,select,[contenteditable="true"]')) {
+      if (dialogueRef.current && !dialogueRef.current.choices?.length && ['KeyE', 'Space'].includes(event.code) && !event.target.closest?.('input,textarea,select,[contenteditable="true"]')) {
         event.preventDefault();
         if (!event.repeat) dispatch({ type: 'DISMISS_DIALOGUE' });
         return;
@@ -275,8 +293,7 @@ export default function Adventure() {
   }
   function retrySave() { if (retryGameSave(state, profile, undefined, profileIdentity)) setSaveError(''); }
   const saveNotice = saveError && <div className="journey-save-inline" role="alert"><p>{saveError}</p><div className="journey-inline-actions"><button className="journey-button" onClick={retrySave}>Retry save</button><button className="journey-button" onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div></div>;
-  const tasks = questProgress(state);
-  const taskList = Array.isArray(tasks) ? tasks : Object.values(tasks || {});
+
   const recordedSites = Object.values(ADVENTURE_REGIONS).flatMap(entry => entry.objects
     .filter(object => object.discoveryFlag && state.flags[object.discoveryFlag])
     .map(object => ({ id: `${entry.id}:${object.id}`, name: object.name, region: entry.name })));
@@ -285,7 +302,7 @@ export default function Adventure() {
 
   return <main className="journey-game" data-gamepad-context={`${state.locationId}:${state.mode}:${paused}`}>
     <header className="journey-hud"><button className="journey-brand-button" onClick={() => setPanel('menu')} aria-label="Open Cogimon menu"><img src="/cogimon-icon.svg" width="24" height="24" alt="" /> COGIMON</button>
-      <div className="journey-location"><strong>{region.name}</strong><span>{state.mode === 'journey' ? 'The Lantern Signal' : state.mode === 'practice' ? 'Practice · separate progress' : 'Rival Circuit · separate progress'}</span></div>
+      <div className="journey-location"><strong>{region.name}</strong><span>{state.mode === 'journey' ? storyTitle : state.mode === 'practice' ? 'Practice · separate progress' : 'Rival Circuit · separate progress'}</span></div>
       <nav aria-label="Adventure menu"><button onClick={() => setPanel('map')}>Map</button><button onClick={() => setPanel('team')}>Team</button><button onClick={() => setPanel('journal')}>Journal</button><button onClick={() => setPanel('locker')}>Locker</button><button aria-label="More game options" onClick={() => setPanel('menu')}>☰</button></nav>
     </header>
 
@@ -299,22 +316,29 @@ export default function Adventure() {
     <footer className="journey-explore-console"><div className="journey-companion-status"><CompanionArt id={companion.id} skinId={profile.loadout.skinId} /><div><strong>{companion.name} <small>Lv. {companion.level}</small></strong><Meter value={companion.hp} max={companion.maxHp} label="HP" /><span className="journey-save-status" role="status">{savedAt || 'Your companion is ready'}</span></div></div>
       <div className="journey-objective">
         <div className="journey-destination">{route ? <><strong>To {route.name}</strong><p>{route.blocked ? 'Route locked · check the field map' : route.arrived ? 'Destination reached' : `${route.next.name} lies ${route.direction} · column ${route.next.x}, row ${route.next.y}`}</p><button onClick={() => setTrackedDestination(null)} aria-label="Clear tracked destination">Clear</button></> : <><strong>Choose your route</strong><p>Valley roads are open. Pick a destination on the field map.</p><button onClick={() => setPanel('map')}>Map</button></>}</div>
-        <div className="journey-goal-details"><span>The Lantern Signal</span><p className="journey-story-objective">{adventureObjective(state)}</p>{optionalObjective && <small className="journey-side-objective">{optionalObjective}</small>}</div>
+        <div className="journey-goal-details"><span>{storyTitle}</span><p className="journey-story-objective">{adventureObjective(state)}</p>{optionalObjective && <small className="journey-side-objective">{optionalObjective}</small>}</div>
         {state.message && <small className="journey-event-message" aria-live="polite">{state.message}</small>}
       </div>
       <div className="journey-explore-controls"><div className="journey-dpad" aria-label="Movement controls">{[[0, -1, 'up', 0], [-1, 0, 'left', -90], [0, 1, 'down', 180], [1, 0, 'right', 90]].map(([dx, dy, direction, angle]) => <button key={direction} className={direction} aria-label={`Move ${direction}`} disabled={paused} style={{ touchAction: 'none' }} onPointerDown={(event) => hold(event, dx, dy)} onPointerUp={stopHold} onPointerCancel={stopHold} onLostPointerCapture={stopHold} onClick={(event) => { if (event.detail === 0) move(dx, dy); }}><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style={{ transform: `rotate(${angle}deg)` }}><path d="M12 5 21 19H3Z" fill="currentColor" /></svg></button>)}</div><button className={`journey-button journey-run-control ${running ? 'is-running' : ''}`} disabled={paused} aria-pressed={running} onClick={() => { runToggle.current = !runToggle.current; updateRunning(); }}>Run <kbd>Shift</kbd></button><button className="journey-button is-primary journey-interact" disabled={!nearby || paused} onClick={() => dispatch({ type: 'INTERACT' })}>Interact <kbd>E</kbd></button><button className="journey-button journey-traverse" disabled={!traversal || paused} title={traversal?.label || 'Face a marked crossing or climbing route'} onClick={() => dispatch({ type: 'TRAVERSE' })}>{traversalLabel}<kbd>Space</kbd></button></div>
     </footer>
     {saveError && <div className="journey-save-warning" role="alert">{saveError}<button onClick={retrySave}>Retry save</button><button onClick={() => dispatchGame({ type: 'RETURN_TITLE' })}>Leave without saving</button></div>}
 
-    {state.dialogue && <GameDialog notice={saveNotice} title={state.dialogue.speaker} onClose={() => dispatch({ type: 'DISMISS_DIALOGUE' })} className="journey-narrative-dialog"><p className="journey-narrative-text" aria-live="polite">{state.dialogue.text}</p><button className="journey-button is-primary" onClick={() => dispatch({ type: 'DISMISS_DIALOGUE' })}>Continue ▸</button></GameDialog>}
+    {state.dialogue && <GameDialog notice={saveNotice} title={state.dialogue.speaker} onClose={() => dispatch({ type: 'DISMISS_DIALOGUE' })} className="journey-narrative-dialog"><p className="journey-narrative-text" aria-live="polite">{state.dialogue.text}</p>{state.dialogue.choices?.length ? <div className="journey-dialogue-choices" role="group" aria-label="Choose your reply">{state.dialogue.choices.map(choice => <button key={choice.id} className="journey-button" onClick={() => dispatch({ type: 'DIALOGUE_CHOICE', choiceId: choice.id })}>{choice.label}</button>)}</div> : <button className="journey-button is-primary" onClick={() => dispatch({ type: 'DISMISS_DIALOGUE' })}>Continue ▸</button>}{nearby?.valleyBoard && <button className="journey-button" onClick={() => { dispatch({ type: 'DISMISS_DIALOGUE' }); setJournalView('almanac'); setPanel('journal'); }}>Open Valley Almanac</button>}</GameDialog>}
 
-    {state.puzzle && !state.dialogue && <GameDialog notice={saveNotice} title="Archive Relay · Recall" onClose={() => dispatch({ type: 'CANCEL_PUZZLE' })}><p>Remember the sequence in the relay notes. Which lamp comes next?</p><div className="journey-relay-lamps"><button className="journey-lamp is-amber" onClick={() => dispatch({ type: 'PUZZLE_CHOICE', lamp: 'amber' })}>Amber lamp</button><button className="journey-lamp is-cyan" onClick={() => dispatch({ type: 'PUZZLE_CHOICE', lamp: 'cyan' })}>Cyan lamp</button></div><p aria-live="polite">{state.message}</p><p className="journey-muted">Recall means applying a clue you learned earlier. No model call is needed.</p></GameDialog>}
+    {state.puzzle && !fieldPuzzle && !state.dialogue && <GameDialog notice={saveNotice} title="Archive Relay · Recall" onClose={() => dispatch({ type: 'CANCEL_PUZZLE' })}><p>Remember the sequence in the relay notes. Which lamp comes next?</p><div className="journey-relay-lamps"><button className="journey-lamp is-amber" onClick={() => dispatch({ type: 'PUZZLE_CHOICE', lamp: 'amber' })}>Amber lamp</button><button className="journey-lamp is-cyan" onClick={() => dispatch({ type: 'PUZZLE_CHOICE', lamp: 'cyan' })}>Cyan lamp</button></div><p aria-live="polite">{state.message}</p><p className="journey-muted">Recall means applying a clue you learned earlier. No model call is needed.</p></GameDialog>}
 
-    {state.result && <GameDialog notice={saveNotice} title={state.result.heading || (state.result.outcome === 'won' ? 'A signal cleared!' : 'A moment to recover')} className="journey-result-dialog"><div className="journey-result-display"><CompanionArt id={companion.id} /><div><p className="journey-result-outcome">{state.result.outcome === 'restored' ? 'WELCOME HOME, LANTERN KEEPER' : state.result.outcome === 'won' ? 'VICTORY' : state.result.outcome === 'lost' ? 'RECOVER & TRY AGAIN' : 'SAFE RETURN'}</p><p>{state.result.text}</p>{state.result.rewards?.length > 0 && <ul className="journey-reward-list">{state.result.rewards.map((reward, index) => <li key={typeof reward === 'string' ? reward : index}>✦ {typeof reward === 'string' ? getCosmetic(reward)?.name || reward : reward.name || reward.id}</li>)}</ul>}<p className="journey-muted">{state.mode === 'journey' ? 'Quest rewards are granted once. Progress stays with you.' : 'This mode does not grant Journey XP or cosmetics.'}</p></div></div><div className="journey-inline-actions"><button className="journey-button is-primary" onClick={() => dispatch({ type: 'CONTINUE_RESULT' })}>{state.mode === 'practice' ? 'Practice again ▸' : state.mode === 'circuit' && !state.circuit.completed ? 'Next encounter ▸' : 'Continue ▸'}</button>{state.result.outcome === 'restored' && <button className="journey-button" onClick={() => { dispatch({ type: 'CONTINUE_RESULT' }); setPanel('locker'); }}>Equip your rewards</button>}{state.mode !== 'journey' && <>{state.returnJourney && <button className="journey-button" onClick={() => dispatch({ type: 'EXIT_MODE' })}>Return to Journey</button>}<button className="journey-button" onClick={exit}>Return to title</button></>}</div></GameDialog>}
+    {fieldPuzzle && !state.dialogue && <GameDialog notice={saveNotice} title={fieldPuzzle.title} onClose={() => dispatch({ type: 'CANCEL_PUZZLE' })} className="journey-field-puzzle">
+      <p>{fieldPuzzle.clue}</p>{fieldPuzzle.prompts?.[state.puzzle.step] && <p className="journey-puzzle-question">{fieldPuzzle.prompts[state.puzzle.step]}</p>}
+      <ol className="journey-puzzle-sequence" style={{ gridTemplateColumns: `repeat(${fieldPuzzle.sequence.length}, minmax(0, 1fr))` }} aria-label="Mechanism progress">{fieldPuzzle.sequence.map((choice, index) => <li key={index} className={index < state.puzzle.step ? 'is-set' : ''}>{index < state.puzzle.step ? fieldPuzzle.choices.find(entry => entry.id === choice).name : <span aria-label={index === state.puzzle.step ? 'Choose this step' : 'Waiting'}>{index + 1}</span>}</li>)}</ol>
+      <div className="journey-puzzle-choices">{fieldPuzzle.choices.map(choice => <button key={choice.id} className="journey-button" onClick={() => dispatch({ type: storyPuzzle ? 'STORY_CHOICE' : 'VALLEY_CHOICE', choice: choice.id })}>{choice.name}</button>)}</div>
+      <p className="journey-puzzle-feedback" role="status">{state.message}</p><p className="journey-muted">A wrong choice resets the sequence. You can leave and try again without losing your progress.</p>
+    </GameDialog>}
+
+    {state.result && <GameDialog notice={saveNotice} title={state.result.heading || (state.result.outcome === 'won' ? 'A signal cleared!' : 'A moment to recover')} className="journey-result-dialog"><div className="journey-result-display"><CompanionArt id={companion.id} /><div><p className="journey-result-outcome">{['river-restored', 'stars-restored'].includes(state.result.outcome) ? 'CHAPTER COMPLETE' : state.result.outcome === 'festival' ? 'THE VALLEY LIGHTS TOGETHER' : state.result.outcome === 'restored' ? 'WELCOME HOME, LANTERN KEEPER' : state.result.outcome === 'won' ? 'VICTORY' : state.result.outcome === 'lost' ? 'RECOVER & TRY AGAIN' : 'SAFE RETURN'}</p><p>{state.result.text}</p>{state.result.rewards?.length > 0 && <ul className="journey-reward-list">{state.result.rewards.map((reward, index) => <li key={typeof reward === 'string' ? reward : index}>✦ {typeof reward === 'string' ? getCosmetic(reward)?.name || reward : reward.name || reward.id}</li>)}</ul>}<p className="journey-muted">{state.mode === 'journey' ? 'Quest rewards are granted once. Progress stays with you.' : 'This mode does not grant Journey XP or cosmetics.'}</p></div></div><div className="journey-inline-actions"><button className="journey-button is-primary" onClick={() => dispatch({ type: 'CONTINUE_RESULT' })}>{state.mode === 'practice' ? 'Practice again ▸' : state.mode === 'circuit' && !state.circuit.completed ? 'Next encounter ▸' : 'Continue ▸'}</button>{['restored', 'festival', 'river-restored', 'stars-restored'].includes(state.result.outcome) && <button className="journey-button" onClick={() => { dispatch({ type: 'CONTINUE_RESULT' }); setPanel('locker'); }}>Equip your rewards</button>}{state.mode !== 'journey' && <>{state.returnJourney && <button className="journey-button" onClick={() => dispatch({ type: 'EXIT_MODE' })}>Return to Journey</button>}<button className="journey-button" onClick={exit}>Return to title</button></>}</div></GameDialog>}
 
     {state.mode === 'circuit' && state.circuit.completed && !state.result && <GameDialog notice={saveNotice} title="Rival Circuit cleared"><p>You cleared all three local rivals. Your best run is {state.circuit.bestWins}/3. Journey rewards and XP are unchanged.</p><div className="journey-inline-actions">{state.returnJourney && <button className="journey-button is-primary" onClick={() => dispatch({ type: 'EXIT_MODE' })}>Return to Journey</button>}<button className="journey-button" onClick={() => dispatch({ type: 'START_CIRCUIT' })}>Run the circuit again</button><button className="journey-button" onClick={exit}>Return to title</button></div></GameDialog>}
     {panel === 'team' && <GameDialog notice={saveNotice} title="Your traveling team" onClose={() => setPanel(null)}><div className="journey-team-list">{state.team.map((member) => <article className="journey-team-member" key={member.id}><CompanionArt id={member.id} /><div><h3>{member.name} <small>Lv. {member.level}</small></h3><p>{COMPANIONS.find((entry) => entry.id === member.id)?.role} · {member.affinity}</p><Meter value={member.hp} max={member.maxHp} label="HP" /><p className="journey-muted">{member.xp} XP · {member.energy}/{member.maxEnergy} energy</p><button className="journey-button" disabled={member.id === state.activeId || member.hp === 0} onClick={() => dispatch({ type: 'SWITCH_COMPANION', companionId: member.id })}>{member.id === state.activeId ? 'Following you' : member.hp === 0 ? 'Needs a rest' : 'Make lead companion'}</button></div></article>)}</div><p className="journey-muted">Mossback can join your starter on this chapter’s route. Adventure stats never increase live-model arena power.</p></GameDialog>}
-    {panel === 'journal' && <GameDialog notice={saveNotice} title="The Lantern Signal" onClose={() => setPanel(null)}><p className="journey-journal-next">{adventureObjective(state)}</p>{optionalObjective && <p className="journey-side-objective">{optionalObjective}</p>}<ol className="journey-journal-quests">{taskList.map((task, index) => <li className={task.done || task.complete ? 'is-complete' : ''} key={task.id || index}><span aria-hidden="true">{task.done || task.complete ? '◆' : '◇'}</span><div><strong>{task.name || task.title || `Lead ${index + 1}`}</strong><p>{task.description || task.objective || task.text}</p></div></li>)}</ol><h3>Neighbors & errands</h3><ol className="journey-journal-quests">{townTasks.map(task => <li key={task.id} className={task.complete ? 'is-complete' : ''}><div><strong>{task.name}{task.complete ? ' · Complete' : task.started ? ' · In progress' : ''}</strong><p>{task.objective}</p></div></li>)}</ol><h3>Places remembered</h3>{recordedSites.length ? <ul className="journey-map-landmarks">{recordedSites.map(site => <li key={site.id}><strong>{site.name}</strong><span>{site.region}</span></li>)}</ul> : <p className="journey-muted">Follow the river roads, inspect mailboxes and look beyond the main trail. Your discoveries will be recorded here.</p>}<button className="journey-button" onClick={() => setPanel('map')}>Open field map <kbd>M</kbd></button><p className="journey-muted">Ward protects a constraint. Recall applies earlier clues. Your choices, not provider credits, drive this journey.</p></GameDialog>}
+    {panel === 'journal' && <GameDialog notice={saveNotice} title="Your field journal" onClose={() => setPanel(null)} className="journey-journal-dialog"><nav className="journey-journal-tabs" aria-label="Journal chapters"><button aria-pressed={journalView === 'story'} onClick={() => setJournalView('story')}>Story</button><button aria-pressed={journalView === 'almanac'} onClick={() => setJournalView('almanac')}>Valley Almanac</button><button aria-pressed={journalView === 'neighbors'} onClick={() => setJournalView('neighbors')}>Neighbors</button></nav>{journalView === 'almanac' ? <ValleyAlmanac state={state} onTrack={trackFromJournal} /> : journalView === 'neighbors' ? <PersonalQuests state={state} onTrack={trackFromJournal} townTasks={townTasks} recordedSites={recordedSites} /> : <StoryJournal state={state} onTrack={trackFromJournal} />}</GameDialog>}
     {panel === 'pack' && <GameDialog notice={saveNotice} title="The field pack" onClose={() => setPanel(null)}><PackContents state={state} dispatch={dispatch} />{ITEMS.some(item => !item.heal && !item.energy && state.inventory[item.id]) && <p className="journey-muted">Keepsakes: {ITEMS.filter(item => !item.heal && !item.energy && state.inventory[item.id]).map(item => item.name).join(' · ')}</p>}</GameDialog>}
     {panel === 'map' && <GameDialog notice={saveNotice} title="Your field map" onClose={() => setPanel(null)}><FieldMap state={state} target={target} onTrack={destination => setTrackedDestination({ ...destination, runId: state.runId })} onClear={() => setTrackedDestination(null)} /></GameDialog>}
     {panel === 'locker' && <GameDialog notice={saveNotice} title="The companion Locker" onClose={() => setPanel(null)} className="journey-locker-dialog"><Locker profile={profile} onChange={changeProfile} onClose={() => setPanel(null)} /><button className="journey-button" onClick={() => setPanel('preview')}>Preview arena entrance</button></GameDialog>}
@@ -325,6 +349,7 @@ export default function Adventure() {
       <div className="journey-system-menu">
         <button className="journey-button" aria-pressed={!muted} onClick={() => setMuted(sfx.toggleMute())}>Sound effects: {muted ? 'Off' : 'On'}</button>
         <button className="journey-button" onClick={() => setPanel('map')}>Field map</button>
+        <button className="journey-button" onClick={() => { setJournalView('almanac'); setPanel('journal'); }}>Valley Almanac</button>
         <button className="journey-button" onClick={() => setPanel('pack')}>Open pack</button>
         <button className="journey-button" onClick={() => setPanel('save-data')}>Save Data · backup</button>
         <button className="journey-button" onClick={() => startMode('START_PRACTICE')}>Practice battle</button>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { ADVENTURE_REGIONS, terrainAt } from '../../../shared/rpg/adventureContent.js';
-import { exitLocked, regionObjects, sideObjective, townObjective, worldProjectProgress } from '../../../shared/rpg/adventure.js';
+import { exitLocked, regionObjects, sideObjective, townObjective, worldProjectProgress, valleyProgress } from '../../../shared/rpg/adventure.js';
 
+import { currentStory, storyLead } from '../../../shared/rpg/story.js';
+import { ValleySeal } from './ValleyAlmanac';
 import { adventureRoute, mapLandmarks } from '../../../shared/rpg/adventureNavigation.js';
 
 const REGION_POINTS = { frontier: [18, 18], grove: [50, 18], sunward: [82, 18], riverlands: [18, 50], orchard: [50, 50], highlands: [82, 50], archive: [18, 82] };
@@ -16,6 +18,9 @@ export default function FieldMap({ state, target, onTrack, onClear }) {
     .map(object => ({ from: entry.id, to: object.to, object, locked: Boolean(exitLocked(state, object) || ADVENTURE_REGIONS[object.to].objects.some(other => other.to === entry.id && other.requiresFlag === object.requiresFlag && exitLocked(state, other))) })))
     .filter((connection, index, all) => all.findIndex(other => other.from === connection.from && other.to === connection.to && other.object.requiresFlag === connection.object.requiresFlag) === index);
   const projects = worldProjectProgress(state);
+  const chapter = currentStory(state);
+  const storyTarget = storyLead(state);
+  const fieldwork = valleyProgress(state).find(project => project.regionId === (region.parentRegion || region.id));
   const routeEdges = new Set(route?.path.slice(1).map((id, index) => [route.path[index], id].sort().join(':')));
   const outdoorRegions = Object.values(ADVENTURE_REGIONS).filter(entry => entry.outdoor !== false);
   const parentId = region.parentRegion || selectedId;
@@ -27,6 +32,7 @@ export default function FieldMap({ state, target, onTrack, onClear }) {
   const optional = townObjective(state) || sideObjective(state);
   return <div className="journey-field-map">
     <p className="journey-muted">Choose a region or known landmark to track. Routes follow open gateways; walk there and Interact to travel.</p>
+    {chapter && storyTarget && <section className="journey-story-map-lead" aria-label="Current story lead"><h3>{chapter.name}</h3><p>{storyTarget.objective}</p><button className="journey-button is-primary" onClick={() => onTrack({ regionId: storyTarget.regionId, objectId: storyTarget.objectId })}>Track story lead</button></section>}
     <nav className="journey-world-map" aria-label="Valley routes">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{connections.map(({ from, to, object, locked }) => <path key={`${from}:${object.id}`} d={object.transport === 'ferry' ? 'M18 18 C-1 22 -1 46 18 50' : from === 'archive' || to === 'archive' ? 'M18 18 Q-12 50 18 82' : object.transport === 'lift' ? 'M18 18 Q50 -12 82 18' : `M${REGION_POINTS[from].join(' ')} L${REGION_POINTS[to].join(' ')}`} className={`${locked ? 'is-locked' : ''} ${routeEdges.has([from, to].sort().join(':')) && !locked && (from !== state.locationId && to !== state.locationId || route.next?.requiresFlag === object.requiresFlag) ? 'is-tracked' : ''}`} />)}</svg>
       {outdoorRegions.map(entry => <button key={entry.id} aria-label={`Track ${entry.name}`} aria-pressed={entry.id === target?.regionId && !target?.objectId} onClick={() => { setSelectedId(entry.id); onTrack({ regionId: entry.id }); }} style={{ left: `${REGION_POINTS[entry.id][0]}%`, top: `${REGION_POINTS[entry.id][1]}%` }}><strong>{entry.name}</strong><span>{entry.id === (ADVENTURE_REGIONS[state.locationId].parentRegion || state.locationId) ? 'You are here' : state.discoveries.includes(entry.id) ? 'Visited' : 'Unexplored'}</span></button>)}
@@ -34,6 +40,8 @@ export default function FieldMap({ state, target, onTrack, onClear }) {
     <p className="journey-map-connections">Valley route diagram · dashed paths are locked · gold paths lead to your destination.</p>
     {route && <div className="journey-map-tracking"><p><strong>Tracking: {route.name}</strong><br />{route.blocked ? 'No open route yet. Quiet the Static Wisp to enter the Archive.' : route.arrived ? 'You have reached this destination.' : route.path.map(id => ADVENTURE_REGIONS[id].name).join(' → ')}</p><button className="journey-button" onClick={onClear}>Clear destination</button></div>}
     <section className="journey-map-projects" aria-label="Valley projects"><h3>Change the valley</h3>{projects.map(project => <article key={project.id}><div><strong>{project.name}{project.complete ? ' · Open' : ''}</strong><p>{project.complete ? project.benefit : project.objective}</p>{!project.complete && <small>{project.benefit}</small>}</div>{!project.complete && <button className="journey-button" onClick={() => onTrack({ regionId: project.regionId, objectId: project.objectId })}>Track next step</button>}</article>)}</section>
+
+    {fieldwork && <section className="journey-map-fieldwork" aria-label="Regional fieldwork"><ValleySeal regionId={fieldwork.regionId} complete={fieldwork.complete} /><div><h3>{fieldwork.name}{fieldwork.complete ? ' · Restored' : ''}</h3><p>{fieldwork.complete ? fieldwork.description : fieldwork.objective}</p></div>{!fieldwork.complete && <button className="journey-button" onClick={() => onTrack({ regionId: fieldwork.targetRegionId || fieldwork.regionId, objectId: fieldwork.objectId })}>Track fieldwork</button>}</section>}
 
     {rooms.length > 0 && state.discoveries.includes(parentId) && <details className="journey-map-rooms" open={region.outdoor === false}><summary>Homes & places to enter</summary><div className="journey-map-tabs">{rooms.map(room => <button key={room.id} aria-pressed={room.id === selectedId} onClick={() => setSelectedId(room.id)}>{room.name}{state.discoveries.includes(room.id) ? ' · Visited' : ''}</button>)}</div></details>}
     <h3>{region.name}</h3><div className="journey-inline-actions"><button className="journey-button is-primary" aria-pressed={target?.regionId === selectedId && !target?.objectId} onClick={() => onTrack({ regionId: selectedId })}>Track {region.name}</button></div><p className="journey-muted">{region.subtitle} · {outdoorRegions.filter(entry => state.discoveries.includes(entry.id)).length}/{outdoorRegions.length} outdoor regions visited</p>

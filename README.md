@@ -1,19 +1,21 @@
 # Cogimon
 
-An AI creature companion adventure in a browser, with warm GBA-style pixel visuals, a playable first chapter, **The Lantern Signal**, and an optional live AI model arena. The adventure is original fiction; its character stats are game flavor, not measured model performance. [Development blueprint](docs/ai-frontier/README.md).
+An AI creature companion adventure in a browser, with warm GBA-style pixel visuals, three connected story chapters beginning with **The Lantern Signal**, and an optional live AI model arena. The adventure is original fiction; its character stats are game flavor, not measured model performance. [Development blueprint](docs/ai-frontier/README.md).
 
 The GBA companion redesign is being implemented against the [complete progression plan](docs/ai-frontier/PROGRESSION_PLAN.md), with checkpoint evidence in the [work log](docs/ai-frontier/WORK_LOG.md).
 
 ## Playable modes
 
 - **Journey:** name your trainer, inspect three original starter companions, cross an authored town/forest/Archive, recruit Mossback, restore a relay and defeat the Archive Warden. Keyboard, touch and browser-standard gamepad controls are supported; versioned progress saves locally with legacy-save import.
+- **Later chapters:** finish the Lantern Signal, then investigate **The River Remembers** and answer **The Night of Returning Stars**. Two saved dialogue decisions, two new guardians, three personal quests and repeatable resident conversations extend the journey. Open Journal → Story or Neighbors. [Story arc and compatibility](docs/ai-frontier/STORY_ARC.md).
+- **Valley Almanac:** five independent regional fieldworks, three guardian encounters and six collectible stamps connect the existing valley. Restore moss circuits, solar mirrors, river sluices, pollinator gardens and a fallen-star chart; finish the Lantern Signal and return for the festival and Locker rewards. Open Journal → Valley Almanac. [Expansion and project analysis](docs/ai-frontier/VALLEY_ALMANAC.md).
 - **Practice:** repeatable, deterministic creature combat without changing Journey XP or unlocks.
 - **Rival Circuit:** three local rival encounters with recovery and a separate local record. No provider key required.
-- **Trainer duels:** two human trainers create/join an invite room and choose simultaneous creature moves. All starters use equal server-controlled stats; Journey rewards stay separate. The local server must be running. [Duel rules and hosting limits](docs/ai-frontier/PVP.md).
+- **Trainer duels:** two human trainers create/join an invite room and choose simultaneous creature moves. A handheld-style battlefield plays move reveals, lunges, shields, energy pulses, hit reactions, HP drain and knockouts using original companion art. All starters use equal server-controlled stats; Journey rewards stay separate. The local server must be running. [Duel rules, animation sequence and hosting limits](docs/ai-frontier/PVP.md).
 - **Locker:** equip earned Lantern cosmetics, a title and up to three badges; preview the arena entrance without making a model call. These rewards remain local/unverified.
 - **Live model arena:** enter from Frontier Crossing to play Roast, Prompt-Injection, or Impersonation matches using your own provider credentials. This is separate from RPG combat and may incur provider charges.
 
-The first chapter is a bounded playable slice, not a finished open-world game. A lore codex separates sourced AI history from invented game abilities. Shared-world multiplayer, ranked play, more chapters, deeper RPG combat, and a fully reviewed BYOK challenge system remain planned. See the [roadmap](docs/ai-frontier/ROADMAP.md).
+The three-chapter Journey is a bounded adventure through the authored valley. A lore codex separates sourced AI history from invented game abilities. Shared-world multiplayer, ranked play, further chapters, deeper RPG combat, and a fully reviewed BYOK challenge system remain planned. See the [roadmap](docs/ai-frontier/ROADMAP.md).
 
 PixiJS renders exploration and the arena; React owns readable HUD, dialogue, controls, and menus.
 

@@ -40,6 +40,12 @@ export const COSMETICS = Object.freeze([
     description: 'Carry a little of Frontier Crossing with you.',
     unlockHint: 'Return to Mara after restoring the lantern signal.',
   },
+  { id: 'badge-valley-almanac', type: 'badge', name: 'Valley Almanac', description: 'A record of the valley’s restored places.', unlockHint: 'Complete the Valley Almanac and light the festival lantern.' },
+  { id: 'title-valley-keeper', type: 'title', name: 'Valley Keeper', description: 'A keeper of the valley’s living stories.', unlockHint: 'Complete the Valley Almanac and light the festival lantern.' },
+  { id:'badge-river-memory', type:'badge', name:'River Memory', description:'A shared promise between river and orchard.', unlockHint:'Finish The River Remembers.' },
+  { id:'title-river-keeper', type:'title', name:'River Keeper', description:'Carry the river’s promise.', unlockHint:'Finish The River Remembers.' },
+  { id:'badge-returning-stars', type:'badge', name:'Returning Stars', description:'An answer carried across the valley.', unlockHint:'Finish The Night of Returning Stars.' },
+  { id:'title-star-keeper', type:'title', name:'Star Keeper', description:'Keep a light for those returning home.', unlockHint:'Finish The Night of Returning Stars.' },
 ].map(Object.freeze));
 
 const record = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);

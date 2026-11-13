@@ -1,11 +1,15 @@
+import { sideStoryProgress, storyLead } from './story.js';
 import { ADVENTURE_REGIONS } from './adventureContent.js';
-import { exitLocked, regionObjects, worldProjectProgress } from './adventure.js';
+import { exitLocked, regionObjects, worldProjectProgress, valleyProgress } from './adventure.js';
 
 export function mapLandmarks(state, regionId) {
-  const publicLeads = worldProjectProgress(state).filter(project => !project.complete && project.regionId === regionId).map(project => project.objectId);
+  const publicLeads = [...worldProjectProgress(state), ...valleyProgress(state)].filter(project => !project.complete && (project.targetRegionId || project.regionId) === regionId).map(project => project.objectId);
+  const storyTargets = [storyLead(state), ...sideStoryProgress(state).filter(quest => !quest.complete && quest.available !== false && !quest.locked).flatMap(quest => quest.leads?.length ? quest.leads : [quest.next])].filter(Boolean);
+  publicLeads.push(...storyTargets.filter(lead => lead.regionId === regionId).map(lead => lead.objectId));
+  if (regionId === 'frontier') publicLeads.push('almanac-board', 'festival-lantern');
   return regionObjects({ ...state, locationId: regionId }).filter(object =>
     (state.discoveries.includes(regionId) || publicLeads.includes(object.id)) &&
-    object.type !== 'enemy' && (object.type !== 'pickup' || publicLeads.includes(object.id)) &&
+    (object.type !== 'enemy' || publicLeads.includes(object.id)) && (object.type !== 'pickup' || publicLeads.includes(object.id)) &&
     (object.id !== 'sunward-overlook' || state.flags.overlookFound) &&
     (!object.secret || state.flags[object.discoveryFlag]));
 }

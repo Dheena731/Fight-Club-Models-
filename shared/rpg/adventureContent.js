@@ -1,5 +1,7 @@
+import { STORY_FLAG_IDS, expandStoryWorld } from './storyContent.js';
 import { REGIONS } from './world.js';
 import { expandInhabitedWorld, TOWN_FLAG_IDS } from './inhabitedContent.js';
+import { expandValleyWorld, VALLEY_FLAG_IDS } from './valleyContent.js';
 
 export const CHAPTER_ID = 'lantern-signal';
 export const MAP_REVISION = 2;
@@ -21,6 +23,11 @@ export const MOVES = [
 
 const intent = (id, name, damage, description) => ({ id, name, damage, description });
 export const ENCOUNTERS = {
+  'echo-guardian': { id:'echo-guardian', story:true, artId:'crosswake', name:'Echo Guardian', maxHp:48, xp:20, flag:'echoDefeated', rewardIds:[], intents:[intent('gather','Gather Current',0,'The current gathers.'),intent('surge','River Surge',12,'Ward against the surge.'),intent('flow','Receding Flow',5,'The water falls back.')] },
+  'constellation-keeper': { id:'constellation-keeper', story:true, artId:'patchbyte', name:'Constellation Keeper', maxHp:54, xp:25, flag:'keeperDefeated', rewardIds:[], intents:[intent('gather','Gather Starlight',0,'The stars gather.'),intent('surge','Starfall',13,'Ward against the starfall.'),intent('glow','Afterglow',5,'A softer light follows.')] },
+  'bramble-sentinel': { id: 'bramble-sentinel', valley: true, artId: 'mossback', name: 'Bramble Sentinel', maxHp: 38, xp: 20, flag: 'groveStamp', rewardIds: [], intents: [intent('thorn', 'Thorn Brush', 4, 'A light brush of thorns precedes the roots.'), intent('gather', 'Gather Roots', 0, 'The roots gather for a sweeping strike.'), intent('surge', 'Bramble Sweep', 11, 'Ward against the sweep.')] },
+  'tideglass-crab': { id: 'tideglass-crab', valley: true, artId: 'crosswake', name: 'Tideglass Navigator', maxHp: 42, xp: 20, flag: 'riverStamp', rewardIds: [], intents: [intent('gather', 'Gather Tide', 0, 'The tide gathers for a glass wave.'), intent('surge', 'Glass Wave', 12, 'Ward against the wave.'), intent('backwash', 'Backwash', 5, 'The retreating water leaves a smaller strike.')] },
+  'starfall-ram': { id: 'starfall-ram', valley: true, artId: 'rampart', name: 'Starfall Bull', maxHp: 46, xp: 20, flag: 'highlandsStamp', rewardIds: [], intents: [intent('hoof', 'Crater Hoof', 5, 'A quick hoofbeat starts the pattern.'), intent('gather', 'Gather Stars', 0, 'The bull gathers starlight for a charge.'), intent('surge', 'Meteor Charge', 13, 'Ward against the charge.')] },
   'static-wisp': { id: 'static-wisp', name: 'Static Wisp', maxHp: 30, xp: 25, flag: 'wispDefeated', rewardIds: ['badge-static-clear'], intents: [intent('gather', 'Gathering Static', 0, 'The Wisp gathers light. Strike now; a surge follows.'), intent('surge', 'Static Surge', 12, 'A heavy surge is coming. Ward can absorb it.'), intent('spark', 'Fading Spark', 5, 'A small spark leaves an opening.')] },
   'archive-warden': { id: 'archive-warden', name: 'Archive Warden', maxHp: 64, xp: 40, flag: 'bossDefeated', rewardIds: ['badge-archive-warden'], intents: [intent('gather', 'Read the Record', 0, 'The Warden recalls its next pattern. Attack the opening.'), intent('surge', 'Sealed Verdict', 15, 'A strong verdict approaches. Ward or use a healthy teammate.'), intent('sweep', 'Shelf Sweep', 7, 'A measured sweep crosses the room.')] },
   'practice-wisp': { id: 'practice-wisp', name: 'Practice Wisp', maxHp: 30, xp: 0, rewardIds: [], intents: [intent('gather', 'Practice Wind-up', 0, 'A safe opening before the demonstration strike.'), intent('surge', 'Practice Strike', 10, 'Try Ward against this strike.')] },
@@ -40,7 +47,7 @@ export const ITEMS = [
 ];
 export const SUNWARD_FLAG_IDS = ['lensQuestStarted', 'windClueRead', 'lensRecovered', 'lensReturned', 'overlookFound'];
 export const EXPLORATION_FLAG_IDS = ['millWheelSeen', 'waterfallFound', 'riverCacheFound', 'orchardLetterRead', 'gardenFound', 'orchardCacheFound', 'ruinsRead', 'observatoryFound', 'highlandCacheFound'];
-export const FLAG_IDS = ['questStarted', 'shardFound', 'wispDefeated', 'recruited', 'noteRead', 'relayRestored', 'bossDefeated', 'questComplete', ...SUNWARD_FLAG_IDS, ...EXPLORATION_FLAG_IDS, ...TOWN_FLAG_IDS];
+export const FLAG_IDS = ['questStarted', 'shardFound', 'wispDefeated', 'recruited', 'noteRead', 'relayRestored', 'bossDefeated', 'questComplete', ...SUNWARD_FLAG_IDS, ...EXPLORATION_FLAG_IDS, ...TOWN_FLAG_IDS, ...VALLEY_FLAG_IDS, ...STORY_FLAG_IDS];
 export const TRAVERSAL_DURATION_MS = { jump: 420, climb: 760, ledge: 320 };
 export const QUESTS = [
   { id: 'signal', name: 'The Lantern Signal', flag: 'questStarted', objective: 'Find Mara by the old lantern, west of Market Street.' },
@@ -288,6 +295,8 @@ ADVENTURE_REGIONS.highlands = {
 };
 
 expandInhabitedWorld(ADVENTURE_REGIONS);
+expandValleyWorld(ADVENTURE_REGIONS);
+expandStoryWorld(ADVENTURE_REGIONS);
 
 export const WORLD_PROJECTS = [
   { id: 'canal-ferry', name: 'Reopen the Canal Ferry', flag: 'wheelRepaired', benefit: 'A two-way ferry connects the town dock directly to Amber Watermill.', stages: [

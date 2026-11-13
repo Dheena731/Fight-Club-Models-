@@ -4,7 +4,7 @@
 
 ## RPG visual hierarchy
 
-Cogimon uses a cream wordmark with a plum outline and an amber pixel spark with two eyes (`client/public/cogimon-icon.svg`) as its favicon and menu mark. The optional model destination is branded Cogimon Arena. The chapter remains The Lantern Signal, and original companion names remain unchanged.
+Cogimon uses a cream wordmark with a plum outline and an amber pixel spark with two eyes (`client/public/cogimon-icon.svg`) as its favicon and menu mark. The optional model destination is branded Cogimon Arena. The first chapter remains The Lantern Signal, and original companion names remain unchanged.
 
 Cogimon is the product brand: an AI creature companion adventure in a warm GBA visual world. **The Lantern Signal** names the first chapter. Use Cogimon on product surfaces and Cogimon Arena for the optional live-model destination; keep existing `ai-frontier:` and `aba:` browser keys stable for save/preference compatibility and credential cleanup.
 
@@ -42,6 +42,7 @@ Amber is the product accent. Fighter colors remain identity signals: Claude cora
 - Corner: P1 plans one prompt card per round before any paid battle call starts
 - Fight: Pixi stage plus React HUD, streaming speech, impact grammar, and round log
 - Result: winner moment, fight recap, rematch, and sharing
+- Trainer duels: one GBA-style battle frame with slim species-first HP plates, a distant front-facing rival and a larger cropped back-facing companion. Teal dialogue joins a cream 2×2 command menu with a keyboard focus cursor. Keep the battlefield and commands visible at 320×568, 390×844, 844×390 and 1280×800. Server-revealed attacks, HP drain and fainting follow one simultaneous turn sequence; reduced motion preserves readable feedback. See [battle presentation](docs/ai-frontier/PVP.md#battle-presentation).
 
 ## Interaction rules
 

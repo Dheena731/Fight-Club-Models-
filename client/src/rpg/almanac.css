@@ -1,0 +1,70 @@
+.journey-journal-dialog { width: 880px; max-width: min(880px, calc(100vw - 30px)); }
+.journey-journal-tabs { display: flex; gap: 4px; margin: -2px 0 24px; border-bottom: 2px solid #a8b09b; }
+.journey-journal-tabs button { min-height: 48px; padding: 10px 16px; border: 0; background: transparent; color: #535d4d; font-weight: 700; }
+.journey-journal-tabs button[aria-pressed="true"] { background: #35654f; color: #f4f6ed; }
+.journey-journal-tabs button:hover:not([aria-pressed="true"]) { background: #e0e6d3; color: #2b2438; }
+.journey-almanac-intro { display: flex; align-items: center; gap: 24px; }
+.journey-almanac-intro h3 { margin: 0 0 8px; font-size: 25px; }
+.journey-almanac-intro p { margin: 0; color: #535d4d; line-height: 1.6; }
+.journey-almanac-count { flex: 0 0 100px; text-align: center; color: #35654f; font-size: 48px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.journey-almanac-count small { display: block; font-size: 15px; font-weight: 400; }
+.journey-almanac-stamps { list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 24px 0; margin: 22px 0 0; border-top: 1px solid #bdc7ae; border-bottom: 1px solid #bdc7ae; }
+.journey-almanac-stamps li { min-width: 0; }
+.journey-stamp-target { width: 100%; min-height: 112px; padding: 7px 2px; border: 0; background: transparent; color: #2b2438; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; font-size: 14px; line-height: 1.3; }
+.journey-almanac-stamps small { color: #35654f; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.journey-stamp-target:hover { background: #e0e6d3; }
+.journey-valley-seal { width: 48px; height: 48px; flex: 0 0 48px; color: #5a6a51; }
+.journey-valley-seal.is-grove { color: #35654f; }
+.journey-valley-seal.is-sunward { color: #896626; }
+.journey-valley-seal.is-riverlands { color: #336e76; }
+.journey-valley-seal.is-orchard { color: #994e53; }
+.journey-valley-seal.is-highlands { color: #70608e; }
+.journey-valley-seal.is-archive { color: #62656f; }
+.journey-almanac-homecoming { color: #535d4d; line-height: 1.6; margin: 18px 0 24px; }
+.journey-almanac-projects { list-style: none; padding: 0; margin: 0; }
+.journey-almanac-projects > li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 22px 0; border-top: 1px solid #bdc7ae; }
+.journey-almanac-projects h4 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 19px; margin: 0 0 5px; }
+.journey-almanac-projects h4 span { color: #535d4d; font-size: 13px; font-weight: 400; white-space: nowrap; }
+.journey-almanac-projects p { color: #535d4d; font-size: 15px; margin: 0; line-height: 1.55; }
+.journey-almanac-projects .is-complete h4 { color: #35654f; }
+.journey-almanac-projects details { margin-top: 8px; }
+.journey-almanac-projects summary { min-height: 44px; display: list-item; align-content: center; color: #35654f; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.journey-almanac-projects summary:focus-visible { outline: 3px solid #896626; outline-offset: 3px; }
+.journey-almanac-projects details ol { list-style: none; padding: 10px 0 0; }
+.journey-almanac-projects details li { display: flex; gap: 10px; padding: 7px 0; font-size: 14px; color: #535d4d; }
+.journey-almanac-projects details li span { min-width: 32px; color: #75603a; font-variant-numeric: tabular-nums; }
+.journey-almanac-projects details li.is-done, .journey-almanac-projects details li.is-done span { color: #35654f; }
+.journey-map-fieldwork { display: flex; align-items: center; gap: 16px; padding: 20px 0; border-block: 1px solid #bdc7ae; margin: 20px 0; }
+.journey-map-fieldwork > div { flex: 1; }
+.journey-map-fieldwork h3 { margin: 0 0 4px; }
+.journey-map-fieldwork p { margin: 0; color: #535d4d; }
+.journey-puzzle-sequence { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 28px 0; }
+.journey-puzzle-sequence li { display: grid; place-items: center; min-height: 68px; border: 2px dashed #85947d; color: #626e58; font-size: 22px; }
+.journey-puzzle-sequence .is-set { border-style: solid; background: #dce7ce; color: #2a4d37; }
+.journey-puzzle-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.journey-puzzle-choices button { min-height: 56px; }
+.journey-puzzle-feedback { min-height: 48px; color: #35654f; line-height: 1.5; }
+.journey-battle-scene.is-grove { background: #94b17f; }
+.journey-battle-scene.is-grove .journey-battle-distant { background: #46745a; }
+.journey-battle-scene.is-riverlands { background: #afcbbe; }
+.journey-battle-scene.is-riverlands .journey-battle-distant { background: #5f9a92; }
+.journey-battle-scene.is-highlands { background: #b9b6c6; }
+.journey-battle-scene.is-highlands .journey-battle-distant { background: #777a8e; }
+@media (max-width: 600px) {
+  .journey-almanac-stamps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; }
+  .journey-almanac-intro { gap: 12px; }
+  .journey-almanac-intro h3 { font-size: 21px; }
+  .journey-almanac-count { flex-basis: 70px; font-size: 38px; }
+  .journey-almanac-projects > li { grid-template-columns: 40px minmax(0, 1fr); gap: 12px; }
+  .journey-almanac-projects .journey-valley-seal { width: 40px; height: 40px; }
+  .journey-almanac-projects > li > button { grid-column: 2; justify-self: start; }
+  .journey-almanac-projects h4 { flex-wrap: wrap; gap: 2px 12px; }
+  .journey-map-fieldwork { flex-wrap: wrap; }
+  .journey-map-fieldwork > button { margin-left: 64px; }
+  .journey-puzzle-sequence, .journey-puzzle-choices { gap: 8px; }
+  .journey-puzzle-sequence li { font-size: 18px; min-height: 58px; }
+  .journey-journal-tabs button { flex: 1; padding-inline: 9px; }
+}
+@media (max-width: 360px) {
+  .journey-almanac-stamps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

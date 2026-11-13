@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Application, Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js';
 import { ADVENTURE_REGIONS, terrainAt, TRAVERSAL_DURATION_MS } from '../../../shared/rpg/adventureContent.js';
 import { exitLocked, isAdventureWalkable, regionObjects } from '../../../shared/rpg/adventure.js';
+import { activeStoryStage } from '../../../shared/rpg/story.js';
 import { WALK_STEP_MS, stepDuration } from '../lib/adventureMovement.js';
 import { cameraAxis, fieldPoseBounds, followerTile, sampleTrail, stridePose } from '../lib/adventureAnimation.js';
 import { crossingTimeline, environmentGrid, groundNoise, landscapeValue, settlementFrameBounds, traversalPose } from '../lib/adventureEnvironment.js';
@@ -11,7 +12,7 @@ const DIRECTIONS = { south: 0, down: 0, west: 1, left: 1, east: 2, right: 2, nor
 const COLUMNS = { emberquill: 1, kitewhisk: 2, duplet: 3 };
 let assetsPromise;
 
-function loadArt() {
+async function loadArt(regionId) {
   if (!assetsPromise) assetsPromise = Promise.all([
     Assets.load('/assets/frontier/field-atlas.webp'),
     Assets.load('/assets/frontier/portraits/mossback.webp'),
@@ -26,7 +27,11 @@ function loadArt() {
     Assets.load('/assets/frontier/settlement/interiors.webp'),
     Assets.load('/assets/frontier/settlement/outdoors.webp'),
   ]).catch((error) => { assetsPromise = null; throw error; });
-  return assetsPromise;
+  const art = await assetsPromise;
+  const guardianId = { riverlands: 'crosswake', highlands: 'rampart', archive: 'patchbyte' }[regionId];
+  const guardianArt = guardianId ? await Assets.load(`/assets/frontier/portraits/${guardianId}.webp`).catch(() => null) : null;
+  if (guardianArt) guardianArt.source.scaleMode = 'nearest';
+  return [...art, guardianArt];
 }
 
 function frame(atlas, column, row, columns, rows) {
@@ -37,7 +42,7 @@ function frame(atlas, column, row, columns, rows) {
 
 function rect(graphics, x, y, w, h, color) { graphics.rect(x, y, w, h).fill(color); }
 
-function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt, observatoryArt, bridgeArt, treeArt, cottageArt, buildingsAtlas, interiorsAtlas, outdoorsAtlas) {
+function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt, observatoryArt, bridgeArt, treeArt, cottageArt, buildingsAtlas, interiorsAtlas, outdoorsAtlas, guardianArt) {
   const region = ADVENTURE_REGIONS[state.locationId];
   const width = region.width || 20; const height = region.height || 12;
   const indoor = region.outdoor === false;
@@ -53,7 +58,7 @@ function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt
   const frames = []; const ambient = [];
   const orchard = region.biome === 'orchard';
   const fieldSeed = [...region.id].reduce((seed, letter) => seed + letter.charCodeAt(0), 0);
-  let swayingTrees = 0;
+  let swayingTrees = 0; let fruitTrees = 0;
   const getFrame = (...args) => { const texture = frame(...args); frames.push(texture); return texture; };
   const grid = environmentGrid(region);
   const tileKind = (x, y) => grid[y]?.[x];
@@ -224,11 +229,124 @@ function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt
       rect(graphics, fx - 1, fy - 7, 3, 5, seed % 2 ? '#f6c6ac' : '#fff4ce'); rect(graphics, fx, fy - 5, 1, 1, '#dba84d');
     }
   }
-  function smallProp(kind, tx, ty, w = 1, h = 1) {
+  function smallProp(kind, tx, ty, w = 1, h = 1, object = {}) {
     const detailed = settlement(kind, tx, ty, w, h); if (detailed) return detailed;
     const x = (tx + 0.5) * TILE; const y = (ty + 1) * TILE; const n = groundNoise(tx, ty);
     const g = new Graphics(); g.position.set(x, y); g.zIndex = y; actors.addChild(g);
-    if (kind === 'door') {
+    const stamp = { grove: 'groveStamp', sunward: 'sunwardStamp', riverlands: 'riverStamp', orchard: 'orchardStamp', highlands: 'highlandsStamp' }[forest ? 'grove' : region.biome];
+    const progressFlag = {
+      'grove-inscription': 'groveInscription', 'grove-dial': 'groveDial', 'dawn-etching': 'dawnEtching',
+      'sluice-ledger': 'sluiceLedger', 'upstream-gate': 'upstreamOpen', 'downstream-gate': 'downstreamOpen',
+      'orchard-beehive': 'orchardStamp', 'blossom-bed': 'pollenCollected', 'star-chart': 'starChart', 'star-crater': 'constellation',
+    }[object.id];
+    const complete = object.storyFlag ? Boolean(state.flags[object.storyFlag]) : Boolean(state.flags[object.task?.flag] || state.flags[object.discoveryFlag] || state.flags[object.puzzle?.flag] || state.flags[object.flag] || state.flags[object.storyFlag] || state.flags[progressFlag] || state.flags[kind === 'festival-lantern' || kind === 'almanac-board' ? 'valleyComplete' : stamp]);
+    const accent = complete ? '#f9e39a' : '#9dc2a2';
+    if (['grove-inscription', 'dawn-etching', 'star-chart'].includes(object.id)) {
+      shadow(x, y, 13); stone(g, -13, -24, 26, 24, n);
+      if (object.id === 'star-chart') {
+        g.poly([-8, -13, -2, -20, 5, -14, 9, -19]).stroke({ color: '#e8d49c', width: 1 });
+        for (const [px, py] of [[-8, -13], [-2, -20], [5, -14], [9, -19]]) rect(g, px - 1, py - 1, 3, 3, '#f6e7ba');
+      } else if (object.id === 'dawn-etching') {
+        g.circle(0, -14, 5).stroke({ color: '#e5c87f', width: 2 }); rect(g, -9, -8, 18, 2, '#79715a');
+        for (const px of [-8, 0, 8]) rect(g, px, -23, 1, 3, '#e5c87f');
+      } else {
+        rect(g, -1, -21, 2, 15, '#668564'); rect(g, -7, -17, 7, 3, '#85ac75'); rect(g, 1, -13, 7, 3, '#85ac75');
+      }
+    } else if (object.id === 'sluice-ledger') {
+      shadow(x, y, 10); rect(g, -2, -19, 4, 20, '#796245'); rect(g, -12, -25, 24, 9, '#a98351');
+      rect(g, -10, -28, 20, 10, '#e5d4a3'); rect(g, -1, -28, 1, 10, '#a08b60');
+      for (const yy of [-25, -22]) { rect(g, -8, yy, 5, 1, '#7d8069'); rect(g, 2, yy, 5, 1, '#7d8069'); }
+    } else if (object.id === 'blossom-bed') {
+      g.zIndex = -1; rect(g, -21, -12, 42, 16, '#806b45'); rect(g, -22, 3, 44, 3, '#b7955f');
+      for (const px of [-14, -3, 9]) { flowers(g, px, -4, n + px); rect(g, px + 3, -6, 2, 2, '#f8df8e'); }
+    } else if (kind === 'moss-dial') {
+      shadow(x, y, 13); stone(g, -11, -22, 22, 22, n);
+      g.circle(0, -13, 7).fill('#527c69'); g.circle(0, -13, 5).fill(accent);
+      rect(g, -1, -18, 2, 10, '#557c63'); rect(g, -5, -14, 10, 2, '#557c63');
+      for (const dx of [-15, 13]) { rect(g, dx, -8, 2, 8, '#4d8052'); rect(g, dx - 3, -7, 7, 2, '#91b76d'); rect(g, dx - 2, -11, 5, 2, '#a6c77a'); }
+    } else if (kind === 'heliograph') {
+      shadow(x, y, 13); rect(g, -3, -20, 6, 21, '#78654b'); rect(g, -10, -3, 20, 4, '#a98e60');
+      g.circle(0, -26, 12).fill('#a27b42'); g.circle(0, -26, 9).fill(complete ? '#f6db83' : '#a5c9c0');
+      rect(g, -5, -31, 7, 2, '#f8edc7'); rect(g, 3, -27, 2, 5, '#e7f1d6');
+      rect(g, 13, -34, 2, 32, '#725d45'); g.poly([15, -33, 27, -30, 20, -25, 15, -26]).fill('#d3945b');
+    } else if (kind === 'sluice') {
+      shadow(x, y, 14); rect(g, -13, -17, 26, 17, '#776047'); rect(g, -10, -15, 20, 13, '#b9874d');
+      for (const dx of [-7, 0, 7]) rect(g, dx, -14, 2, 12, '#dfbd7d');
+      rect(g, -14, -19, 28, 3, '#d3ae72'); g.circle(0, -23, 7).stroke({ color: '#9d7146', width: 2 });
+      rect(g, -1, -30, 2, 14, '#d6b77c'); rect(g, -7, -24, 14, 2, '#d6b77c');
+      rect(g, -12, -2, 24, 3, complete ? '#aedfd0' : '#78b9b8');
+    } else if (kind === 'beehive') {
+      shadow(x, y, 12); rect(g, -9, -20, 18, 20, '#c99649'); rect(g, -11, -19, 22, 3, '#f1d088');
+      for (const yy of [-15, -10, -5]) rect(g, -9, yy, 18, 2, '#e5b766');
+      g.circle(0, -7, 3).fill(complete ? '#f6dc85' : '#624b38'); rect(g, -7, -23, 14, 3, '#efd491');
+      flowers(g, -20, -2, n); flowers(g, 5, -2, n + 1);
+    } else if (kind === 'star-crater') {
+      g.zIndex = -1; g.ellipse(0, -3, 46, 21).fill('#8b8c84'); g.ellipse(0, -5, 39, 17).fill('#b1b2a2');
+      g.ellipse(0, -7, 30, 12).fill('#737f81'); g.ellipse(0, -8, 23, 8).fill('#616e79');
+      for (const [px, py, size] of [[-36, -15, 7], [30, 6, 8], [-25, 13, 6], [18, -21, 6]]) stone(g, px, py, size, size, n);
+      g.poly([-10, -11, -6, -31, 8, -35, 14, -18, 7, -7]).fill(complete ? '#e8cf89' : '#9eb7c1');
+      g.poly([-6, -31, 8, -35, 2, -16, -10, -11]).fill(complete ? '#f7e2a6' : '#bed5d7');
+      rect(g, 2, -24, 3, 14, complete ? '#fff2c5' : '#d2e5dc');
+    } else if (kind === 'almanac-board') {
+      shadow(x, y, 14); for (const dx of [-11, 8]) rect(g, dx, -29, 3, 30, '#76563d');
+      rect(g, -15, -35, 30, 21, '#806143'); rect(g, -13, -33, 26, 17, '#e6d0a0');
+      rect(g, -10, -30, 8, 10, '#b4cba4'); rect(g, 1, -30, 9, 2, '#977c56'); rect(g, 1, -26, 9, 2, '#977c56');
+      rect(g, 1, -22, 6, 2, '#977c56'); rect(g, -17, -37, 34, 3, '#c69d65');
+      if (complete) { rect(g, -8, -27, 4, 4, '#e3ad54'); rect(g, -7, -26, 2, 2, '#fff0b5'); }
+    } else if (kind === 'festival-lantern') {
+      shadow(x, y, 9); rect(g, -2, -34, 4, 35, '#72553f'); rect(g, -10, -42, 20, 14, '#b66f49');
+      rect(g, -8, -40, 16, 10, complete ? '#f8df91' : '#e7bd79'); rect(g, -10, -43, 20, 3, '#785442');
+      rect(g, -7, -28, 14, 2, '#785442'); rect(g, -1, -39, 2, 8, '#d49258');
+      if (state.flags.riverComplete) { rect(g, -12, -30, 3, 9, '#d79979'); rect(g, 9, -30, 3, 9, '#e7cb7c'); }
+    } else if (kind === 'river-bell') {
+      shadow(x, y, 13); for (const dx of [-12, 9]) { rect(g, dx, -37, 3, 38, '#76563d'); rect(g, dx + 1, -36, 1, 35, '#d1ab73'); }
+      rect(g, -15, -39, 30, 4, '#9a7048'); rect(g, -2, -35, 4, 5, '#715640');
+      g.poly([-7, -30, 7, -30, 9, -18, 12, -15, -12, -15, -9, -18]).fill('#b68b4f');
+      rect(g, -6, -28, 12, 2, '#e7c67d'); rect(g, -2, -14, 4, 3, '#70543d');
+      if (complete) { rect(g, -19, -25, 5, 2, '#f8e2a1'); rect(g, 14, -25, 5, 2, '#f8e2a1'); rect(g, -22, -20, 5, 2, '#d3e8cd'); rect(g, 17, -20, 5, 2, '#d3e8cd'); }
+      rect(g, 14, -10, 8, 9, '#a67d50'); rect(g, 15, -10, 6, 2, '#dcb67a');
+      if (state.flags.riverComplete) { rect(g, -22, -8, 8, 7, state.flags.riverPublic ? '#8eaa72' : '#bd9865'); rect(g, -21, -10, 6, 3, state.flags.riverPublic ? '#c7d491' : '#e6ca91'); }
+    } else if (kind === 'listening-post') {
+      shadow(x, y, 11); stone(g, -9, -26, 18, 26, n);
+      rect(g, -5, -21, 10, 12, '#6b8f80'); rect(g, -3, -19, 6, 2, '#d5e0b5'); rect(g, -5, -14, 10, 1, '#d5e0b5');
+      rect(g, -15, -12, 3, 12, '#816344'); rect(g, -19, -14, 11, 3, '#c2a06a');
+      if (complete) { rect(g, -10, -29, 4, 2, '#f2d994'); rect(g, 6, -29, 4, 2, '#f2d994'); }
+    } else if (kind === 'pollen-press') {
+      shadow(x, y, 13); rect(g, -12, -5, 24, 5, '#73563e'); rect(g, -10, -19, 20, 14, '#ac8354');
+      rect(g, -13, -22, 26, 4, '#dfbd7c'); rect(g, -2, -32, 4, 12, '#73563e'); rect(g, -9, -33, 18, 3, '#b9925c');
+      rect(g, -7, -16, 14, 8, complete ? '#f1d57d' : '#d5c39a'); rect(g, 13, -7, 8, 6, '#b98e59');
+      for (const dx of [-16, 16]) { rect(g, dx, -3, 2, 4, '#5d8c57'); rect(g, dx - 2, -6, 5, 3, '#e8bc91'); }
+    } else if (kind === 'sky-beacon') {
+      shadow(x, y, 12); stone(g, -11, -8, 22, 8, n); rect(g, -3, -30, 6, 23, '#806445');
+      g.poly([-10, -31, 0, -43, 10, -31, 0, -21]).fill('#9d855a');
+      g.poly([-6, -31, 0, -38, 6, -31, 0, -25]).fill(complete ? '#f7de93' : '#99c4bf');
+      rect(g, -1, -35, 2, 8, '#f4edc8'); rect(g, -4, -32, 8, 2, '#f4edc8');
+      if (complete) { rect(g, -1, -52, 2, 8, '#f9e8ac'); rect(g, -17, -32, 5, 2, '#f9e8ac'); rect(g, 12, -32, 5, 2, '#f9e8ac'); }
+      if (state.flags.starsComplete) { rect(g, -1, -68, 2, 15, '#f5e8b0'); rect(g, -2, -59, 4, 1, '#fff4ca'); }
+    } else if (kind === 'memory-desk') {
+      shadow(x, y, 14); rect(g, -13, -15, 26, 4, '#d5ad74'); rect(g, -11, -11, 3, 12, '#76583e'); rect(g, 8, -11, 3, 12, '#76583e');
+      rect(g, -9, -22, 18, 7, '#f0dfb2'); rect(g, 0, -22, 1, 7, '#9c8966');
+      for (const yy of [-20, -17]) { rect(g, -7, yy, 5, 1, '#8a8065'); rect(g, 2, yy, 5, 1, '#8a8065'); }
+      rect(g, 10, -21, 2, 7, '#bd8058'); rect(g, 12, -23, 2, 3, '#e9d9ab');
+      if (complete) { rect(g, -17, -8, 4, 8, '#a78555'); rect(g, -18, -10, 6, 3, '#f0ce7b'); }
+    } else if (kind === 'mail-satchel') {
+      shadow(x, y, 10); rect(g, -9, -13, 18, 13, '#a86f4b'); rect(g, -8, -15, 16, 7, '#ce9a67'); rect(g, -2, -12, 4, 6, '#e8c67f');
+      rect(g, -7, -19, 14, 5, '#f1dfb4'); rect(g, -5, -18, 10, 1, '#b59c77');
+      if (complete) { rect(g, 9, -11, 9, 7, '#f4e5bd'); g.poly([9, -11, 13, -8, 18, -11]).stroke({ color: '#bd9f77', width: 1 }); }
+    } else if (kind === 'ribbon-tree') {
+      shadow(x, y, 12); rect(g, -3, -27, 6, 28, '#805f42'); g.poly([-16, -25, -12, -35, -3, -40, 9, -37, 17, -27, 10, -19, -10, -19]).fill('#709b68');
+      rect(g, -12, -32, 18, 3, '#a5c57d'); rect(g, -13, -21, 26, 2, '#557e58');
+      for (const [dx, dy] of [[-8, -25], [4, -29], [10, -22]]) { rect(g, dx, dy, 3, 8, complete ? '#edca79' : '#c78c78'); rect(g, dx + 3, dy + 5, 3, 2, complete ? '#f3e0a3' : '#e8b59b'); }
+    } else if (kind === 'survey-tripod') {
+      shadow(x, y, 12); g.poly([-12, 1, 0, -23, 11, 1]).stroke({ color: '#806044', width: 2 }); rect(g, -2, -23, 4, 24, '#b18c5a');
+      rect(g, -9, -29, 18, 7, '#a6814f'); rect(g, -7, -28, 14, 4, complete ? '#f3dc9b' : '#a7c9bd'); rect(g, 5, -30, 4, 9, '#d8b46e');
+      rect(g, 13, -5, 7, 5, '#e3d2aa'); rect(g, 14, -4, 5, 1, '#9f9070');
+    } else if (kind === 'noticeboard') {
+      shadow(x, y, 13); for (const dx of [-10, 8]) rect(g, dx, -29, 3, 30, '#76563d');
+      rect(g, -14, -34, 28, 19, '#94704b'); rect(g, -12, -32, 24, 15, '#c9a777');
+      rect(g, -10, -30, 9, 10, '#f1dfb5'); rect(g, 2, -29, 8, 8, '#e5d3a7'); rect(g, -8, -27, 5, 1, '#a28c6b'); rect(g, 4, -27, 4, 1, '#a28c6b');
+      if (complete) { rect(g, -1, -20, 5, 4, '#d98b69'); rect(g, 0, -19, 3, 2, '#f4d09a'); }
+    } else if (kind === 'door') {
       g.zIndex = -1; rect(g, -11, -5, 22, 5, '#a9997b'); rect(g, -9, -5, 18, 1, '#e5d2aa'); rect(g, -12, 0, 24, 2, '#7b715e');
       if (indoor && ty >= height - 3) { rect(g, -10, -10, 20, 10, '#493c32'); rect(g, -12, -10, 2, 11, '#b18b5b'); rect(g, 10, -10, 2, 11, '#b18b5b'); }
     } else if (kind === 'hay') {
@@ -333,6 +451,13 @@ function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt
       : forest ? [0xc7dfbf, 0xe3edcf, 0xd3e6c6, 0xffffff] : [0xe6e9c6, 0xd4e3ca, 0xffedcd, 0xffffff];
     sprite.tint = tints[n % tints.length];
     if (n & 32) sprite.scale.x *= -1;
+    if (orchard && fruitTrees < 24 && n % 3 === 0) {
+      const fruit = new Graphics(); fruit.position.set(x, y); fruit.zIndex = y + 1;
+      for (const [dx, dy] of [[-14, -49], [9, -57], [17, -37], [-4, -33]]) {
+        rect(fruit, dx, dy, 4, 4, '#bd755a'); rect(fruit, dx + 1, dy, 2, 1, '#f3bb81'); rect(fruit, dx + 2, dy - 2, 1, 2, '#4e8052');
+      }
+      actors.addChild(fruit); fruitTrees++;
+    }
     if (swayingTrees < 16 && n % 3 === 0) { ambient.push({ sprite, type: 'tree', phase: x * 0.03 + y * 0.07 }); swayingTrees++; }
     return sprite;
   }
@@ -425,7 +550,7 @@ function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt
       if (locked) { rect(g, 13, -27, 6, 5, '#dbb677'); rect(g, 14, -29, 4, 3, '#91856a'); }
       else ambient.push({ sprite: g, type: 'lantern', phase: x * 0.1 });
     }
-    else if (object.appearance) smallProp(object.appearance, object.x, object.y, object.w || 1, object.h || 1);
+    else if (object.appearance && !object.encounterId && !['enemy', 'boss'].includes(object.type)) smallProp(object.appearance, object.x, object.y, object.w || 1, object.h || 1, object);
     else if (object.type === 'exit') {
       const g = new Graphics(); g.position.set(x, y); g.zIndex = y; actors.addChild(g);
       for (const side of [-1, 1]) { stone(g, side * 16 - 5, -28, 10, 28, 0); rect(g, side * 16 - 6, -29, 12, 3, '#e0d5ac'); }
@@ -444,12 +569,89 @@ function drawWorld(state, fieldAtlas, mossbackArt, npcAtlas, enemyAtlas, millArt
       if (object.type === 'rest') smallProp('bench', object.x, object.y);
       else { const g = new Graphics(); rect(g, -2, -18, 4, 19, '#755b42'); rect(g, -14, -31, 28, 18, '#846747'); rect(g, -13, -30, 26, 15, '#dfc393'); rect(g, -11, -29, 22, 1, '#f8e2b2'); rect(g, -9, -25, 18, 2, '#8e7653'); rect(g, -9, -20, 13, 2, '#8e7653'); g.position.set(x, y); g.zIndex = y; actors.addChild(g); }
     } else if (object.type === 'enemy' || object.type === 'boss' || object.encounterId) {
-      const enemy = new Sprite(getFrame(enemyAtlas, object.encounterId === 'archive-warden' ? 1 : 0, 0, 2, 1)); enemy.anchor.set(0.5, 0.9); enemy.width = 44; enemy.height = 44; enemy.position.set(x, y); enemy.zIndex = y; actors.addChild(enemy);
+      const portrait = object.encounterId === 'bramble-sentinel' ? mossbackArt : ['tideglass-crab', 'starfall-ram', 'echo-guardian', 'constellation-keeper'].includes(object.encounterId) ? guardianArt : null;
+      const enemy = new Sprite(portrait || getFrame(enemyAtlas, object.encounterId === 'archive-warden' ? 1 : 0, 0, 2, 1)); enemy.anchor.set(0.5, 0.9); enemy.width = portrait ? 54 : 44; enemy.height = portrait ? 54 : 44; enemy.position.set(x, y); enemy.zIndex = y; actors.addChild(enemy);
+      if (object.encounterId?.includes('crab')) enemy.tint = '#e5ad89';
+      else if (object.encounterId?.includes('ram')) enemy.tint = '#d9d5eb';
+      else if (object.encounterId === 'bramble-sentinel') enemy.tint = '#c0dda4';
     } else if (object.type === 'item' || object.type === 'pickup' || object.discoveryFlag || object.id === 'shard') {
       const icon = new Graphics(); rect(icon, -4, -21, 8, 15, '#93d7df'); rect(icon, -7, -18, 14, 8, '#b6edf0'); rect(icon, -2, -24, 4, 3, '#fdf1bd'); icon.position.set(x, y); icon.zIndex = y; actors.addChild(icon);
     }
+    const actionableStory = activeStoryStage(state, object);
+    if (actionableStory) { const marker = new Graphics(); marker.poly([0, -4, 4, 0, 0, 4, -4, 0]).fill('#ffe298'); marker.position.set(x, y - 52); marker.zIndex = y + 2; actors.addChild(marker); }
     const discovered = object.discoveryFlag && state.flags[object.discoveryFlag];
-    if (!discovered && !(object.task && state.flags[object.task.flag]) && !object.appearance && ['npc', 'enemy', 'boss', 'item', 'landmark'].includes(object.type)) { const marker = new Graphics(); marker.poly([-3, 0, 3, 0, 0, 4]).fill('#ffe298'); marker.position.set(x, y - 39); marker.zIndex = y + 1; actors.addChild(marker); }
+    if (!actionableStory && !discovered && !(object.task && state.flags[object.task.flag]) && !object.appearance && ['npc', 'enemy', 'boss', 'item', 'landmark'].includes(object.type)) { const marker = new Graphics(); marker.poly([-3, 0, 3, 0, 0, 4]).fill('#ffe298'); marker.position.set(x, y - 39); marker.zIndex = y + 1; actors.addChild(marker); }
+  }
+
+  // Small working details sit beside the existing town and grove landmarks.
+  if (state.locationId === 'frontier') {
+    const post = new Graphics(); post.position.set(14.5 * TILE, 12.2 * TILE); post.zIndex = post.y; actors.addChild(post);
+    rect(post, -10, -14, 20, 3, '#8b6848'); rect(post, -9, -11, 2, 11, '#76563d'); rect(post, 7, -11, 2, 11, '#76563d');
+    rect(post, -7, -20, 8, 6, '#ead9b1'); rect(post, 2, -18, 6, 4, '#f3dfb6'); rect(post, -5, -18, 4, 1, '#a58c69');
+    rect(post, 10, -6, 6, 6, '#ad8152'); rect(post, 11, -7, 4, 2, '#dfbb7c');
+  }
+  if (forest) {
+    const roots = new Graphics(); roots.position.set(12.5 * TILE, 11.2 * TILE); roots.zIndex = -1; actors.addChild(roots);
+    roots.poly([-18, 0, -9, -3, -4, -11, -2, -11, -5, -3, 4, 1]).stroke({ color: '#67855f', width: 2 });
+    roots.poly([4, 1, 11, -4, 17, -4]).stroke({ color: '#67855f', width: 2 });
+    rect(roots, 11, -10, 1, 6, '#5f8958'); rect(roots, 9, -12, 5, 3, '#b4c987');
+    rect(roots, -17, -7, 3, 2, '#d8c99a'); rect(roots, -15, -6, 1, 4, '#a89570');
+  }
+
+  if (forest) {
+    const trace = new Graphics(); trace.zIndex = -1; actors.addChild(trace);
+    const lineY = 10.7 * TILE;
+    for (let px = 12.5 * TILE; px <= 18.5 * TILE; px += 6) {
+      rect(trace, px, lineY, 4, 2, state.flags.groveDial ? '#d8ca7e' : '#66855c');
+      if (px % 18 === 0) rect(trace, px, lineY - 3, 2, 5, '#7ca268');
+    }
+  }
+  if (state.locationId === 'sunward' && state.flags.sunwardStamp) {
+    const beam = new Graphics(); beam.zIndex = -2; actors.addChild(beam);
+    beam.poly([22.5 * TILE, 7.3 * TILE, 23 * TILE, 7.5 * TILE, 31.8 * TILE, 19 * TILE, 30.6 * TILE, 19 * TILE]).fill({ color: '#f5dc8c', alpha: 0.16 });
+    for (const [tx, ty] of [[25, 11], [28, 15]]) {
+      const mirror = smallProp('heliograph', tx, ty); mirror.scale.set(0.65);
+    }
+  }
+  if (state.locationId === 'orchard' && state.flags.orchardStamp) {
+    for (const [tx, ty] of [[13, 18], [16, 20], [27, 18], [29, 21]]) smallProp('flowers', tx, ty);
+  }
+  if (state.locationId === 'highlands' && state.flags.constellation) {
+    const chartLight = new Graphics(); chartLight.zIndex = -1; actors.addChild(chartLight);
+    for (const [tx, ty] of [[38.5, 32.2], [39.3, 31.3], [40.2, 32.1], [41, 31.2], [42.5, 32.2]]) {
+      rect(chartLight, tx * TILE, ty * TILE, 2, 5, '#e6d5a3'); rect(chartLight, tx * TILE - 1, ty * TILE + 1, 4, 2, '#e6d5a3');
+    }
+  }
+  if (state.locationId === 'frontier' && (state.flags.valleyComplete || state.flags.starsComplete)) {
+    const bunting = new Graphics(); bunting.zIndex = 13 * TILE; actors.addChild(bunting);
+    for (const yy of state.flags.starsComplete ? [7, 9, 13] : [9, 13]) {
+      bunting.moveTo(11 * TILE, yy * TILE).lineTo(20 * TILE, yy * TILE).stroke({ color: '#806947', width: 1 });
+      for (let tx = 11; tx < 20; tx++) bunting.poly([tx * TILE + 3, yy * TILE + 1, tx * TILE + 14, yy * TILE + 1, tx * TILE + 8, yy * TILE + 11]).fill(['#d6ad60', '#699681', '#b7826d'][tx % 3]);
+    }
+  }
+
+  // A few local inhabitants give each landmark a sense of life without covering paths.
+  const habitat = regionObjects(state).find(object => ({
+    grove: 'moss-dial', sunward: 'heliograph', riverlands: 'sluice', orchard: 'beehive', highlands: 'star-crater',
+  })[region.biome] === object.appearance || forest && object.appearance === 'moss-dial');
+  if (habitat) for (let i = 0; i < 3; i++) {
+    const creature = new Graphics();
+    const biome = forest ? 'grove' : region.biome;
+    if (biome === 'orchard') {
+      rect(creature, -2, -1, 5, 3, '#e4b75c'); rect(creature, 0, -1, 1, 3, '#674f3a'); rect(creature, -1, -3, 2, 2, '#f8ebc8'); rect(creature, 2, -3, 2, 2, '#f8ebc8');
+    } else if (biome === 'riverlands') {
+      rect(creature, -3, 0, 6, 2, '#d9e8c1'); rect(creature, 3, -1, 2, 4, '#d9e8c1');
+    } else if (biome === 'highlands') {
+      rect(creature, -2, 0, 5, 1, '#f5e5ad'); rect(creature, 0, -2, 1, 5, '#f5e5ad');
+    } else if (biome === 'sunward') {
+      rect(creature, -1, -8, 1, 9, '#856e4f'); creature.poly([0, -8, 6, -6, 0, -4]).fill('#d89b68');
+    } else {
+      rect(creature, -2, -2, 5, 5, { color: '#e4d982', alpha: 0.24 }); rect(creature, 0, 0, 1, 1, '#fff3be');
+    }
+    if (biome === 'riverlands') creature.position.set((27 + i % 2) * TILE, (18 + i * 4) * TILE);
+    else creature.position.set((habitat.x + 0.5) * TILE + (i - 1) * 17, (habitat.y + 0.5) * TILE - 19 - i % 2 * 7);
+    creature.zIndex = (habitat.y + 1) * TILE + 1; actors.addChild(creature);
+    ambient.push({ sprite: creature, type: 'wildlife', phase: i * 2.1, originX: creature.x, originY: creature.y, biome });
   }
 
   const cloudShade = new Container(); world.addChildAt(cloudShade, 1);
@@ -588,9 +790,9 @@ export default function AdventureScene({ state, motion = {}, onTraversalEnd }) {
     const app = new Application();
     async function start() {
       try {
-        const art = await loadArt();
+        const art = await loadArt(stateRef.current.locationId);
         if (disposed) return;
-        art.forEach(texture => { texture.source.scaleMode = 'nearest'; });
+        art.forEach(texture => { if (texture) texture.source.scaleMode = 'nearest'; });
         await app.init({ width: hostRef.current?.clientWidth || 640, height: hostRef.current?.clientHeight || 400, antialias: false, background: '#527c62', resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true });
         initialized = true;
         if (disposed) { app.destroy(true, { children: true }); return; }
@@ -655,6 +857,10 @@ export default function AdventureScene({ state, motion = {}, onTraversalEnd }) {
               item.sprite.x = item.originX + Math.sin(scene.time / 2600 + item.phase) * 7;
               item.sprite.y = item.originY + Math.sin(scene.time / 3400 + item.phase) * 5;
               item.sprite.alpha = reduced ? 0 : (item.glow ? 0.3 : 0.18) + (Math.sin(scene.time / 1700 + item.phase) + 1) * 0.22;
+            } else if (item.type === 'wildlife') {
+              item.sprite.x = item.originX + (reduced || item.biome === 'sunward' ? 0 : Math.sin(scene.time / 1800 + item.phase) * 4);
+              item.sprite.y = item.originY + (reduced || item.biome === 'sunward' ? 0 : Math.sin(scene.time / 1200 + item.phase) * 2);
+              item.sprite.alpha = reduced ? 1 : 0.8 + wave * 0.2;
             } else if (item.type === 'npc') item.sprite.y = item.originY + (reduced ? 0 : Math.sin(scene.time / 900 + item.phase) * 0.45);
             else if (item.type === 'tree') item.sprite.rotation = wave * 0.004;
             else if (item.type === 'water') { item.sprite.x = item.originX + wave * 3; item.sprite.alpha = 0.35 + wave * 0.15; }
@@ -687,7 +893,7 @@ export default function AdventureScene({ state, motion = {}, onTraversalEnd }) {
   useEffect(() => {
     if (!ready || !appRef.current) return;
     let cancelled = false;
-    loadArt().then((art) => {
+    loadArt(stateRef.current.locationId).then((art) => {
       if (cancelled || !appRef.current) return;
       const old = sceneRef.current;
       if (old) { appRef.current.stage.removeChild(old.world); old.world.destroy({ children: true }); old.frames.forEach((texture) => texture.destroy(false)); }

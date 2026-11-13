@@ -1,7 +1,10 @@
+import { STORY_FLAG_IDS } from './storyContent.js';
+import { validStoryFlags } from './story.js';
 import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, ENCOUNTERS, EXPLORATION_FLAG_IDS, FLAG_IDS, ITEMS, MAP_REVISION, MAX_BATTLE_TURNS, STARTER_IDS, SUNWARD_FLAG_IDS } from './adventureContent.js';
 import { adventureResult, beginBattle, createAdventure, createCompanion, enemyIntent, isAdventureWalkable, MODES, normalizeTrainerName } from './adventure.js';
 import { fromSave as fromLegacySave, toSave as toLegacySave } from './worldState.js';
 import { TOWN_FLAG_IDS, TOWN_QUESTS } from './inhabitedContent.js';
+import { VALLEY_FLAG_IDS, VALLEY_PROJECTS } from './valleyContent.js';
 
 export const ADVENTURE_SAVE_KEY = 'ai-frontier:adventure:v3';
 export const CIRCUIT_SAVE_KEY = 'ai-frontier:circuit:v1';
@@ -53,6 +56,15 @@ function migrateTownFields(value) {
   if (!record(value) || !record(value.flags) || TOWN_FLAG_IDS.some(id => owns(value.flags, id))) return value;
   return { ...value, flags: { ...value.flags, ...Object.fromEntries(TOWN_FLAG_IDS.map(id => [id, false])) } };
 }
+function migrateValleyFields(value) {
+  if (!record(value) || !record(value.flags) || VALLEY_FLAG_IDS.some(id => owns(value.flags, id))) return value;
+  return { ...value, flags: { ...value.flags, ...Object.fromEntries(VALLEY_FLAG_IDS.map(id => [id, false])) } };
+}
+
+function migrateStoryFields(value) {
+  if (!record(value) || !record(value.flags) || STORY_FLAG_IDS.some(id => owns(value.flags, id))) return value;
+  return { ...value, flags: { ...value.flags, ...Object.fromEntries(STORY_FLAG_IDS.map(id => [id, false])) } };
+}
 
 function legacyHistory(value) {
   const old = fromLegacySave(value);
@@ -86,7 +98,10 @@ function migrate(value) {
 function validFlags(flags, mode) {
   if (!record(flags) || !FLAG_IDS.every(id => typeof flags[id] === 'boolean')) return false;
   if (mode !== 'journey') return FLAG_IDS.every(id => !flags[id]);
+  if (!validStoryFlags(flags)) return false;
   if (TOWN_QUESTS.some(quest => quest.stages.some((stage, index) => flags[stage.flag] && quest.stages.slice(0, index).some(previous => !flags[previous.flag])))) return false;
+  if (VALLEY_PROJECTS.some(project => project.steps.some((stage, index) => flags[stage.flag] && project.steps.slice(0, index).some(previous => !flags[previous.flag])))) return false;
+  if (flags.valleyComplete && (!flags.questComplete || VALLEY_PROJECTS.some(project => !flags[project.flag]))) return false;
   return (!flags.shardFound || flags.questStarted)
     && (!flags.wispDefeated || flags.shardFound)
     && (!flags.recruited || flags.wispDefeated)
@@ -99,7 +114,7 @@ function validFlags(flags, mode) {
 }
 
 function readV3(value, nested = false) {
-  value = migrateTownFields(migrateExplorationFields(migrateSunwardFields(migrateV3Map(value))));
+  value = migrateStoryFields(migrateValleyFields(migrateTownFields(migrateExplorationFields(migrateSunwardFields(migrateV3Map(value))))));
   if (!record(value) || value.version !== 3 || value.chapterId !== CHAPTER_ID || !MODES.includes(value.mode)
     || value.mapRevision !== MAP_REVISION || typeof value.runId !== 'string' || !/^[a-zA-Z0-9:-]{1,80}$/.test(value.runId)
     || !STARTER_IDS.includes(value.starterId) || typeof value.trainerName !== 'string' || normalizeTrainerName(value.trainerName) !== value.trainerName
@@ -150,7 +165,8 @@ function readV3(value, nested = false) {
     if (!integer(battle.enemyHp, 1, encounter.maxHp) || battle.turn === 0 && battle.enemyHp !== encounter.maxHp) return null;
     if (value.mode === 'journey') {
       const object = ADVENTURE_REGIONS[state.locationId].objects.find(entry => entry.encounterId === battle.encounterId);
-      if (!encounter.flag || state.flags[encounter.flag] || !object || Math.abs(object.x - state.x) + Math.abs(object.y - state.y) !== 1
+      const distance = object && Math.abs(object.x - state.x) + Math.abs(object.y - state.y);
+      if (!encounter.flag || state.flags[encounter.flag] || !object || distance > 1 || distance === 0 && !object.passable || object.requires?.some(flag => !state.flags[flag])
         || battle.encounterId === 'static-wisp' && !state.flags.shardFound || battle.encounterId === 'archive-warden' && !state.flags.relayRestored) return null;
     } else if (value.mode === 'practice' ? battle.encounterId !== 'practice-wisp' : battle.encounterId !== CIRCUIT_IDS[circuit.index] || circuit.wins !== circuit.index || circuit.completed) return null;
     state.battle = beginBattle(state, battle.encounterId).battle;
@@ -160,10 +176,10 @@ function readV3(value, nested = false) {
     state.battle.log = [`${encounter.name}: resumed at turn ${battle.turn + 1}.`];
   }
   if (pending != null) {
-    if (!record(pending) || !['won', 'lost', 'retreated', 'restored'].includes(pending.outcome)) return null;
+    if (!record(pending) || !['won', 'lost', 'retreated', 'restored', 'festival', 'river-restored', 'stars-restored'].includes(pending.outcome)) return null;
     const encounter = owns(ENCOUNTERS, pending.encounterId) ? ENCOUNTERS[pending.encounterId] : null;
-    if (pending.outcome === 'restored') {
-      if (value.mode !== 'journey' || !state.flags.questComplete || pending.encounterId !== null) return null;
+    if (['restored', 'festival', 'river-restored', 'stars-restored'].includes(pending.outcome)) {
+      if (value.mode !== 'journey' || !(pending.outcome === 'festival' ? state.flags.valleyComplete : pending.outcome === 'river-restored' ? state.flags.riverComplete : pending.outcome === 'stars-restored' ? state.flags.starsComplete : state.flags.questComplete) || pending.encounterId !== null) return null;
     } else {
       if (!encounter) return null;
       if (value.mode === 'journey' && (!encounter.flag || pending.outcome === 'won' && !state.flags[encounter.flag])) return null;

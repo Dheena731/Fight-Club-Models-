@@ -47,7 +47,7 @@ export default function JourneyTitle() {
       {error && <p className="journey-error journey-title-footnote" role="alert">{error} Original saves have not been removed.</p>}
       {message && <p className="journey-title-footnote" role="status">{message}</p>}
     </section>
-    <footer className="journey-title-caption"><span>THE LANTERN SIGNAL</span><span>Original companions. A world to restore.</span></footer>
+    <footer className="journey-title-caption"><span>THE LANTERN SIGNAL</span><span>Original companions. Three connected chapters.</span></footer>
 
     {screen === 'replace' && <GameDialog title="A new beginning?" onClose={() => setScreen('menu')}>
       <p>Beginning a new Journey replaces {saved ? `${saved.trainerName}’s current adventure` : 'the unreadable adventure snapshot'} on this device. The previous-generation save is kept separately.</p>
@@ -64,16 +64,16 @@ export default function JourneyTitle() {
       <div className="journey-starter-layout"><div className="journey-starter-portrait"><CompanionArt id={starterId} /><span>{companion.affinity}</span></div>
         <div className="journey-starter-details"><p className="journey-muted">Your first companion</p><h3>{companion.name}</h3><p>{companion.description}</p><p><strong>{companion.role}</strong></p>
           <div className="journey-starter-picks" aria-label="Inspect a starter">{starters.map((entry) => <button key={entry.id} className={`journey-starter-pick ${starterId === entry.id ? 'is-selected' : ''}`} aria-pressed={starterId === entry.id} onClick={() => setStarterId(entry.id)}><CompanionArt id={entry.id} /><span>{entry.name}</span></button>)}</div>
-          <button className="journey-button is-primary" onClick={begin}>Journey with {companion.name} ▸</button><p className="journey-muted">Every starter can finish the chapter. Choose the one you like.</p>
+          <button className="journey-button is-primary" onClick={begin}>Journey with {companion.name} ▸</button><p className="journey-muted">Every starter can follow the whole story. Choose the one you like.</p>
           {replace && <p className="journey-muted">This confirms replacement of the current Journey.</p>}{error && <p role="alert" className="journey-error">{error}</p>}
         </div></div>
     </GameDialog>}
     {screen === 'settings' && <GameDialog title="The field guide" onClose={() => setScreen('menu')}>
       <button className="journey-button" onClick={() => setScreen('save-data')}>Save Data · backup & restore</button>
-      <h3>Ways to play</h3><p><strong>Journey:</strong> explore, build a team and restore the Lantern Signal. Saves automatically on this device.</p><p><strong>Practice:</strong> learn combat without changing your adventure.</p><p><strong>Rival Circuit:</strong> a local three-encounter challenge, entered from the town board.</p>
+      <h3>Ways to play</h3><p><strong>Journey:</strong> explore, build a team and restore the Lantern Signal, then continue through The River Remembers and The Night of Returning Stars. Saves automatically on this device.</p><p><strong>Practice:</strong> learn combat without changing your adventure.</p><p><strong>Rival Circuit:</strong> a local three-encounter challenge, entered from the town board.</p>
       <p><strong>Trainer duels:</strong> invite another human to a creature duel. Companions use equal base stats. Duels grant no Journey rewards and need no provider key.</p>
       <p><strong>Live Arena:</strong> optional real-model shows. Requires your own provider credentials and may incur charges. It is not two-player matchmaking.</p>
-      <h3>Controls</h3><p>Arrow keys or WASD to move. Hold Shift or toggle Run to run. E inspects; Space jumps, climbs or drops at marked routes and interacts elsewhere. M opens the map, J the Journal, T the Team and I the Pack. Escape returns from menus. Touch controls are always available.</p>
+      <p>Open Journal → Story to track the next chapter lead, Neighbors for personal quests, or Valley Almanac for regional fieldwork. Conversation choices are remembered; completed chapters change what residents say.</p><h3>Controls</h3><p>Arrow keys or WASD to move. Hold Shift or toggle Run to run. E inspects; Space jumps, climbs or drops at marked routes and interacts elsewhere. M opens the map, J the Journal, T the Team and I the Pack. Escape returns from menus. Touch controls are always available.</p>
       <p>Standard gamepad: left stick or D-pad to move and choose, A to confirm or interact, B to go back, X to run, Y to traverse a marked route, and Start for the game menu.</p>
       <p>Use the view controls to see more of the world or inspect small details. The Sound button enables footsteps and world ambience.</p>
       <p className="journey-muted">System reduced-motion settings are respected. Audio stays off until you enable it during play. All creatures, world abilities and prestige levels are game fiction, not model benchmarks.</p>

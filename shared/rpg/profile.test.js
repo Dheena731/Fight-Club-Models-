@@ -17,8 +17,8 @@ const memoryStorage = (initial = null) => {
   };
 };
 
-test('the catalog has the five fixed rewards and immutable, unique IDs', () => {
-  assert.deepEqual(rewards, ['skin-lantern', 'badge-lantern-signal', 'badge-static-clear', 'badge-archive-warden', 'title-lantern-keeper']);
+test('the catalog has the fixed rewards and immutable, unique IDs', () => {
+  assert.deepEqual(rewards, ['skin-lantern', 'badge-lantern-signal', 'badge-static-clear', 'badge-archive-warden', 'title-lantern-keeper', 'badge-valley-almanac', 'title-valley-keeper', 'badge-river-memory', 'title-river-keeper', 'badge-returning-stars', 'title-star-keeper']);
   assert.equal(new Set(rewards).size, rewards.length);
   assert.ok(Object.isFrozen(COSMETICS));
   for (const item of COSMETICS) {
@@ -83,7 +83,7 @@ test('pinning is unique, limited to three badges and reversible without deleting
   assert.deepEqual(removed.ownedIds, rewards);
   assert.deepEqual(equipCosmetic(removed, badges[1]).loadout.badgeIds, [badges[0], badges[2], badges[1]]);
   assert.equal(equipCosmetic(profile, 'skin-lantern', { unequip: true }).loadout.skinId, null);
-  assert.equal(equipCosmetic(profile, 'title-lantern-keeper', { unequip: true }).loadout.titleId, null);
+  assert.equal(equipCosmetic(profile, 'title-star-keeper', { unequip: true }).loadout.titleId, null);
   assert.deepEqual(profile.loadout.badgeIds, badges, 'input is not mutated');
 });
 

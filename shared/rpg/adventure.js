@@ -1,5 +1,8 @@
+import { STORY_CHAPTERS, STORY_PUZZLES } from './storyContent.js';
+import { storyLead, activeStoryStage } from './story.js';
 import { ADVENTURE_REGIONS, CHAPTER_ID, CIRCUIT_IDS, COMPANIONS, ENCOUNTERS, EXPLORATION_FLAG_IDS, FLAG_IDS, ITEMS, LAMP_CHOICES, MAP_REVISION, MAX_BATTLE_TURNS, MOVES, QUESTS, RELAY_SEQUENCE, STARTER_IDS, WORLD_PROJECTS, terrainAt } from './adventureContent.js';
 import { TOWN_QUESTS } from './inhabitedContent.js';
+import { VALLEY_PROJECTS, VALLEY_PUZZLES } from './valleyContent.js';
 
 export const ADVENTURE_VERSION = 3;
 export const MODES = ['journey', 'practice', 'circuit'];
@@ -45,14 +48,28 @@ export function unlockedRewardIds(state) {
     ...(state.flags.wispDefeated ? ['badge-static-clear'] : []),
     ...(state.flags.bossDefeated ? ['badge-archive-warden'] : []),
     ...(state.flags.questComplete ? ['skin-lantern', 'badge-lantern-signal', 'title-lantern-keeper'] : []),
+    ...(state.flags.riverComplete ? ['badge-river-memory', 'title-river-keeper'] : []),
+    ...(state.flags.starsComplete ? ['badge-returning-stars', 'title-star-keeper'] : []),
+    ...(state.flags.valleyComplete ? ['badge-valley-almanac', 'title-valley-keeper'] : []),
   ];
 }
 
 export const questProgress = state => QUESTS.filter((quest, index) => index === 0 || state.flags[quest.flag] || state.flags[QUESTS[index - 1].flag]).map(quest => ({ ...quest, complete: state.flags[quest.flag] }));
+export const valleyProgress = state => {
+  if (state.mode !== 'journey') return [];
+  const projects = VALLEY_PROJECTS.map(project => {
+    const next = project.steps.find(stage => !state.flags[stage.flag]);
+    return { ...project, complete: state.flags[project.flag], started: project.steps.some(stage => state.flags[stage.flag]), regionId: project.regionId, targetRegionId: next?.regionId, objectId: next?.objectId, objective: next?.objective || 'Stamp earned.' };
+  });
+  const locations = [['frontier', 'guide'], ['grove', 'shard'], ['grove', 'static'], ['archive', 'archive-note'], ['archive', 'relay'], ['archive', 'guardian'], ['frontier', 'guide']];
+  const steps = QUESTS.map((quest, index) => ({ flag: quest.flag, objective: quest.objective, regionId: locations[index][0], objectId: locations[index][1] }));
+  const next = steps.find(stage => !state.flags[stage.flag]);
+  return [...projects, { id: 'archive', name: 'Archive', description: 'Bring the Lantern Signal home.', flag: 'questComplete', steps, complete: state.flags.questComplete, started: state.flags.questStarted, regionId: 'archive', targetRegionId: next?.regionId, objectId: next?.objectId, objective: next?.objective || 'Stamp earned.' }];
+};
 export function adventureObjective(state) {
   if (state.mode === 'practice') return 'Practice only: read the intent, try commands, then retry or return. No Journey XP or rewards.';
   if (state.mode === 'circuit') return state.circuit.completed ? 'Rival Circuit complete. Your local record is separate from Journey.' : `Rival Circuit ${state.circuit.index + 1}/3: ${ENCOUNTERS[CIRCUIT_IDS[state.circuit.index]].name}. Recovery follows each fight.`;
-  return QUESTS.find(quest => !state.flags[quest.flag])?.objective || 'The Lantern Signal is complete. Your town is restored; open the Locker to equip your rewards.';
+  return QUESTS.find(quest => !state.flags[quest.flag])?.objective || storyLead(state)?.objective || 'All three chapters are complete. Visit your neighbors, finish the Almanac, or explore a road you remember.';
 }
 export const lanternStatus = state => state.flags.questComplete ? 'restored' : state.flags.bossDefeated ? 'lit' : 'dark';
 export const journalEntries = state => questProgress(state).map(quest => ({ id: quest.id, text: quest.objective, complete: quest.complete }));
@@ -155,12 +172,13 @@ export function beginBattle(state, encounterId) {
 }
 export function adventureResult(state, outcome, encounterId = null) {
   const enemy = ENCOUNTERS[encounterId];
-  const headings = { won: 'Victory!', lost: 'A safe return', retreated: 'Retreated safely', restored: 'The Lantern Signal returns' };
+  const headings = { 'river-restored': 'The River Remembers', 'stars-restored': 'The Night of Returning Stars', won: 'Victory!', lost: 'A safe return', retreated: 'Retreated safely', restored: 'The Lantern Signal returns', festival: 'The Valley Festival' };
   return { outcome, encounterId, heading: headings[outcome],
-    text: outcome === 'restored' ? 'Mara lights the town lantern. You earned the Lantern identity set. Open the Locker to equip it. Local / unverified.'
+    text: outcome === 'river-restored' ? 'Mara rings the bell. Toma and Bela promise to warn each other before the gates move again. You earned the River Memory badge and River Keeper title.' : outcome === 'stars-restored' ? 'Mara sets another place by the lantern. Across the valley, the beacons answer one another. You earned the Returning Stars badge and Star Keeper title.' : outcome === 'festival' ? 'The festival lantern shines. Your team recovered and gained 25 XP; you earned the Valley Almanac badge and Valley Keeper title. Open the Locker to equip them. Local / unverified.'
+      : outcome === 'restored' ? 'Mara lights the town lantern. You earned the Lantern identity set. Open the Locker to equip it. Local / unverified.'
       : outcome === 'won' ? `${enemy.name}: encounter cleared.${state.mode === 'journey' ? ' Check the save indicator before leaving your Journey.' : ' No Journey XP or rewards were granted.'}`
         : 'Your quest progress is safe. The team has recovered. Retry when ready; no completion was granted.',
-    rewards: state.mode !== 'journey' ? [] : outcome === 'restored' ? ['skin-lantern', 'badge-lantern-signal', 'title-lantern-keeper'] : outcome === 'won' ? [...enemy.rewardIds] : [],
+    rewards: state.mode !== 'journey' ? [] : outcome === 'river-restored' ? ['badge-river-memory', 'title-river-keeper'] : outcome === 'stars-restored' ? ['badge-returning-stars', 'title-star-keeper'] : outcome === 'festival' ? ['badge-valley-almanac', 'title-valley-keeper'] : outcome === 'restored' ? ['skin-lantern', 'badge-lantern-signal', 'title-lantern-keeper'] : outcome === 'won' ? [...enemy.rewardIds] : [],
   };
 }
 function finishBattle(state, outcome) {
@@ -201,6 +219,45 @@ function startMode(state, mode) {
   const next = createAdventure({ trainerName: state.trainerName, starterId: state.starterId, mode });
   return { ...next, circuit: mode === 'circuit' ? { ...next.circuit, bestWins: state.circuit.bestWins } : { ...state.circuit }, returnJourney: journey };
 }
+function residentTopics(state, object) {
+  const f = state.flags;
+  const topics = {
+    guide: f.questComplete && [
+      ['lantern', 'Ask about the lantern', f.starsComplete ? 'The lantern looks small beside the stars, but it brings our neighbors to the same table.' : 'I light it each evening so anyone on the road can find their way home.'],
+      ['family', 'Ask about Lio', 'My brother worries when I stay out late. He leaves a chair by the kitchen window for me.'],
+    ],
+    miller: [
+      ['wheel', 'Ask about the wheel', f.riverComplete ? (f.riverPublic ? 'The warning is in the public ledger now. Everyone can add what they remember.' : 'I spoke to Bela and the families myself. Trust takes time.') : 'The wheel turns the river’s work into flour for the crossing.'],
+      ['anji', 'Ask about Anji', 'Anji notices the small changes I miss. The mill is safer because she asks questions.'],
+    ],
+    'orchard-keeper': [
+      ['trees', 'Ask about the orchard', f.riverComplete ? 'The bell tells us when the gates move. Toma and I listen for it together.' : 'The old trees shelter the lower gardens from the wind.'],
+      ['pip', 'Ask about Pip', f.ribbonsComplete ? 'Pip’s ribbons make the tree look like a celebration. I saved one for my door.' : 'Pip visits when the blossoms open and asks the best questions.'],
+    ],
+    'star-keeper': [
+      ['sky', 'Ask about the stars', f.starsComplete ? 'The missing light returned. Veya has already marked it on a fresh chart.' : 'Clouds make us patient. A chart is a promise to look again tomorrow.'],
+      ['veya', 'Ask about Veya', 'She keeps the records I would otherwise leave scattered under cups of tea.'],
+    ],
+    'inn-traveler': [
+      ['maps', 'Ask about maps', f.mapComplete ? 'Your sketches gave the map its meeting places. People have begun adding their own notes.' : 'A road is useful, but a map should also show where someone might find a friend.'],
+      ['journey', 'Ask about traveling', 'The inn keeps a warm corner for travelers. I trade maps for stories over supper.'],
+    ],
+    'weaver-child': [
+      ['ribbons', 'Ask about ribbons', f.ribbonsComplete ? 'The orchard tree wears my ribbons now. I made another for Bela!' : 'I save the bright scraps from weaving. They make good ribbons.'],
+      ['home', 'Ask about home', 'When the loom is quiet, I listen for people coming down the lane.'],
+    ],
+    'observatory-assistant': [
+      ['reply', 'Ask about the sky', f.starsComplete ? (f.starsSela ? 'Sela saw her name in the reply. I am glad she knows we heard.' : 'Every household had a place in the reply. I can see it from here.') : 'Orrin watches the sky; I write down what he sees before the clouds return.'],
+      ['letter', 'Ask about Mara', f.letterComplete ? 'My letter is on its way. I will visit Mara myself when these charts are finished.' : 'I keep meaning to write to Mara. The charts always seem to need one more line.'],
+    ],
+    'keeper-relative': [
+      ['mara', 'Ask about Mara', 'She checks the lantern every evening. I keep her chair ready when she comes home.'],
+      ['home', 'Ask about the crossing', f.riverComplete ? 'The river bell reaches our kitchen now. It is a reassuring sound.' : 'This kitchen is where our neighbors bring news and share a meal.'],
+    ],
+  };
+  return topics[object.id] || null;
+}
+
 function interact(state) {
   const object = nearbyInteractable(state);
   if (!object) return state;
@@ -209,7 +266,41 @@ function interact(state) {
     if (exitLocked(state, object)) return talk(state, object.name, object.lockedText);
     return { ...state, locationId: object.to, ...object.entry, discoveries: [...new Set([...state.discoveries, object.to])], message: `Entered ${ADVENTURE_REGIONS[object.to].name}.` };
   }
+  const stage = activeStoryStage(state, object);
+  if (stage) {
+    if (stage.kind === 'choice') return { ...state, dialogue: { speaker: object.name, text: stage.text, conversation: { id: stage.flag, stepId: stage.id, regionId: stage.regionId, objectId: stage.objectId }, choices: stage.choices.map(({id,label})=>({id,label})) }, message: stage.text };
+    if (stage.kind === 'puzzle') return { ...state, puzzle: { kind:'story', id:stage.puzzle, step:0 }, message: STORY_PUZZLES[stage.puzzle].clue };
+    if (stage.kind === 'battle') return beginBattle(state, object.encounterId);
+    const sideReward = ['mapComplete', 'ribbonsComplete', 'letterComplete'].includes(stage.flag);
+    let next = grantFlag(state, stage.flag, stage.kind === 'finale' ? 25 : sideReward ? 10 : 0);
+    if (sideReward) next = { ...next, inventory: { ...next.inventory, potion: Math.min(99, next.inventory.potion + 1) } };
+    if (stage.kind === 'finale') return { ...recover(next), result: adventureResult(next, stage.flag === 'riverComplete' ? 'river-restored' : 'stars-restored'), message: stage.text };
+    return talk(next, object.name, stage.text);
+  }
+  if (object.encounterId && ENCOUNTERS[object.encounterId]?.story) return talk(state, object.name, 'The echo is quiet. Follow the current story to wake it.');
+  const topics = residentTopics(state, object);
+  if (topics) return { ...state, dialogue: { speaker: object.name, text: 'What would you like to ask?', conversation: { type:'topic', regionId:state.locationId, objectId:object.id }, choices: topics.map(([id,label])=>({id,label})) }, message: 'Choose a topic.' };
   if (object.service === 'heal') return talk(recover(state), object.name, object.text || 'Rest here. Your whole team has recovered its HP and energy.');
+  if (object.valleyBoard) return talk(state, object.name, 'The Valley Almanac commissions five independent fieldworks and the Archive homecoming. Collect all six stamps, then light the festival lantern here.');
+  if (object.valleyFinale) {
+    if (state.flags.valleyComplete) return talk(state, object.name, 'The festival lantern shines for every keeper of the valley.');
+    if (!state.flags.questComplete || VALLEY_PROJECTS.some(project => !state.flags[project.flag])) return talk(state, object.name, 'Gather all six Almanac stamps before lighting the festival lantern.');
+    const next = recover(grantFlag(state, 'valleyComplete', 25));
+    return { ...next, result: adventureResult(next, 'festival'), message: 'The festival lantern shines. Open the Locker for your Valley rewards.' };
+  }
+  if (object.valleyHive) {
+    if (state.flags.orchardStamp) return talk(state, object.name, 'The hive hums and the orchard blooms.');
+    if (!state.flags.pollinatorRequest) return talk(grantFlag(state, 'pollinatorRequest'), object.name, 'The pollinators need pollen from the blossom bed. Bring some back to the hive.');
+    if (!state.flags.pollenCollected) return talk(state, object.name, 'Gather pollen at the blossom bed and return here.');
+    return talk(grantFlag(state, 'orchardStamp', 20), object.name, 'The hive hums again. The orchard is restored, its stamp is yours, and your team gains 20 XP.');
+  }
+  if (object.valleyPuzzle) {
+    const puzzle = VALLEY_PUZZLES[object.valleyPuzzle];
+    if (state.flags[puzzle.flag]) return talk(state, object.name, puzzle.text);
+    if (puzzle.requires.some(flag => !state.flags[flag])) return talk(state, object.name, 'Find and read the nearby clue first.');
+    return { ...state, puzzle: { kind: 'valley', id: puzzle.id, step: 0 }, message: puzzle.clue };
+  }
+  if (object.encounterId && object.requires) return object.requires.every(flag => state.flags[flag]) ? beginBattle(state, object.encounterId) : talk(state, object.name, 'Complete the fieldwork steps first.');
   if (object.task) {
     const task = object.task;
     if (state.flags[task.flag]) return talk(state, object.name, task.completedText || task.text);
@@ -308,11 +399,42 @@ export function adventureReducer(state, action) {
       return { ...state, x: state.x + dx, y: state.y + dy, facing, message: '' };
     }
     case 'INTERACT': return state.mode !== 'journey' || state.battle || state.result || state.dialogue || state.puzzle || state.transition ? state : interact(state);
+    case 'DIALOGUE_CHOICE': {
+      const conversation = state.dialogue?.conversation;
+      if (!conversation || state.mode !== 'journey' || state.battle || state.result || state.puzzle || state.transition || conversation.regionId !== state.locationId) return state;
+      const object = nearbyInteractable(state);
+      const stage = object && activeStoryStage(state, object);
+      if (conversation.type === 'topic') {
+        if (!object || object.id !== conversation.objectId || stage) return state;
+        const topic = residentTopics(state, object)?.find(([id]) => id === action.choiceId);
+        return topic ? talk(state, object.name, topic[2]) : state;
+      }
+      if (!stage || stage.kind !== 'choice' || stage.flag !== conversation.id || stage.id !== conversation.stepId || object.id !== conversation.objectId) return state;
+      const choice = stage.choices.find(entry=>entry.id === action.choiceId);
+      if (!choice) return state;
+      return talk({ ...state, flags: { ...state.flags, [stage.flag]:true, [choice.flag]:true } }, object.name, choice.text);
+    }
+    case 'STORY_CHOICE': {
+      const puzzle = state.puzzle?.kind === 'story' && STORY_PUZZLES[state.puzzle.id];
+      const object = nearbyInteractable(state);
+      const stage = object && activeStoryStage(state, object);
+      if (!puzzle || !stage || stage.kind !== 'puzzle' || stage.puzzle !== puzzle.id || state.mode !== 'journey' || puzzle.requires.some(flag=>!state.flags[flag]) || !Number.isInteger(state.puzzle.step) || state.puzzle.step < 0 || state.puzzle.step >= puzzle.sequence.length || !puzzle.choices.some(choice=>choice.id===action.choice)) return state;
+      if (action.choice !== puzzle.sequence[state.puzzle.step]) return { ...state, puzzle:{...state.puzzle,step:0}, message:'The pattern resets. Read the clue and try again.' };
+      if (state.puzzle.step + 1 < puzzle.sequence.length) return {...state,puzzle:{...state.puzzle,step:state.puzzle.step+1},message:'The pattern responds.'};
+      return talk({...grantFlag(state,puzzle.flag),puzzle:null},puzzle.title,puzzle.text);
+    }
     case 'PUZZLE_CHOICE': {
-      if (!state.puzzle || !LAMP_CHOICES.some(lamp => lamp.id === action.lamp)) return state;
+      if (!state.puzzle || state.puzzle.kind || !LAMP_CHOICES.some(lamp => lamp.id === action.lamp)) return state;
       if (action.lamp !== RELAY_SEQUENCE[state.puzzle.step]) return { ...state, puzzle: { step: 0 }, message: 'The lamps reset. Recall the order in the notes.' };
       if (state.puzzle.step === 0) return { ...state, puzzle: { step: 1 }, message: 'Amber hums. Choose the second lamp.' };
       return talk({ ...grantFlag(state, 'relayRestored', 20), puzzle: null }, 'Archive Relay', 'Both lamps shine. The Warden waits to the north; then bring the signal home to Mara.');
+    }
+    case 'VALLEY_CHOICE': {
+      const puzzle = state.puzzle?.kind === 'valley' && Object.hasOwn(VALLEY_PUZZLES, state.puzzle.id) && VALLEY_PUZZLES[state.puzzle.id];
+      if (!puzzle || state.mode !== 'journey' || state.flags[puzzle.flag] || puzzle.requires.some(flag => !state.flags[flag]) || !Number.isInteger(state.puzzle.step) || state.puzzle.step < 0 || state.puzzle.step >= puzzle.sequence.length || !puzzle.choices.some(choice => choice.id === action.choice)) return state;
+      if (action.choice !== puzzle.sequence[state.puzzle.step]) return { ...state, puzzle: { ...state.puzzle, step: 0 }, message: 'The sequence resets. Read the clue and try again.' };
+      if (state.puzzle.step + 1 < puzzle.sequence.length) return { ...state, puzzle: { ...state.puzzle, step: state.puzzle.step + 1 }, message: 'The pattern responds. Choose the next mark.' };
+      return talk({ ...grantFlag(state, puzzle.flag, puzzle.flag === 'sunwardStamp' ? 20 : 0), puzzle: null }, puzzle.title, puzzle.text);
     }
     case 'CANCEL_PUZZLE': return state.puzzle ? { ...state, puzzle: null } : state;
     case 'BATTLE_MOVE': {
